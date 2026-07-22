@@ -1,0 +1,419 @@
+{
+  "$defs": {
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ScreenWorkflowExperienceAdmission": {
+      "additionalProperties": false,
+      "description": "Private owner admission over one immutable external review snapshot.",
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "source_kind": {
+          "enum": [
+            "session-memory-manual-review",
+            "operator-review-packet",
+            "other-reviewed-evidence"
+          ],
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "source_record_id": {
+          "minLength": 1,
+          "title": "Source Record Id",
+          "type": "string"
+        },
+        "source_snapshot_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Snapshot Sha256",
+          "type": "string"
+        },
+        "review_packet_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Review Packet Sha256",
+          "type": "string"
+        },
+        "review_wave_id": {
+          "minLength": 1,
+          "title": "Review Wave Id",
+          "type": "string"
+        },
+        "recurrence": {
+          "$ref": "#/$defs/ScreenWorkflowExperienceRecurrence"
+        },
+        "reviewed_by": {
+          "minLength": 1,
+          "title": "Reviewed By",
+          "type": "string"
+        },
+        "reviewed_at": {
+          "format": "date-time",
+          "title": "Reviewed At",
+          "type": "string"
+        },
+        "review_note": {
+          "minLength": 1,
+          "title": "Review Note",
+          "type": "string"
+        },
+        "claims": {
+          "items": {
+            "$ref": "#/$defs/ScreenWorkflowExperienceClaim"
+          },
+          "minItems": 1,
+          "title": "Claims",
+          "type": "array"
+        },
+        "public_safe_projection_checked": {
+          "const": true,
+          "title": "Public Safe Projection Checked",
+          "type": "boolean"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        }
+      },
+      "required": [
+        "id",
+        "source_kind",
+        "source_record_id",
+        "source_snapshot_sha256",
+        "review_packet_sha256",
+        "review_wave_id",
+        "recurrence",
+        "reviewed_by",
+        "reviewed_at",
+        "review_note",
+        "claims",
+        "public_safe_projection_checked",
+        "provenance"
+      ],
+      "title": "ScreenWorkflowExperienceAdmission",
+      "type": "object"
+    },
+    "ScreenWorkflowExperienceClaim": {
+      "additionalProperties": false,
+      "description": "One owner-reviewed lesson with private evidence and a public-safe summary.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "disposition": {
+          "$ref": "#/$defs/ScreenWorkflowExperienceDisposition"
+        },
+        "source_observation": {
+          "minLength": 1,
+          "title": "Source Observation",
+          "type": "string"
+        },
+        "public_summary": {
+          "minLength": 1,
+          "title": "Public Summary",
+          "type": "string"
+        },
+        "public_limitation": {
+          "minLength": 1,
+          "title": "Public Limitation",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "owner_review_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Owner Review Refs",
+          "type": "array"
+        },
+        "target_surfaces": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Target Surfaces",
+          "type": "array"
+        },
+        "public_case_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9._-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Public Case Id"
+        }
+      },
+      "required": [
+        "id",
+        "disposition",
+        "source_observation",
+        "public_summary",
+        "public_limitation",
+        "evidence_refs",
+        "owner_review_refs",
+        "target_surfaces"
+      ],
+      "title": "ScreenWorkflowExperienceClaim",
+      "type": "object"
+    },
+    "ScreenWorkflowExperienceDisposition": {
+      "enum": [
+        "accepted",
+        "rejected",
+        "deferred"
+      ],
+      "title": "ScreenWorkflowExperienceDisposition",
+      "type": "string"
+    },
+    "ScreenWorkflowExperiencePublicClaim": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "disposition": {
+          "$ref": "#/$defs/ScreenWorkflowExperienceDisposition"
+        },
+        "summary": {
+          "minLength": 1,
+          "title": "Summary",
+          "type": "string"
+        },
+        "limitation": {
+          "minLength": 1,
+          "title": "Limitation",
+          "type": "string"
+        },
+        "target_surfaces": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Target Surfaces",
+          "type": "array"
+        },
+        "public_case_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9._-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Public Case Id"
+        }
+      },
+      "required": [
+        "id",
+        "disposition",
+        "summary",
+        "limitation",
+        "target_surfaces"
+      ],
+      "title": "ScreenWorkflowExperiencePublicClaim",
+      "type": "object"
+    },
+    "ScreenWorkflowExperiencePublicProjection": {
+      "additionalProperties": false,
+      "description": "Source-neutral projection safe for a public candidate-knowledge packet.",
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "admission_id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Admission Id",
+          "type": "string"
+        },
+        "source_kind": {
+          "enum": [
+            "session-memory-manual-review",
+            "operator-review-packet",
+            "other-reviewed-evidence"
+          ],
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "recurrence": {
+          "$ref": "#/$defs/ScreenWorkflowExperienceRecurrence"
+        },
+        "truth_status": {
+          "const": "owner-reviewed-candidate",
+          "default": "owner-reviewed-candidate",
+          "title": "Truth Status",
+          "type": "string"
+        },
+        "private_evidence_retained": {
+          "const": true,
+          "default": true,
+          "title": "Private Evidence Retained",
+          "type": "boolean"
+        },
+        "claims": {
+          "items": {
+            "$ref": "#/$defs/ScreenWorkflowExperiencePublicClaim"
+          },
+          "minItems": 1,
+          "title": "Claims",
+          "type": "array"
+        }
+      },
+      "required": [
+        "admission_id",
+        "source_kind",
+        "recurrence",
+        "claims"
+      ],
+      "title": "ScreenWorkflowExperiencePublicProjection",
+      "type": "object"
+    },
+    "ScreenWorkflowExperienceRecurrence": {
+      "enum": [
+        "single-demo",
+        "recurring-project-demos"
+      ],
+      "title": "ScreenWorkflowExperienceRecurrence",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Immutable local receipt binding private refs to a sanitized projection hash.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "pattern": "^workflowexperience_[0-9a-f]{24}$",
+      "title": "Id",
+      "type": "string"
+    },
+    "admission": {
+      "$ref": "#/$defs/ScreenWorkflowExperienceAdmission"
+    },
+    "public_projection": {
+      "$ref": "#/$defs/ScreenWorkflowExperiencePublicProjection"
+    },
+    "public_projection_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Public Projection Sha256",
+      "type": "string"
+    },
+    "stored_at": {
+      "format": "date-time",
+      "title": "Stored At",
+      "type": "string"
+    },
+    "immutable": {
+      "const": true,
+      "default": true,
+      "title": "Immutable",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "id",
+    "admission",
+    "public_projection",
+    "public_projection_sha256",
+    "stored_at"
+  ],
+  "title": "ScreenWorkflowExperienceReceipt",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/screen-workflow-experience-receipt.schema.json"
+}

@@ -175,6 +175,17 @@ complete cue review. A reviewed timing can bind the visual durations in
 must sum to its one reviewed cue. Narration becomes a dedicated normalized audio
 track in the same canonical timeline and lineage as the screen recording.
 
+Post-delivery learning has a separate authority boundary.
+`ScreenWorkflowExperienceAdmission` binds one immutable external evidence
+snapshot to explicit owner dispositions. The full receipt remains in ignored
+product state; a tracked candidate packet may cite only the content hash of the
+source-neutral `ScreenWorkflowExperiencePublicProjection`. Session-memory or
+another evidence system may produce the upstream review packet, but it does not
+become a runtime dependency and cannot promote its own provisional candidates.
+This makes repeated project demos a cumulative evaluation lane while keeping
+private session identities, paths, wording, and raw refs outside the public
+seed.
+
 ## Security and privacy
 
 The default server binds to loopback. Project paths are validated beneath the

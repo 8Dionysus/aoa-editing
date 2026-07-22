@@ -34,7 +34,7 @@ def test_screen_workflow_candidate_retains_reviewed_temporal_failures() -> None:
         )
     )
 
-    assert packet.revision == 3
+    assert packet.revision == 4
     assert "source-contiguous-speed-tier" in packet.allowed_operations
     assert any("Working shimmer" in item for item in packet.failure_modes)
     history = {item.case_id: item for item in packet.application_history}
@@ -43,3 +43,6 @@ def test_screen_workflow_candidate_retains_reviewed_temporal_failures() -> None:
     assert history["builder-week-continuous-speed-review"].metrics[
         "operator_score_fraction"
     ] == 0.87
+    evidence_paths = [item.evidence_path for item in history.values()]
+    assert not any(item.startswith("operator-review:") for item in evidence_paths)
+    assert any(item.startswith("private-review-receipt:sha256:") for item in evidence_paths)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from datetime import UTC, datetime
 from enum import StrEnum
 from fractions import Fraction
@@ -86,6 +87,17 @@ class ScreenWorkflowTemporalBehavior(StrEnum):
     MONOTONIC = "monotonic"
     DIRECTIONAL = "directional"
     IRREGULAR = "irregular"
+
+
+class ScreenWorkflowExperienceDisposition(StrEnum):
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    DEFERRED = "deferred"
+
+
+class ScreenWorkflowExperienceRecurrence(StrEnum):
+    SINGLE_DEMO = "single-demo"
+    RECURRING_PROJECT_DEMOS = "recurring-project-demos"
 
 
 class JobStatus(StrEnum):
@@ -931,6 +943,160 @@ class ScreenWorkflowPlan(FrozenModel):
             raise ValueError("only a reviewed-for-capture plan can be capture-ready")
         if self.capture_ready and not self.reviewed_by:
             raise ValueError("capture-ready plan requires an attributable reviewer")
+        return self
+
+
+class ScreenWorkflowExperienceClaim(FrozenModel):
+    """One owner-reviewed lesson with private evidence and a public-safe summary."""
+
+    id: str = Field(pattern=r"^[a-z0-9][a-z0-9._-]*$")
+    disposition: ScreenWorkflowExperienceDisposition
+    source_observation: str = Field(min_length=1)
+    public_summary: str = Field(min_length=1)
+    public_limitation: str = Field(min_length=1)
+    evidence_refs: list[str] = Field(min_length=1)
+    owner_review_refs: list[str] = Field(min_length=1)
+    target_surfaces: list[str] = Field(min_length=1)
+    public_case_id: str | None = Field(
+        default=None,
+        pattern=r"^[a-z0-9][a-z0-9._-]*$",
+    )
+
+    @model_validator(mode="after")
+    def validate_claim(self) -> ScreenWorkflowExperienceClaim:
+        if self.disposition is ScreenWorkflowExperienceDisposition.ACCEPTED:
+            if self.public_case_id is None:
+                raise ValueError("an accepted experience claim requires a public case id")
+        elif self.public_case_id is not None:
+            raise ValueError("only accepted experience claims may create a public case")
+        if len(self.evidence_refs) != len(set(self.evidence_refs)):
+            raise ValueError("experience evidence refs must be unique")
+        if len(self.owner_review_refs) != len(set(self.owner_review_refs)):
+            raise ValueError("experience owner-review refs must be unique")
+        if not set(self.owner_review_refs).issubset(self.evidence_refs):
+            raise ValueError("experience owner-review refs must also be evidence refs")
+        if len(self.target_surfaces) != len(set(self.target_surfaces)):
+            raise ValueError("experience target surfaces must be unique")
+        return self
+
+
+class ScreenWorkflowExperienceAdmission(FrozenModel):
+    """Private owner admission over one immutable external review snapshot."""
+
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(pattern=r"^[a-z0-9][a-z0-9._-]*$")
+    source_kind: Literal[
+        "session-memory-manual-review",
+        "operator-review-packet",
+        "other-reviewed-evidence",
+    ]
+    source_record_id: str = Field(min_length=1)
+    source_snapshot_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    review_packet_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    review_wave_id: str = Field(min_length=1)
+    recurrence: ScreenWorkflowExperienceRecurrence
+    reviewed_by: str = Field(min_length=1)
+    reviewed_at: datetime
+    review_note: str = Field(min_length=1)
+    claims: list[ScreenWorkflowExperienceClaim] = Field(min_length=1)
+    public_safe_projection_checked: Literal[True]
+    provenance: Provenance
+
+    @model_validator(mode="after")
+    def validate_admission(self) -> ScreenWorkflowExperienceAdmission:
+        claim_ids = [item.id for item in self.claims]
+        if len(claim_ids) != len(set(claim_ids)):
+            raise ValueError("experience claim ids must be unique")
+        if not any(
+            item.disposition is ScreenWorkflowExperienceDisposition.ACCEPTED
+            for item in self.claims
+        ):
+            raise ValueError("an experience admission requires at least one accepted claim")
+        if self.reviewed_at.utcoffset() is None:
+            raise ValueError("experience owner review time must include a timezone")
+        return self
+
+
+class ScreenWorkflowExperiencePublicClaim(FrozenModel):
+    id: str = Field(pattern=r"^[a-z0-9][a-z0-9._-]*$")
+    disposition: ScreenWorkflowExperienceDisposition
+    summary: str = Field(min_length=1)
+    limitation: str = Field(min_length=1)
+    target_surfaces: list[str] = Field(min_length=1)
+    public_case_id: str | None = Field(
+        default=None,
+        pattern=r"^[a-z0-9][a-z0-9._-]*$",
+    )
+
+
+class ScreenWorkflowExperiencePublicProjection(FrozenModel):
+    """Source-neutral projection safe for a public candidate-knowledge packet."""
+
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    admission_id: str = Field(pattern=r"^[a-z0-9][a-z0-9._-]*$")
+    source_kind: Literal[
+        "session-memory-manual-review",
+        "operator-review-packet",
+        "other-reviewed-evidence",
+    ]
+    recurrence: ScreenWorkflowExperienceRecurrence
+    truth_status: Literal["owner-reviewed-candidate"] = "owner-reviewed-candidate"
+    private_evidence_retained: Literal[True] = True
+    claims: list[ScreenWorkflowExperiencePublicClaim] = Field(min_length=1)
+
+
+class ScreenWorkflowExperienceReceipt(FrozenModel):
+    """Immutable local receipt binding private refs to a sanitized projection hash."""
+
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(pattern=r"^workflowexperience_[0-9a-f]{24}$")
+    admission: ScreenWorkflowExperienceAdmission
+    public_projection: ScreenWorkflowExperiencePublicProjection
+    public_projection_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    stored_at: datetime
+    immutable: Literal[True] = True
+
+    @model_validator(mode="after")
+    def validate_receipt(self) -> ScreenWorkflowExperienceReceipt:
+        if self.public_projection.admission_id != self.admission.id:
+            raise ValueError("experience projection does not identify its admission")
+        expected_claims = [
+            ScreenWorkflowExperiencePublicClaim(
+                id=item.id,
+                disposition=item.disposition,
+                summary=item.public_summary,
+                limitation=item.public_limitation,
+                target_surfaces=item.target_surfaces,
+                public_case_id=item.public_case_id,
+            )
+            for item in self.admission.claims
+        ]
+        if (
+            self.public_projection.source_kind != self.admission.source_kind
+            or self.public_projection.recurrence != self.admission.recurrence
+            or self.public_projection.claims != expected_claims
+        ):
+            raise ValueError("experience projection does not match its private admission")
+        payload = json.dumps(
+            self.public_projection.model_dump(mode="json"),
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+        ).encode("utf-8")
+        digest = hashlib.sha256(payload).hexdigest()
+        if digest != self.public_projection_sha256:
+            raise ValueError("experience public projection hash does not match")
+        admission_payload = json.dumps(
+            self.admission.model_dump(mode="json"),
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+        ).encode("utf-8")
+        admission_digest = hashlib.sha256(admission_payload).hexdigest()
+        if self.id != f"workflowexperience_{admission_digest[:24]}":
+            raise ValueError("experience receipt id does not match its private admission")
+        if self.stored_at != self.admission.reviewed_at:
+            raise ValueError("experience receipt time must equal the owner review time")
         return self
 
 
@@ -4000,6 +4166,11 @@ SCHEMA_MODELS: dict[str, type[BaseModel]] = {
     "derived-media": DerivedMediaManifest,
     "editorial-brief": EditorialBriefRevision,
     "screen-workflow-plan": ScreenWorkflowPlan,
+    "screen-workflow-experience-admission": ScreenWorkflowExperienceAdmission,
+    "screen-workflow-experience-public-projection": (
+        ScreenWorkflowExperiencePublicProjection
+    ),
+    "screen-workflow-experience-receipt": ScreenWorkflowExperienceReceipt,
     "screen-workflow-voiceover-timing": ScreenWorkflowVoiceoverTiming,
     "screen-workflow-edit-spec": ScreenWorkflowEditSpec,
     "reference-workflow-study-plan": ReferenceWorkflowStudyPlan,

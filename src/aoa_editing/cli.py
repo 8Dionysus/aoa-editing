@@ -24,6 +24,9 @@ from aoa_editing.application.reference_workspace import (
     MotionCorrectionService,
     ReferenceWorkspaceService,
 )
+from aoa_editing.application.screen_workflow_experience import (
+    admit_screen_workflow_experience,
+)
 from aoa_editing.application.service import EditingService
 from aoa_editing.config import Settings
 from aoa_editing.domain.models import (
@@ -40,6 +43,7 @@ from aoa_editing.domain.models import (
     Scenario,
     ScreenWorkflowBeatInput,
     ScreenWorkflowEditSpec,
+    ScreenWorkflowExperienceAdmission,
     ScreenWorkflowPlan,
     ScreenWorkflowVoiceoverCue,
     ScreenWorkflowVoiceoverTiming,
@@ -365,6 +369,35 @@ def workflow_plan_script(
     selected_output.parent.mkdir(parents=True, exist_ok=True)
     selected_output.write_text(plan.model_dump_json(indent=2) + "\n", encoding="utf-8")
     _emit(plan)
+
+
+@workflow_app.command("admit-experience")
+def workflow_admit_experience(
+    admission_path: Annotated[
+        Path,
+        typer.Option(
+            "--admission",
+            help="Owner-reviewed private experience-admission JSON",
+        ),
+    ],
+) -> None:
+    """Bind private reviewed evidence to an immutable public-safe projection hash."""
+
+    admission = ScreenWorkflowExperienceAdmission.model_validate_json(
+        admission_path.read_text(encoding="utf-8")
+    )
+    settings = Settings.from_env()
+    receipt, path = admit_screen_workflow_experience(admission, settings=settings)
+    _emit(
+        {
+            "schema_version": "1.0.0",
+            "receipt_id": receipt.id,
+            "receipt_path": str(path),
+            "public_projection_sha256": receipt.public_projection_sha256,
+            "public_projection": receipt.public_projection.model_dump(mode="json"),
+            "private_evidence_retained": True,
+        }
+    )
 
 
 @workflow_app.command("time-voiceover")

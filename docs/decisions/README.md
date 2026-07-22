@@ -26,3 +26,4 @@ facts.
 - [ADR-0019](ADR-0019-reviewed-voiceover-timing-and-mix.md): reviewed narration timing and canonical voiceover track for screen workflows
 - [ADR-0020](ADR-0020-host-stt-normalization-adapter.md): path-free normalization of live abyss-machine Whisper health and transcript evidence
 - [ADR-0021](ADR-0021-terminal-workflow-temporal-integrity.md): source-contiguous agent pacing, live terminal holds, and reviewed speed-risk boundaries
+- [ADR-0022](ADR-0022-reviewed-demo-experience-admission.md): private reviewed demo evidence, source-neutral projection hashes, and a recurring improvement loop

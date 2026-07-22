@@ -1,0 +1,131 @@
+{
+  "$defs": {
+    "ScreenWorkflowExperienceDisposition": {
+      "enum": [
+        "accepted",
+        "rejected",
+        "deferred"
+      ],
+      "title": "ScreenWorkflowExperienceDisposition",
+      "type": "string"
+    },
+    "ScreenWorkflowExperiencePublicClaim": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "disposition": {
+          "$ref": "#/$defs/ScreenWorkflowExperienceDisposition"
+        },
+        "summary": {
+          "minLength": 1,
+          "title": "Summary",
+          "type": "string"
+        },
+        "limitation": {
+          "minLength": 1,
+          "title": "Limitation",
+          "type": "string"
+        },
+        "target_surfaces": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Target Surfaces",
+          "type": "array"
+        },
+        "public_case_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9._-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Public Case Id"
+        }
+      },
+      "required": [
+        "id",
+        "disposition",
+        "summary",
+        "limitation",
+        "target_surfaces"
+      ],
+      "title": "ScreenWorkflowExperiencePublicClaim",
+      "type": "object"
+    },
+    "ScreenWorkflowExperienceRecurrence": {
+      "enum": [
+        "single-demo",
+        "recurring-project-demos"
+      ],
+      "title": "ScreenWorkflowExperienceRecurrence",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Source-neutral projection safe for a public candidate-knowledge packet.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "admission_id": {
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "title": "Admission Id",
+      "type": "string"
+    },
+    "source_kind": {
+      "enum": [
+        "session-memory-manual-review",
+        "operator-review-packet",
+        "other-reviewed-evidence"
+      ],
+      "title": "Source Kind",
+      "type": "string"
+    },
+    "recurrence": {
+      "$ref": "#/$defs/ScreenWorkflowExperienceRecurrence"
+    },
+    "truth_status": {
+      "const": "owner-reviewed-candidate",
+      "default": "owner-reviewed-candidate",
+      "title": "Truth Status",
+      "type": "string"
+    },
+    "private_evidence_retained": {
+      "const": true,
+      "default": true,
+      "title": "Private Evidence Retained",
+      "type": "boolean"
+    },
+    "claims": {
+      "items": {
+        "$ref": "#/$defs/ScreenWorkflowExperiencePublicClaim"
+      },
+      "minItems": 1,
+      "title": "Claims",
+      "type": "array"
+    }
+  },
+  "required": [
+    "admission_id",
+    "source_kind",
+    "recurrence",
+    "claims"
+  ],
+  "title": "ScreenWorkflowExperiencePublicProjection",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/screen-workflow-experience-public-projection.schema.json"
+}
