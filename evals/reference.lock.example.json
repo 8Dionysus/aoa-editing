@@ -1,0 +1,21 @@
+{
+  "schema": "aoa_editing_reference_lock_v1",
+  "source_image": {
+    "path": "/absolute/path/to/source-image.png",
+    "role": "permitted_reconstruction_source_after_readiness",
+    "size_bytes": 0,
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "reference_video": {
+    "path": "/absolute/path/to/reference-video.mp4",
+    "role": "evaluation_only_forbidden_render_input",
+    "size_bytes": 0,
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "pre_gate_allowed_operations": [
+    "existence",
+    "readability",
+    "byte_size",
+    "sha256"
+  ]
+}

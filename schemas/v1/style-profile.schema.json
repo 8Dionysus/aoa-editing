@@ -1,0 +1,77 @@
+{
+  "$defs": {
+    "StyleConfirmation": {
+      "additionalProperties": false,
+      "properties": {
+        "preference": {
+          "title": "Preference",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value"
+        },
+        "confirmed_at": {
+          "format": "date-time",
+          "title": "Confirmed At",
+          "type": "string"
+        },
+        "source": {
+          "const": "explicit-user-confirmation",
+          "default": "explicit-user-confirmation",
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "preference",
+        "value"
+      ],
+      "title": "StyleConfirmation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "scope": {
+      "title": "Scope",
+      "type": "string"
+    },
+    "explicit_opt_in": {
+      "const": true,
+      "title": "Explicit Opt In",
+      "type": "boolean"
+    },
+    "confirmations": {
+      "items": {
+        "$ref": "#/$defs/StyleConfirmation"
+      },
+      "minItems": 1,
+      "title": "Confirmations",
+      "type": "array"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "scope",
+    "explicit_opt_in",
+    "confirmations"
+  ],
+  "title": "StyleProfile",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/style-profile.schema.json"
+}

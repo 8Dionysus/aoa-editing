@@ -1,0 +1,39 @@
+{
+  "schema": "aoa_editing_model_manifest_v2",
+  "captured_at": "2026-07-19T07:45:00-06:00",
+  "project_managed_models": [],
+  "baseline_requires_model_weights": false,
+  "capability_catalog": "manifests/ai-capabilities.json",
+  "local_binding_overlay": ".aoa-editing.local.toml",
+  "resolved_provider_receipts": "var/state/provider-receipts",
+  "host_adapters": [
+    {
+      "capability": "speech.transcript",
+      "alias": "local-ai://speech/transcript/default",
+      "owner": "abyss-machine / abyss-stack",
+      "binding_state": "untracked-local-overlay",
+      "weights_copied_or_modified_by_project": false,
+      "project_hash": null,
+      "hash_authority": "host model inventory",
+      "license_authority": "host model card and inventory"
+    },
+    {
+      "capability": "editorial.plan",
+      "alias": "local-ai://editorial/plan/default",
+      "owner": "abyss-stack / abyss-machine",
+      "binding_state": "untracked-local-overlay",
+      "required_for_baseline": false,
+      "weights_copied_or_modified_by_project": false,
+      "project_hash": null,
+      "hash_authority": "host model inventory",
+      "license_authority": "host model card and inventory"
+    }
+  ],
+  "policy": {
+    "downloaded_for_this_repository": false,
+    "large_artifacts_in_git": false,
+    "unhashed_model_claims": false,
+    "provider_output_authority": "evidence-or-proposal-only"
+  },
+  "rationale": "The deterministic product, reconstruction, clean rerun, and transfer corpus need no downloaded model. Optional host models resolve only through typed aliases and owner-backed live receipts."
+}

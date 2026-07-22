@@ -1,0 +1,144 @@
+# Operations
+
+## Repo-local runtime and storage
+
+| Purpose | Default |
+| --- | --- |
+| Repository home | `<repository-root>` |
+| Python runtime | `<home>/.venv` |
+| Canonical projects | `<home>/var/projects` |
+| Runtime evaluations | `<home>/var/evals` |
+| Product artifacts | `<home>/var/artifacts` |
+| Regenerable editor cache | `<home>/var/cache` |
+| Temporary work | `<home>/var/tmp` |
+| Rebuildable state/indexes | `<home>/var/state` |
+
+`AOA_EDITING_HOME` selects another complete home. A repo-local
+`.aoa-editing.local.toml` may bind local provider aliases without entering Git.
+Legacy per-root environment variables are compatibility inputs during
+migration, not defaults. Resolution never depends on the current working
+directory.
+
+Shared models, host-managed AI runtimes, and shared AI/compile/browser caches
+remain outside the product home with their stack/machine owners. Medium and
+heavy work still passes through `abyss-machine resource launch`.
+
+## Local AI aliases
+
+Tracked declarations live in `manifests/ai-capabilities.json`. Copy only
+owner-proven bindings from `.aoa-editing.local.example.toml` into the ignored
+`.aoa-editing.local.toml`; replace every inventory placeholder from a current
+stack/machine receipt. Do not put credentials or model paths in either file.
+
+For the host Whisper binding, run `./scripts/host-stt-adapter health` and copy
+its exact backend, model id, and model revision into the ignored overlay. The
+adapter joins current owner read models, removes physical paths, and marks the
+transcript partial when the host supplies only file-level text. Do not bind the
+raw dictation JSON directly to the product alias.
+
+```bash
+./scripts/aoa-editing provider catalog
+./scripts/aoa-editing provider bindings
+./scripts/aoa-editing provider invoke \
+  local-ai://speech/transcript/default \
+  --request /path/to/local-request.json \
+  --no-fallback
+```
+
+The resolver validates the tracked request/response schemas, privacy and live
+health, then writes one immutable receipt under
+`var/state/provider-receipts/`. Receipt parameters retain semantic options but
+redact runtime media paths and credential-like fields. Disabled, unavailable,
+and unbound capabilities are honest normal states; deterministic editing does
+not depend on them.
+
+## Bootstrap
+
+`scripts/bootstrap` uses CPython 3.12, pinned runtime/dev dependencies, a pinned
+build backend, and pinned pip. It installs the project editable without resolving
+undeclared dependencies, then runs `doctor`.
+
+No privileged operation is currently required. If a future required system
+package is missing, use the operator-approved `pkexec` route; never request or
+capture a password. An unavailable authorization must be reported as a blocker.
+
+## Health and verification
+
+```bash
+./scripts/aoa-editing doctor --json
+./scripts/verify
+./scripts/ui-smoke --output var/tmp/ui-smoke
+```
+
+`doctor` distinguishes mandatory FFmpeg/ffprobe from optional Kdenlive/MLT and
+host AI capabilities. The product binds to `127.0.0.1:8787` by default.
+
+## Command map
+
+| Intent | Command |
+| --- | --- |
+| Bootstrap pinned runtime | `./scripts/bootstrap` |
+| Start no-terminal workbench | `./scripts/launch` or desktop entry |
+| Test all contracts | `./scripts/test` |
+| Generic evaluation | `./scripts/eval` |
+| Draft narration timing | `./scripts/aoa-editing workflow time-voiceover --help` |
+| Review narration timing | `./scripts/aoa-editing workflow review-voiceover --help` |
+| Provider alias contract gate | `./scripts/aoa-editing eval provider-aliases --output /new/root` |
+| Sealed readiness gate | `./scripts/aoa-editing gate readiness` |
+| Freeze Comparison v2 | `./scripts/aoa-editing eval reference-freeze-comparison-v2 --help` |
+| Run/review Comparison v2 | `./scripts/aoa-editing eval reference-compare-v2 --help` / `reference-review-v2 --help` |
+| Run bounded Reconstruction v2 pass | `./scripts/aoa-editing eval reference-reconstruct-pass-v2 --help` |
+| Verify and summarize Reconstruction v2 study | `./scripts/aoa-editing eval reference-summarize-study-v2 --help` |
+| Attach reference understanding workspace | `./scripts/aoa-editing reference attach --help` |
+| Inspect all-frame reference workspace | `./scripts/aoa-editing reference show --help` |
+| Preview semantic motion correction | `./scripts/aoa-editing reference preview-language --help` |
+| Review individual corrections | `./scripts/aoa-editing reference review --help` |
+| Replay selected v2 semantics in a clean home | `./scripts/aoa-editing eval clean-rerun-v2 --help` |
+| Safe cleanup preview/apply | `./scripts/clean` / `./scripts/clean --apply` |
+| Full frozen-spec proof chain | `./scripts/reproduce-reference --help` (usage on missing args) |
+
+`scripts/reproduce-reference` requires a frozen spec, a new output root, and an
+explicit visual-review statement. It performs reconstruction, comparison,
+candidate extraction, clean rerun, and unrelated-source transfer. It cannot run
+against a stale readiness revision.
+
+`workflow time-voiceover` requires a reviewed capture plan and an already
+ingested narration asset. It writes a new timing draft and may invoke only the
+typed local transcript alias; a missing provider falls back to measured pauses.
+`workflow review-voiceover` requires a complete cue list plus reviewer and
+review note, writes a separate immutable reviewed revision, and never mutates
+the draft. Keep its delivery frame rate equal to the later screen recording.
+
+`reference attach` accepts the immutable Reconstruction Study v2 and optionally
+the host-local reference file. Only the reference hash and an untracked binding
+are retained; the physical path does not enter the project registration.
+`reference show`, artifact playback, and correction preview/review all fail
+closed unless the current Git revision has a passing readiness receipt. A
+language preview never writes a version. The `review` input must decide every
+proposal item; only approved items pass through the normal reversible patch
+service.
+
+`clean-rerun-v2` requires the frozen Spec v2, the passing selected `5r`
+reconstruction receipt, and a completely absent output root. It copies neither
+the baseline project nor its renders. The command consumes the permitted PNG
+plus the receipt's typed phase-correction semantics, recreates the full
+application path, and fails unless semantic fingerprints, preview/final hashes,
+lineage, inodes, QC, and editable exports all prove independence and
+equivalence.
+
+## Backup and restore
+
+Back up a whole project directory under `var/projects/project_*`. The authoritative
+files are `project.json`, `assets/*/asset.json`, immutable source files,
+`evidence/*.json`, `treatments/*.json`, `patches/*.json`, and `versions/*.json`.
+`index.sqlite3`, renders, QC, and exports are derived or rebuildable. Briefs,
+decision graphs/logs, and style profiles are authoritative JSON and must be
+included when relevant. Never back
+up only SQLite and assume the project is preserved.
+
+## Legacy rollback boundary
+
+Legacy operator roots remain untouched during copy/rebuild and cutover. Raw
+inventories and cutover receipts live only under the ignored
+`var/artifacts/migrations` tree. Successful validation does not authorize
+legacy cleanup; cleanup requires a separate report and fresh operator approval.

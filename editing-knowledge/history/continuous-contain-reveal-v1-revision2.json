@@ -1,0 +1,1219 @@
+{
+  "schema_version": "1.0.0",
+  "id": "technique_continuous_contain_reveal",
+  "revision": 2,
+  "title": "Continuous close-detail to whole-image reveal",
+  "intent": "Begin on a rotated close detail, then continuously settle into a centered whole-image contain view while preserving source texture.",
+  "applicability": [
+    "A single still image can support the complete visual result.",
+    "The desired reveal uses one source-wide similarity transform.",
+    "A portrait canvas intentionally exposes background around the contained image."
+  ],
+  "contraindications": [
+    "Independent subjects or depth layers must move separately.",
+    "The source lacks enough resolution for the opening crop.",
+    "The composition requires semantic object replacement or generated pixels."
+  ],
+  "required_evidence": [
+    "image.statistics",
+    "image.depth_layers"
+  ],
+  "allowed_operations": [
+    "contain",
+    "normalized-position-keyframes",
+    "scale-keyframes",
+    "rotation-keyframes",
+    "virtual-camera"
+  ],
+  "rules": [
+    "Fit the complete source before camera scaling and rotate before transparent padding.",
+    "Express placement as normalized source-center coordinates on the output canvas.",
+    "Preserve a virtual source canvas large enough for the maximum camera scale."
+  ],
+  "heuristics": [
+    "Use dense linear segments when measurements exist; endpoint easing is a fallback.",
+    "Keep background explicit so the final contain reveal is intentional and reviewable."
+  ],
+  "creative_variants": [
+    "Mirror the opening center while preserving the settle point.",
+    "Reduce opening scale for lower-resolution sources.",
+    "Reverse the curve for a whole-image to detail ending."
+  ],
+  "constraints": [
+    "No reference pixels, audio, masks, or optical flow may enter render lineage.",
+    "The output aspect ratio must match the packet unless the recipe is retimed/reframed.",
+    "Every curve begins at frame zero and includes the final frame."
+  ],
+  "failure_modes": [
+    "Pre-scaling to output resolution destroys opening-crop detail.",
+    "Deeply nested FFmpeg expressions fail on dense curves.",
+    "Rotating after padding changes the observed center path and exposes wrong edges.",
+    "Feature-poor sources prevent objective camera-path remeasurement."
+  ],
+  "qc": [
+    "Validate frame count, frame rate, aspect ratio, and source-only lineage.",
+    "Remeasure scale, rotation, and normalized center across the rendered video.",
+    "Review paired contact-sheet samples for blur, edge exposure, and temporal jumps."
+  ],
+  "positive_examples": [
+    "A textured square illustration revealed inside a 9:16 canvas.",
+    "A high-resolution photograph where one close detail motivates the opening."
+  ],
+  "negative_examples": [
+    "A portrait requiring independently moving face, foreground, and background layers.",
+    "A low-resolution icon enlarged beyond its available detail."
+  ],
+  "application_history": [
+    {
+      "case_id": "comparison_bbf326901ea541b1ad69a2f6468288f1",
+      "source_class": "high-resolution textured square still",
+      "outcome": "pass",
+      "evidence_path": "runtime-eval:reference/comparison.json",
+      "metrics": {
+        "vmaf_mean": 88.065453,
+        "ssim_all": 0.957869,
+        "scale_rmse": 0.00035645090139674177,
+        "rotation_rmse_degrees": 0.0011240462903422885,
+        "center_rmse_normalized": 0.000543849025053466
+      }
+    },
+    {
+      "case_id": "transfer_696416f0fda348dcbc65668905a86a61",
+      "source_class": "procedural textured landscape illustration",
+      "outcome": "pass",
+      "evidence_path": "runtime-eval:transfer/transfer.json",
+      "metrics": {
+        "scale_rmse": 0.0021884062616076326,
+        "rotation_rmse_degrees": 0.005962094978611968,
+        "center_rmse_normalized": 0.0016662431136075446
+      }
+    }
+  ],
+  "status": "candidate",
+  "camera_motion": {
+    "duration_frames": 333,
+    "frame_rate": {
+      "numerator": 25,
+      "denominator": 1
+    },
+    "aspect_width": 9,
+    "aspect_height": 16,
+    "fit_mode": "contain",
+    "position_mode": "canvas_center",
+    "position": [
+      {
+        "frame": 0,
+        "x": 0.28593345441238754,
+        "y": 0.6278381815885761,
+        "easing": "linear"
+      },
+      {
+        "frame": 5,
+        "x": 0.2859529193420725,
+        "y": 0.6278083823749848,
+        "easing": "linear"
+      },
+      {
+        "frame": 10,
+        "x": 0.28602776366500543,
+        "y": 0.6277069518913766,
+        "easing": "linear"
+      },
+      {
+        "frame": 15,
+        "x": 0.2861278673663685,
+        "y": 0.6275551093628027,
+        "easing": "linear"
+      },
+      {
+        "frame": 20,
+        "x": 0.28631123062443115,
+        "y": 0.6273445872671561,
+        "easing": "linear"
+      },
+      {
+        "frame": 25,
+        "x": 0.2865052215912806,
+        "y": 0.6270537822289802,
+        "easing": "linear"
+      },
+      {
+        "frame": 30,
+        "x": 0.2867791970782224,
+        "y": 0.626706346587429,
+        "easing": "linear"
+      },
+      {
+        "frame": 35,
+        "x": 0.28711671241336467,
+        "y": 0.626307778378333,
+        "easing": "linear"
+      },
+      {
+        "frame": 40,
+        "x": 0.2875196483330845,
+        "y": 0.6258066447406953,
+        "easing": "linear"
+      },
+      {
+        "frame": 45,
+        "x": 0.2880264800883386,
+        "y": 0.6252707662973881,
+        "easing": "linear"
+      },
+      {
+        "frame": 50,
+        "x": 0.2885994112336008,
+        "y": 0.6246554613037898,
+        "easing": "linear"
+      },
+      {
+        "frame": 55,
+        "x": 0.28926180112465905,
+        "y": 0.6239115165301975,
+        "easing": "linear"
+      },
+      {
+        "frame": 60,
+        "x": 0.290063633299597,
+        "y": 0.6231581111026009,
+        "easing": "linear"
+      },
+      {
+        "frame": 65,
+        "x": 0.2909581270082044,
+        "y": 0.6222850646880524,
+        "easing": "linear"
+      },
+      {
+        "frame": 70,
+        "x": 0.2919798892585336,
+        "y": 0.6213084349557388,
+        "easing": "linear"
+      },
+      {
+        "frame": 75,
+        "x": 0.2931572935560974,
+        "y": 0.6202750521056258,
+        "easing": "linear"
+      },
+      {
+        "frame": 80,
+        "x": 0.2944689268872975,
+        "y": 0.61913883005127,
+        "easing": "linear"
+      },
+      {
+        "frame": 85,
+        "x": 0.29591590061186357,
+        "y": 0.6178806876527851,
+        "easing": "linear"
+      },
+      {
+        "frame": 90,
+        "x": 0.2975566935584372,
+        "y": 0.6165483315860917,
+        "easing": "linear"
+      },
+      {
+        "frame": 95,
+        "x": 0.2993593654609539,
+        "y": 0.6151160565807637,
+        "easing": "linear"
+      },
+      {
+        "frame": 100,
+        "x": 0.3013346774373653,
+        "y": 0.6135573789984219,
+        "easing": "linear"
+      },
+      {
+        "frame": 105,
+        "x": 0.3035155380360975,
+        "y": 0.6119132997447814,
+        "easing": "linear"
+      },
+      {
+        "frame": 110,
+        "x": 0.3058707062964313,
+        "y": 0.6101608498737316,
+        "easing": "linear"
+      },
+      {
+        "frame": 115,
+        "x": 0.30843868561802973,
+        "y": 0.6082697694356247,
+        "easing": "linear"
+      },
+      {
+        "frame": 120,
+        "x": 0.31121625935048813,
+        "y": 0.6063195868660287,
+        "easing": "linear"
+      },
+      {
+        "frame": 125,
+        "x": 0.31419054984508543,
+        "y": 0.6042343216338427,
+        "easing": "linear"
+      },
+      {
+        "frame": 130,
+        "x": 0.31736988985236564,
+        "y": 0.6020320433633917,
+        "easing": "linear"
+      },
+      {
+        "frame": 135,
+        "x": 0.3207865317838564,
+        "y": 0.5997439373916397,
+        "easing": "linear"
+      },
+      {
+        "frame": 140,
+        "x": 0.32439837629959456,
+        "y": 0.5973475306280462,
+        "easing": "linear"
+      },
+      {
+        "frame": 145,
+        "x": 0.32822272329649727,
+        "y": 0.5948298442348937,
+        "easing": "linear"
+      },
+      {
+        "frame": 150,
+        "x": 0.3322750953095375,
+        "y": 0.5922455613362156,
+        "easing": "linear"
+      },
+      {
+        "frame": 155,
+        "x": 0.33650853792905605,
+        "y": 0.5895569750974125,
+        "easing": "linear"
+      },
+      {
+        "frame": 160,
+        "x": 0.3409614694492302,
+        "y": 0.5867599291840404,
+        "easing": "linear"
+      },
+      {
+        "frame": 165,
+        "x": 0.3456121530772769,
+        "y": 0.5838946487641697,
+        "easing": "linear"
+      },
+      {
+        "frame": 170,
+        "x": 0.3504543724791788,
+        "y": 0.5809480894302221,
+        "easing": "linear"
+      },
+      {
+        "frame": 175,
+        "x": 0.3554740722030798,
+        "y": 0.5779100155855981,
+        "easing": "linear"
+      },
+      {
+        "frame": 180,
+        "x": 0.360661772048417,
+        "y": 0.5748218916893126,
+        "easing": "linear"
+      },
+      {
+        "frame": 185,
+        "x": 0.3660284457289962,
+        "y": 0.5716736035755153,
+        "easing": "linear"
+      },
+      {
+        "frame": 190,
+        "x": 0.3715199450456879,
+        "y": 0.5684562094708043,
+        "easing": "linear"
+      },
+      {
+        "frame": 195,
+        "x": 0.3771637694341071,
+        "y": 0.5652018497087454,
+        "easing": "linear"
+      },
+      {
+        "frame": 200,
+        "x": 0.3829149102886104,
+        "y": 0.5619140767757553,
+        "easing": "linear"
+      },
+      {
+        "frame": 205,
+        "x": 0.3887862067742291,
+        "y": 0.5585888359067357,
+        "easing": "linear"
+      },
+      {
+        "frame": 210,
+        "x": 0.3947374863354767,
+        "y": 0.5552633428920241,
+        "easing": "linear"
+      },
+      {
+        "frame": 215,
+        "x": 0.40073045169291865,
+        "y": 0.5519230895532081,
+        "easing": "linear"
+      },
+      {
+        "frame": 220,
+        "x": 0.4067815743955974,
+        "y": 0.5485699285054533,
+        "easing": "linear"
+      },
+      {
+        "frame": 225,
+        "x": 0.4128622875578235,
+        "y": 0.5452485325300753,
+        "easing": "linear"
+      },
+      {
+        "frame": 230,
+        "x": 0.4189458694707656,
+        "y": 0.5419521140496748,
+        "easing": "linear"
+      },
+      {
+        "frame": 235,
+        "x": 0.4249821458079607,
+        "y": 0.5386773437263819,
+        "easing": "linear"
+      },
+      {
+        "frame": 240,
+        "x": 0.43100129398364506,
+        "y": 0.5354667941143323,
+        "easing": "linear"
+      },
+      {
+        "frame": 245,
+        "x": 0.4369110614107542,
+        "y": 0.5323068960521458,
+        "easing": "linear"
+      },
+      {
+        "frame": 250,
+        "x": 0.44274541677873236,
+        "y": 0.529211742603645,
+        "easing": "linear"
+      },
+      {
+        "frame": 255,
+        "x": 0.44844460850928264,
+        "y": 0.5262184449487823,
+        "easing": "linear"
+      },
+      {
+        "frame": 260,
+        "x": 0.4539839664881034,
+        "y": 0.5233183898137967,
+        "easing": "linear"
+      },
+      {
+        "frame": 265,
+        "x": 0.459368044554139,
+        "y": 0.5205183267668464,
+        "easing": "linear"
+      },
+      {
+        "frame": 270,
+        "x": 0.4645288518648831,
+        "y": 0.5178496801894679,
+        "easing": "linear"
+      },
+      {
+        "frame": 275,
+        "x": 0.4694426190163938,
+        "y": 0.5153113605316105,
+        "easing": "linear"
+      },
+      {
+        "frame": 280,
+        "x": 0.47407811578756676,
+        "y": 0.5129194843362224,
+        "easing": "linear"
+      },
+      {
+        "frame": 285,
+        "x": 0.4784252470499717,
+        "y": 0.5107040383396135,
+        "easing": "linear"
+      },
+      {
+        "frame": 290,
+        "x": 0.4824558883430543,
+        "y": 0.5086518590231643,
+        "easing": "linear"
+      },
+      {
+        "frame": 295,
+        "x": 0.48612643482196105,
+        "y": 0.5067784338855189,
+        "easing": "linear"
+      },
+      {
+        "frame": 300,
+        "x": 0.4894191153974035,
+        "y": 0.5051125686044973,
+        "easing": "linear"
+      },
+      {
+        "frame": 305,
+        "x": 0.4923010001077714,
+        "y": 0.5036578044319449,
+        "easing": "linear"
+      },
+      {
+        "frame": 310,
+        "x": 0.49474447254271403,
+        "y": 0.5024142334623568,
+        "easing": "linear"
+      },
+      {
+        "frame": 315,
+        "x": 0.4967439134085378,
+        "y": 0.5014186638334738,
+        "easing": "linear"
+      },
+      {
+        "frame": 320,
+        "x": 0.4982539091451521,
+        "y": 0.5006613966153226,
+        "easing": "linear"
+      },
+      {
+        "frame": 325,
+        "x": 0.4992803771384485,
+        "y": 0.5001439979043535,
+        "easing": "linear"
+      },
+      {
+        "frame": 330,
+        "x": 0.49974224545199164,
+        "y": 0.499910119007671,
+        "easing": "linear"
+      },
+      {
+        "frame": 332,
+        "x": 0.49979964907582436,
+        "y": 0.4998843247770503,
+        "easing": "linear"
+      }
+    ],
+    "scale": [
+      {
+        "frame": 0,
+        "value": 2.7999813014116204,
+        "easing": "linear"
+      },
+      {
+        "frame": 5,
+        "value": 2.7988092991084796,
+        "easing": "linear"
+      },
+      {
+        "frame": 10,
+        "value": 2.7951775730555846,
+        "easing": "linear"
+      },
+      {
+        "frame": 15,
+        "value": 2.789304602743533,
+        "easing": "linear"
+      },
+      {
+        "frame": 20,
+        "value": 2.781212355512226,
+        "easing": "linear"
+      },
+      {
+        "frame": 25,
+        "value": 2.7708996566553035,
+        "easing": "linear"
+      },
+      {
+        "frame": 30,
+        "value": 2.7585974387442773,
+        "easing": "linear"
+      },
+      {
+        "frame": 35,
+        "value": 2.74424119974785,
+        "easing": "linear"
+      },
+      {
+        "frame": 40,
+        "value": 2.7279032055066286,
+        "easing": "linear"
+      },
+      {
+        "frame": 45,
+        "value": 2.709814464145416,
+        "easing": "linear"
+      },
+      {
+        "frame": 50,
+        "value": 2.6898487116541547,
+        "easing": "linear"
+      },
+      {
+        "frame": 55,
+        "value": 2.6681639373403927,
+        "easing": "linear"
+      },
+      {
+        "frame": 60,
+        "value": 2.644926825060868,
+        "easing": "linear"
+      },
+      {
+        "frame": 65,
+        "value": 2.6200591623720055,
+        "easing": "linear"
+      },
+      {
+        "frame": 70,
+        "value": 2.5936914313455692,
+        "easing": "linear"
+      },
+      {
+        "frame": 75,
+        "value": 2.5659739429946256,
+        "easing": "linear"
+      },
+      {
+        "frame": 80,
+        "value": 2.53682481354567,
+        "easing": "linear"
+      },
+      {
+        "frame": 85,
+        "value": 2.506481936069882,
+        "easing": "linear"
+      },
+      {
+        "frame": 90,
+        "value": 2.474898865650799,
+        "easing": "linear"
+      },
+      {
+        "frame": 95,
+        "value": 2.4421873579900573,
+        "easing": "linear"
+      },
+      {
+        "frame": 100,
+        "value": 2.408508766062918,
+        "easing": "linear"
+      },
+      {
+        "frame": 105,
+        "value": 2.3738075007534745,
+        "easing": "linear"
+      },
+      {
+        "frame": 110,
+        "value": 2.3382079323177747,
+        "easing": "linear"
+      },
+      {
+        "frame": 115,
+        "value": 2.3017178117750468,
+        "easing": "linear"
+      },
+      {
+        "frame": 120,
+        "value": 2.26456550449956,
+        "easing": "linear"
+      },
+      {
+        "frame": 125,
+        "value": 2.226683984063508,
+        "easing": "linear"
+      },
+      {
+        "frame": 130,
+        "value": 2.1881937370678246,
+        "easing": "linear"
+      },
+      {
+        "frame": 135,
+        "value": 2.149202402141583,
+        "easing": "linear"
+      },
+      {
+        "frame": 140,
+        "value": 2.109749736056585,
+        "easing": "linear"
+      },
+      {
+        "frame": 145,
+        "value": 2.0698734415168993,
+        "easing": "linear"
+      },
+      {
+        "frame": 150,
+        "value": 2.0297257201458465,
+        "easing": "linear"
+      },
+      {
+        "frame": 155,
+        "value": 1.9893535069108874,
+        "easing": "linear"
+      },
+      {
+        "frame": 160,
+        "value": 1.9488021244112208,
+        "easing": "linear"
+      },
+      {
+        "frame": 165,
+        "value": 1.9081508295142684,
+        "easing": "linear"
+      },
+      {
+        "frame": 170,
+        "value": 1.8674794811741473,
+        "easing": "linear"
+      },
+      {
+        "frame": 175,
+        "value": 1.8268929801146319,
+        "easing": "linear"
+      },
+      {
+        "frame": 180,
+        "value": 1.786429343452551,
+        "easing": "linear"
+      },
+      {
+        "frame": 185,
+        "value": 1.746178374197898,
+        "easing": "linear"
+      },
+      {
+        "frame": 190,
+        "value": 1.7062053136497788,
+        "easing": "linear"
+      },
+      {
+        "frame": 195,
+        "value": 1.6665624642460561,
+        "easing": "linear"
+      },
+      {
+        "frame": 200,
+        "value": 1.62737153206352,
+        "easing": "linear"
+      },
+      {
+        "frame": 205,
+        "value": 1.5886753958366515,
+        "easing": "linear"
+      },
+      {
+        "frame": 210,
+        "value": 1.550575188410814,
+        "easing": "linear"
+      },
+      {
+        "frame": 215,
+        "value": 1.5130941534377294,
+        "easing": "linear"
+      },
+      {
+        "frame": 220,
+        "value": 1.4763327543886486,
+        "easing": "linear"
+      },
+      {
+        "frame": 225,
+        "value": 1.4403983592385008,
+        "easing": "linear"
+      },
+      {
+        "frame": 230,
+        "value": 1.4053123305186852,
+        "easing": "linear"
+      },
+      {
+        "frame": 235,
+        "value": 1.3712019705660925,
+        "easing": "linear"
+      },
+      {
+        "frame": 240,
+        "value": 1.338066939261007,
+        "easing": "linear"
+      },
+      {
+        "frame": 245,
+        "value": 1.3060965074527486,
+        "easing": "linear"
+      },
+      {
+        "frame": 250,
+        "value": 1.2752177786751495,
+        "easing": "linear"
+      },
+      {
+        "frame": 255,
+        "value": 1.2455870056857867,
+        "easing": "linear"
+      },
+      {
+        "frame": 260,
+        "value": 1.2172749660697286,
+        "easing": "linear"
+      },
+      {
+        "frame": 265,
+        "value": 1.1903561837114023,
+        "easing": "linear"
+      },
+      {
+        "frame": 270,
+        "value": 1.1648956299262194,
+        "easing": "linear"
+      },
+      {
+        "frame": 275,
+        "value": 1.140973937219644,
+        "easing": "linear"
+      },
+      {
+        "frame": 280,
+        "value": 1.1186482543835,
+        "easing": "linear"
+      },
+      {
+        "frame": 285,
+        "value": 1.0980199018667878,
+        "easing": "linear"
+      },
+      {
+        "frame": 290,
+        "value": 1.0791211653924242,
+        "easing": "linear"
+      },
+      {
+        "frame": 295,
+        "value": 1.062102866060205,
+        "easing": "linear"
+      },
+      {
+        "frame": 300,
+        "value": 1.046957692063413,
+        "easing": "linear"
+      },
+      {
+        "frame": 305,
+        "value": 1.0338137755907832,
+        "easing": "linear"
+      },
+      {
+        "frame": 310,
+        "value": 1.0226928499363261,
+        "easing": "linear"
+      },
+      {
+        "frame": 315,
+        "value": 1.0136571347664014,
+        "easing": "linear"
+      },
+      {
+        "frame": 320,
+        "value": 1.0068948527266153,
+        "easing": "linear"
+      },
+      {
+        "frame": 325,
+        "value": 1.002413830150251,
+        "easing": "linear"
+      },
+      {
+        "frame": 330,
+        "value": 1.0002015839329095,
+        "easing": "linear"
+      },
+      {
+        "frame": 332,
+        "value": 0.9999943775518282,
+        "easing": "linear"
+      }
+    ],
+    "rotation": [
+      {
+        "frame": 0,
+        "value": -7.199811636857723,
+        "easing": "linear"
+      },
+      {
+        "frame": 5,
+        "value": -7.194981059034056,
+        "easing": "linear"
+      },
+      {
+        "frame": 10,
+        "value": -7.180816478168471,
+        "easing": "linear"
+      },
+      {
+        "frame": 15,
+        "value": -7.156998702165817,
+        "easing": "linear"
+      },
+      {
+        "frame": 20,
+        "value": -7.125159676784493,
+        "easing": "linear"
+      },
+      {
+        "frame": 25,
+        "value": -7.082721995380906,
+        "easing": "linear"
+      },
+      {
+        "frame": 30,
+        "value": -7.034444476289946,
+        "easing": "linear"
+      },
+      {
+        "frame": 35,
+        "value": -6.97724125137513,
+        "easing": "linear"
+      },
+      {
+        "frame": 40,
+        "value": -6.91188741861356,
+        "easing": "linear"
+      },
+      {
+        "frame": 45,
+        "value": -6.838881869068366,
+        "easing": "linear"
+      },
+      {
+        "frame": 50,
+        "value": -6.758928216440393,
+        "easing": "linear"
+      },
+      {
+        "frame": 55,
+        "value": -6.6724541408500375,
+        "easing": "linear"
+      },
+      {
+        "frame": 60,
+        "value": -6.579971833898661,
+        "easing": "linear"
+      },
+      {
+        "frame": 65,
+        "value": -6.479572021633089,
+        "easing": "linear"
+      },
+      {
+        "frame": 70,
+        "value": -6.374732652163539,
+        "easing": "linear"
+      },
+      {
+        "frame": 75,
+        "value": -6.263665445936715,
+        "easing": "linear"
+      },
+      {
+        "frame": 80,
+        "value": -6.147546241257336,
+        "easing": "linear"
+      },
+      {
+        "frame": 85,
+        "value": -6.0259122709708155,
+        "easing": "linear"
+      },
+      {
+        "frame": 90,
+        "value": -5.899802638845959,
+        "easing": "linear"
+      },
+      {
+        "frame": 95,
+        "value": -5.768975373797462,
+        "easing": "linear"
+      },
+      {
+        "frame": 100,
+        "value": -5.6344441883374685,
+        "easing": "linear"
+      },
+      {
+        "frame": 105,
+        "value": -5.495874097694854,
+        "easing": "linear"
+      },
+      {
+        "frame": 110,
+        "value": -5.35290603624497,
+        "easing": "linear"
+      },
+      {
+        "frame": 115,
+        "value": -5.2064657273893244,
+        "easing": "linear"
+      },
+      {
+        "frame": 120,
+        "value": -5.058703890003705,
+        "easing": "linear"
+      },
+      {
+        "frame": 125,
+        "value": -4.90689306279996,
+        "easing": "linear"
+      },
+      {
+        "frame": 130,
+        "value": -4.751883809416605,
+        "easing": "linear"
+      },
+      {
+        "frame": 135,
+        "value": -4.5961455512564156,
+        "easing": "linear"
+      },
+      {
+        "frame": 140,
+        "value": -4.439108387609189,
+        "easing": "linear"
+      },
+      {
+        "frame": 145,
+        "value": -4.279041788053042,
+        "easing": "linear"
+      },
+      {
+        "frame": 150,
+        "value": -4.11866276814866,
+        "easing": "linear"
+      },
+      {
+        "frame": 155,
+        "value": -3.9582024689052515,
+        "easing": "linear"
+      },
+      {
+        "frame": 160,
+        "value": -3.795794672931335,
+        "easing": "linear"
+      },
+      {
+        "frame": 165,
+        "value": -3.633467578227367,
+        "easing": "linear"
+      },
+      {
+        "frame": 170,
+        "value": -3.470211652594673,
+        "easing": "linear"
+      },
+      {
+        "frame": 175,
+        "value": -3.308037562880305,
+        "easing": "linear"
+      },
+      {
+        "frame": 180,
+        "value": -3.146158722370475,
+        "easing": "linear"
+      },
+      {
+        "frame": 185,
+        "value": -2.9853800985259955,
+        "easing": "linear"
+      },
+      {
+        "frame": 190,
+        "value": -2.8255660810926533,
+        "easing": "linear"
+      },
+      {
+        "frame": 195,
+        "value": -2.6655253474436043,
+        "easing": "linear"
+      },
+      {
+        "frame": 200,
+        "value": -2.5097540086122185,
+        "easing": "linear"
+      },
+      {
+        "frame": 205,
+        "value": -2.3551939459390057,
+        "easing": "linear"
+      },
+      {
+        "frame": 210,
+        "value": -2.2036479218586997,
+        "easing": "linear"
+      },
+      {
+        "frame": 215,
+        "value": -2.0524865262082814,
+        "easing": "linear"
+      },
+      {
+        "frame": 220,
+        "value": -1.9046564748002532,
+        "easing": "linear"
+      },
+      {
+        "frame": 225,
+        "value": -1.7609880433466853,
+        "easing": "linear"
+      },
+      {
+        "frame": 230,
+        "value": -1.6221582993224084,
+        "easing": "linear"
+      },
+      {
+        "frame": 235,
+        "value": -1.4860917154397957,
+        "easing": "linear"
+      },
+      {
+        "frame": 240,
+        "value": -1.3531619348456705,
+        "easing": "linear"
+      },
+      {
+        "frame": 245,
+        "value": -1.2257519521997255,
+        "easing": "linear"
+      },
+      {
+        "frame": 250,
+        "value": -1.1011423761432562,
+        "easing": "linear"
+      },
+      {
+        "frame": 255,
+        "value": -0.9835498827644791,
+        "easing": "linear"
+      },
+      {
+        "frame": 260,
+        "value": -0.8704773907682851,
+        "easing": "linear"
+      },
+      {
+        "frame": 265,
+        "value": -0.7612833523606746,
+        "easing": "linear"
+      },
+      {
+        "frame": 270,
+        "value": -0.6605354917388108,
+        "easing": "linear"
+      },
+      {
+        "frame": 275,
+        "value": -0.5639417828670623,
+        "easing": "linear"
+      },
+      {
+        "frame": 280,
+        "value": -0.47333157615898863,
+        "easing": "linear"
+      },
+      {
+        "frame": 285,
+        "value": -0.39368431802997633,
+        "easing": "linear"
+      },
+      {
+        "frame": 290,
+        "value": -0.3162438313042655,
+        "easing": "linear"
+      },
+      {
+        "frame": 295,
+        "value": -0.24999514629327604,
+        "easing": "linear"
+      },
+      {
+        "frame": 300,
+        "value": -0.18833714644928495,
+        "easing": "linear"
+      },
+      {
+        "frame": 305,
+        "value": -0.13644031836419687,
+        "easing": "linear"
+      },
+      {
+        "frame": 310,
+        "value": -0.09289429660594836,
+        "easing": "linear"
+      },
+      {
+        "frame": 315,
+        "value": -0.05715386822870807,
+        "easing": "linear"
+      },
+      {
+        "frame": 320,
+        "value": -0.02970311736750531,
+        "easing": "linear"
+      },
+      {
+        "frame": 325,
+        "value": -0.011227315529313012,
+        "easing": "linear"
+      },
+      {
+        "frame": 330,
+        "value": -0.000970301612809724,
+        "easing": "linear"
+      },
+      {
+        "frame": 332,
+        "value": -0.001325690193878582,
+        "easing": "linear"
+      }
+    ]
+  },
+  "promotion_questions": [
+    "Does the technique remain stable across photographic, graphic, and alpha sources?",
+    "What automatic resolution guard should cap opening scale?",
+    "Which aspect-ratio adaptations preserve the intended composition?",
+    "How many successful independent applications justify evaluated status?"
+  ],
+  "provenance": {
+    "tool": "aoa-editing-technique-extractor",
+    "tool_version": "0.1.0",
+    "command": [],
+    "parameters": {
+      "source_contract": "passing frozen comparison",
+      "spec_id": "reference_365496bc800a4d60aeeb1a9ed85cf4f9",
+      "comparison_id": "comparison_bbf326901ea541b1ad69a2f6468288f1",
+      "media_identifiers_retained": false
+    },
+    "model_id": null,
+    "model_revision": null,
+    "deterministic": true,
+    "generated_at": "2026-07-15T09:37:06.555857Z"
+  }
+}

@@ -1,0 +1,363 @@
+{
+  "$defs": {
+    "DecisionAlternative": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "tradeoffs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tradeoffs",
+          "type": "array"
+        },
+        "rejected_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rejected Reason"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "DecisionAlternative",
+      "type": "object"
+    },
+    "DecisionApproval": {
+      "enum": [
+        "proposed",
+        "approved",
+        "rejected",
+        "superseded"
+      ],
+      "title": "DecisionApproval",
+      "type": "string"
+    },
+    "DecisionEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "source_decision_id": {
+          "title": "Source Decision Id",
+          "type": "string"
+        },
+        "target_decision_id": {
+          "title": "Target Decision Id",
+          "type": "string"
+        },
+        "relation": {
+          "enum": [
+            "depends_on",
+            "supports",
+            "conflicts_with",
+            "alternative_to"
+          ],
+          "title": "Relation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_decision_id",
+        "target_decision_id",
+        "relation"
+      ],
+      "title": "DecisionEdge",
+      "type": "object"
+    },
+    "DecisionOrigin": {
+      "enum": [
+        "human",
+        "rule",
+        "model",
+        "import"
+      ],
+      "title": "DecisionOrigin",
+      "type": "string"
+    },
+    "EditorialDecision": {
+      "additionalProperties": false,
+      "description": "One explainable and reversible semantic editing decision.",
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "operation_type": {
+          "title": "Operation Type",
+          "type": "string"
+        },
+        "source_asset_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Asset Ids",
+          "type": "array"
+        },
+        "source_ranges": {
+          "additionalProperties": {
+            "items": {
+              "$ref": "#/$defs/FrameRange"
+            },
+            "type": "array"
+          },
+          "title": "Source Ranges",
+          "type": "object"
+        },
+        "timeline_ranges": {
+          "items": {
+            "$ref": "#/$defs/FrameRange"
+          },
+          "title": "Timeline Ranges",
+          "type": "array"
+        },
+        "intent": {
+          "title": "Intent",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "uncertainties": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Uncertainties",
+          "type": "array"
+        },
+        "constraints": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Constraints",
+          "type": "array"
+        },
+        "alternatives": {
+          "items": {
+            "$ref": "#/$defs/DecisionAlternative"
+          },
+          "title": "Alternatives",
+          "type": "array"
+        },
+        "origin": {
+          "$ref": "#/$defs/DecisionOrigin"
+        },
+        "approval": {
+          "$ref": "#/$defs/DecisionApproval",
+          "default": "proposed"
+        },
+        "patch_id": {
+          "title": "Patch Id",
+          "type": "string"
+        },
+        "reversible_operations": {
+          "items": {
+            "$ref": "#/$defs/PatchOperation"
+          },
+          "title": "Reversible Operations",
+          "type": "array"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "operation_type",
+        "intent",
+        "rationale",
+        "confidence",
+        "origin",
+        "patch_id"
+      ],
+      "title": "EditorialDecision",
+      "type": "object"
+    },
+    "FrameRange": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "duration": {
+          "exclusiveMinimum": 0,
+          "title": "Duration",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "duration"
+      ],
+      "title": "FrameRange",
+      "type": "object"
+    },
+    "PatchOperation": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "enum": [
+            "add",
+            "remove",
+            "replace",
+            "test"
+          ],
+          "title": "Op",
+          "type": "string"
+        },
+        "path": {
+          "pattern": "^/",
+          "title": "Path",
+          "type": "string"
+        },
+        "value": {
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "required": [
+        "op",
+        "path"
+      ],
+      "title": "PatchOperation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "base_version_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Base Version Id"
+    },
+    "version_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Version Id"
+    },
+    "treatment_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Treatment Id"
+    },
+    "parent_graph_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parent Graph Id"
+    },
+    "state": {
+      "enum": [
+        "proposed",
+        "approved",
+        "rejected",
+        "superseded"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "decisions": {
+      "items": {
+        "$ref": "#/$defs/EditorialDecision"
+      },
+      "title": "Decisions",
+      "type": "array"
+    },
+    "edges": {
+      "items": {
+        "$ref": "#/$defs/DecisionEdge"
+      },
+      "title": "Edges",
+      "type": "array"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "project_id",
+    "state"
+  ],
+  "title": "EditorialDecisionGraph",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/editorial-decision-graph.schema.json"
+}

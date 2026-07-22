@@ -1,0 +1,543 @@
+{
+  "$defs": {
+    "CheckResult": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "warn",
+            "skip"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "measured": {
+          "additionalProperties": true,
+          "title": "Measured",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "summary"
+      ],
+      "title": "CheckResult",
+      "type": "object"
+    },
+    "CleanRerunApplicationProofV2": {
+      "additionalProperties": false,
+      "description": "Hash-complete normal application path for baseline or clean replay.",
+      "properties": {
+        "receipt_id": {
+          "title": "Receipt Id",
+          "type": "string"
+        },
+        "receipt_path": {
+          "title": "Receipt Path",
+          "type": "string"
+        },
+        "receipt_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Receipt Sha256",
+          "type": "string"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "project_root": {
+          "title": "Project Root",
+          "type": "string"
+        },
+        "project_manifest_path": {
+          "title": "Project Manifest Path",
+          "type": "string"
+        },
+        "project_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Project Manifest Sha256",
+          "type": "string"
+        },
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "asset_path": {
+          "title": "Asset Path",
+          "type": "string"
+        },
+        "asset_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Asset Sha256",
+          "type": "string"
+        },
+        "asset_inode": {
+          "exclusiveMinimum": 0,
+          "title": "Asset Inode",
+          "type": "integer"
+        },
+        "derivatives_manifest_path": {
+          "title": "Derivatives Manifest Path",
+          "type": "string"
+        },
+        "derivatives_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Derivatives Manifest Sha256",
+          "type": "string"
+        },
+        "derivative_artifacts": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Derivative Artifacts",
+          "type": "array"
+        },
+        "treatment_id": {
+          "title": "Treatment Id",
+          "type": "string"
+        },
+        "treatment_path": {
+          "title": "Treatment Path",
+          "type": "string"
+        },
+        "treatment_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Treatment Sha256",
+          "type": "string"
+        },
+        "patch_id": {
+          "title": "Patch Id",
+          "type": "string"
+        },
+        "patch_path": {
+          "title": "Patch Path",
+          "type": "string"
+        },
+        "patch_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Patch Sha256",
+          "type": "string"
+        },
+        "version_id": {
+          "title": "Version Id",
+          "type": "string"
+        },
+        "version_path": {
+          "title": "Version Path",
+          "type": "string"
+        },
+        "version_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Version Sha256",
+          "type": "string"
+        },
+        "decision_graph_id": {
+          "title": "Decision Graph Id",
+          "type": "string"
+        },
+        "decision_graph_path": {
+          "title": "Decision Graph Path",
+          "type": "string"
+        },
+        "decision_graph_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Decision Graph Sha256",
+          "type": "string"
+        },
+        "decision_log_path": {
+          "title": "Decision Log Path",
+          "type": "string"
+        },
+        "semantic_timeline_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Semantic Timeline Sha256",
+          "type": "string"
+        },
+        "profiles": {
+          "additionalProperties": {
+            "$ref": "#/$defs/CleanRerunRenderProofV2"
+          },
+          "title": "Profiles",
+          "type": "object"
+        },
+        "editable_exports": {
+          "additionalProperties": {
+            "$ref": "#/$defs/CleanRerunExportProofV2"
+          },
+          "title": "Editable Exports",
+          "type": "object"
+        },
+        "hidden_manual_steps": {
+          "items": {},
+          "title": "Hidden Manual Steps",
+          "type": "array"
+        }
+      },
+      "required": [
+        "receipt_id",
+        "receipt_path",
+        "receipt_sha256",
+        "project_id",
+        "project_root",
+        "project_manifest_path",
+        "project_manifest_sha256",
+        "asset_id",
+        "asset_path",
+        "asset_sha256",
+        "asset_inode",
+        "derivatives_manifest_path",
+        "derivatives_manifest_sha256",
+        "derivative_artifacts",
+        "treatment_id",
+        "treatment_path",
+        "treatment_sha256",
+        "patch_id",
+        "patch_path",
+        "patch_sha256",
+        "version_id",
+        "version_path",
+        "version_sha256",
+        "decision_graph_id",
+        "decision_graph_path",
+        "decision_graph_sha256",
+        "decision_log_path",
+        "semantic_timeline_sha256",
+        "profiles",
+        "editable_exports"
+      ],
+      "title": "CleanRerunApplicationProofV2",
+      "type": "object"
+    },
+    "CleanRerunExportProofV2": {
+      "additionalProperties": false,
+      "description": "Parser-backed editable projection recreated in the clean workspace.",
+      "properties": {
+        "format": {
+          "enum": [
+            "kdenlive",
+            "otio"
+          ],
+          "title": "Format",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "validator_tool": {
+          "minLength": 1,
+          "title": "Validator Tool",
+          "type": "string"
+        },
+        "validator_present": {
+          "const": true,
+          "default": true,
+          "title": "Validator Present",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "format",
+        "path",
+        "sha256",
+        "validator_tool"
+      ],
+      "title": "CleanRerunExportProofV2",
+      "type": "object"
+    },
+    "CleanRerunRenderProofV2": {
+      "additionalProperties": false,
+      "description": "One independently recreated render joined to QC and source-only lineage.",
+      "properties": {
+        "profile": {
+          "enum": [
+            "preview",
+            "final"
+          ],
+          "title": "Profile",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "inode": {
+          "exclusiveMinimum": 0,
+          "title": "Inode",
+          "type": "integer"
+        },
+        "qc_path": {
+          "title": "Qc Path",
+          "type": "string"
+        },
+        "qc_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Qc Sha256",
+          "type": "string"
+        },
+        "qc_overall": {
+          "const": "pass",
+          "title": "Qc Overall",
+          "type": "string"
+        },
+        "lineage_path": {
+          "title": "Lineage Path",
+          "type": "string"
+        },
+        "lineage_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Lineage Sha256",
+          "type": "string"
+        },
+        "input_hashes": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Input Hashes",
+          "type": "array"
+        },
+        "forbidden_hashes_present": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Forbidden Hashes Present",
+          "type": "array"
+        }
+      },
+      "required": [
+        "profile",
+        "path",
+        "sha256",
+        "inode",
+        "qc_path",
+        "qc_sha256",
+        "qc_overall",
+        "lineage_path",
+        "lineage_sha256",
+        "input_hashes"
+      ],
+      "title": "CleanRerunRenderProofV2",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Revision-bound replay of approved v2 semantics in an empty editing home.",
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "implementation_revision": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Implementation Revision",
+      "type": "string"
+    },
+    "git_clean": {
+      "const": true,
+      "title": "Git Clean",
+      "type": "boolean"
+    },
+    "spec_id": {
+      "title": "Spec Id",
+      "type": "string"
+    },
+    "spec_path": {
+      "title": "Spec Path",
+      "type": "string"
+    },
+    "spec_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Spec Sha256",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "reference_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Reference Sha256",
+      "type": "string"
+    },
+    "approved_phase_correction_id": {
+      "title": "Approved Phase Correction Id",
+      "type": "string"
+    },
+    "approved_phase_correction_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Approved Phase Correction Sha256",
+      "type": "string"
+    },
+    "baseline": {
+      "$ref": "#/$defs/CleanRerunApplicationProofV2"
+    },
+    "replay": {
+      "$ref": "#/$defs/CleanRerunApplicationProofV2"
+    },
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/CheckResult"
+      },
+      "minItems": 1,
+      "title": "Checks",
+      "type": "array"
+    },
+    "artifacts": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Artifacts",
+      "type": "object"
+    },
+    "mandatory_skips": {
+      "const": 0,
+      "default": 0,
+      "title": "Mandatory Skips",
+      "type": "integer"
+    },
+    "old_render_used_as_input": {
+      "const": false,
+      "default": false,
+      "title": "Old Render Used As Input",
+      "type": "boolean"
+    },
+    "reference_media_used_as_input": {
+      "const": false,
+      "default": false,
+      "title": "Reference Media Used As Input",
+      "type": "boolean"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "overall": {
+      "enum": [
+        "pass",
+        "fail"
+      ],
+      "title": "Overall",
+      "type": "string"
+    }
+  },
+  "required": [
+    "implementation_revision",
+    "git_clean",
+    "spec_id",
+    "spec_path",
+    "spec_sha256",
+    "source_sha256",
+    "reference_sha256",
+    "approved_phase_correction_id",
+    "approved_phase_correction_sha256",
+    "baseline",
+    "replay",
+    "checks",
+    "artifacts",
+    "provenance",
+    "overall"
+  ],
+  "title": "CleanRerunReportV2",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/clean-rerun-v2.schema.json"
+}

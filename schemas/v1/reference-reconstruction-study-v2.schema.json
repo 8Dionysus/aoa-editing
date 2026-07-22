@@ -1,0 +1,524 @@
+{
+  "$defs": {
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ReconstructionStudyPassV2": {
+      "additionalProperties": false,
+      "description": "Verified facts and explicit diagnostic judgment for one pass.",
+      "properties": {
+        "sequence": {
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "5r"
+          ],
+          "title": "Sequence",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "pass_kind": {
+          "enum": [
+            "v1_baseline",
+            "timing_easing",
+            "continuous_tangents",
+            "moving_pivot_hypothesis",
+            "coupled_scale_rotation",
+            "phase_compensated_matrix"
+          ],
+          "title": "Pass Kind",
+          "type": "string"
+        },
+        "comparison_id": {
+          "title": "Comparison Id",
+          "type": "string"
+        },
+        "comparison_path": {
+          "title": "Comparison Path",
+          "type": "string"
+        },
+        "comparison_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Comparison Sha256",
+          "type": "string"
+        },
+        "receipt_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Receipt Id"
+        },
+        "receipt_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Receipt Path"
+        },
+        "receipt_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Receipt Sha256"
+        },
+        "motion_gate_revision": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{40}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Motion Gate Revision"
+        },
+        "motion_gate_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Motion Gate Path"
+        },
+        "motion_gate_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Motion Gate Sha256"
+        },
+        "candidate_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Candidate Sha256",
+          "type": "string"
+        },
+        "candidate_same_as_previous": {
+          "title": "Candidate Same As Previous",
+          "type": "boolean"
+        },
+        "objective_overall": {
+          "enum": [
+            "pass",
+            "fail"
+          ],
+          "title": "Objective Overall",
+          "type": "string"
+        },
+        "comparison_overall": {
+          "enum": [
+            "pass",
+            "fail",
+            "warn"
+          ],
+          "title": "Comparison Overall",
+          "type": "string"
+        },
+        "failed_check_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Failed Check Ids",
+          "type": "array"
+        },
+        "metric_summary": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Metric Summary",
+          "type": "object"
+        },
+        "delta_from_previous": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Delta From Previous",
+          "type": "object"
+        },
+        "disposition": {
+          "enum": [
+            "baseline",
+            "rejected",
+            "retained",
+            "selected"
+          ],
+          "title": "Disposition",
+          "type": "string"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        },
+        "diagnostic_visual_observation": {
+          "title": "Diagnostic Visual Observation",
+          "type": "string"
+        },
+        "diagnostic_visual_authority": {
+          "const": "agent_diagnostic",
+          "default": "agent_diagnostic",
+          "title": "Diagnostic Visual Authority",
+          "type": "string"
+        },
+        "artifacts": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Artifacts",
+          "type": "object"
+        },
+        "diagnostic_artifact_sha256": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Diagnostic Artifact Sha256",
+          "type": "object"
+        }
+      },
+      "required": [
+        "sequence",
+        "label",
+        "pass_kind",
+        "comparison_id",
+        "comparison_path",
+        "comparison_sha256",
+        "candidate_sha256",
+        "candidate_same_as_previous",
+        "objective_overall",
+        "comparison_overall",
+        "failed_check_ids",
+        "metric_summary",
+        "delta_from_previous",
+        "disposition",
+        "rationale",
+        "diagnostic_visual_observation",
+        "artifacts",
+        "diagnostic_artifact_sha256"
+      ],
+      "title": "ReconstructionStudyPassV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Machine-readable selection ledger across bounded reconstruction passes.",
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "implementation_revision": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Implementation Revision",
+      "type": "string"
+    },
+    "git_clean": {
+      "const": true,
+      "title": "Git Clean",
+      "type": "boolean"
+    },
+    "plan_path": {
+      "title": "Plan Path",
+      "type": "string"
+    },
+    "plan_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Plan Sha256",
+      "type": "string"
+    },
+    "spec_id": {
+      "title": "Spec Id",
+      "type": "string"
+    },
+    "spec_path": {
+      "title": "Spec Path",
+      "type": "string"
+    },
+    "spec_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Spec Sha256",
+      "type": "string"
+    },
+    "protocol_id": {
+      "title": "Protocol Id",
+      "type": "string"
+    },
+    "protocol_path": {
+      "title": "Protocol Path",
+      "type": "string"
+    },
+    "protocol_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Protocol Sha256",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "reference_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Reference Sha256",
+      "type": "string"
+    },
+    "passes": {
+      "items": {
+        "$ref": "#/$defs/ReconstructionStudyPassV2"
+      },
+      "maxItems": 6,
+      "minItems": 6,
+      "title": "Passes",
+      "type": "array"
+    },
+    "selected_sequence": {
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "5r"
+      ],
+      "title": "Selected Sequence",
+      "type": "string"
+    },
+    "selected_candidate_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Selected Candidate Sha256",
+      "type": "string"
+    },
+    "final_comparison_id": {
+      "title": "Final Comparison Id",
+      "type": "string"
+    },
+    "final_comparison_path": {
+      "title": "Final Comparison Path",
+      "type": "string"
+    },
+    "final_comparison_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Final Comparison Sha256",
+      "type": "string"
+    },
+    "hypothesis_decisions": {
+      "additionalProperties": {
+        "const": "evidence_rejected_unexecuted",
+        "type": "string"
+      },
+      "propertyNames": {
+        "enum": [
+          "affine_homography",
+          "local_warp"
+        ]
+      },
+      "title": "Hypothesis Decisions",
+      "type": "object"
+    },
+    "supplemental_artifacts": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Supplemental Artifacts",
+      "type": "object"
+    },
+    "supplemental_artifact_sha256": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Supplemental Artifact Sha256",
+      "type": "object"
+    },
+    "human_review_status": {
+      "enum": [
+        "pending",
+        "complete"
+      ],
+      "title": "Human Review Status",
+      "type": "string"
+    },
+    "human_review_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Human Review Id"
+    },
+    "human_review_verdict": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Human Review Verdict"
+    },
+    "objective_overall": {
+      "const": "pass",
+      "title": "Objective Overall",
+      "type": "string"
+    },
+    "mandatory_skips": {
+      "const": 0,
+      "default": 0,
+      "title": "Mandatory Skips",
+      "type": "integer"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "overall": {
+      "enum": [
+        "pass",
+        "warn"
+      ],
+      "title": "Overall",
+      "type": "string"
+    }
+  },
+  "required": [
+    "implementation_revision",
+    "git_clean",
+    "plan_path",
+    "plan_sha256",
+    "spec_id",
+    "spec_path",
+    "spec_sha256",
+    "protocol_id",
+    "protocol_path",
+    "protocol_sha256",
+    "source_sha256",
+    "reference_sha256",
+    "passes",
+    "selected_sequence",
+    "selected_candidate_sha256",
+    "final_comparison_id",
+    "final_comparison_path",
+    "final_comparison_sha256",
+    "hypothesis_decisions",
+    "supplemental_artifacts",
+    "supplemental_artifact_sha256",
+    "human_review_status",
+    "objective_overall",
+    "provenance",
+    "overall"
+  ],
+  "title": "ReferenceReconstructionStudyV2",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/reference-reconstruction-study-v2.schema.json"
+}

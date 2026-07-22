@@ -1,0 +1,798 @@
+{
+  "$defs": {
+    "CameraMotionRecipe": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_frames": {
+          "exclusiveMinimum": 0,
+          "title": "Duration Frames",
+          "type": "integer"
+        },
+        "frame_rate": {
+          "$ref": "#/$defs/FrameRate"
+        },
+        "aspect_width": {
+          "exclusiveMinimum": 0,
+          "title": "Aspect Width",
+          "type": "integer"
+        },
+        "aspect_height": {
+          "exclusiveMinimum": 0,
+          "title": "Aspect Height",
+          "type": "integer"
+        },
+        "fit_mode": {
+          "enum": [
+            "contain",
+            "cover"
+          ],
+          "title": "Fit Mode",
+          "type": "string"
+        },
+        "position_mode": {
+          "enum": [
+            "canvas_center",
+            "offset"
+          ],
+          "title": "Position Mode",
+          "type": "string"
+        },
+        "position": {
+          "items": {
+            "$ref": "#/$defs/Vec2Keyframe"
+          },
+          "title": "Position",
+          "type": "array"
+        },
+        "scale": {
+          "items": {
+            "$ref": "#/$defs/ScalarKeyframe"
+          },
+          "title": "Scale",
+          "type": "array"
+        },
+        "rotation": {
+          "items": {
+            "$ref": "#/$defs/ScalarKeyframe"
+          },
+          "title": "Rotation",
+          "type": "array"
+        }
+      },
+      "required": [
+        "duration_frames",
+        "frame_rate",
+        "aspect_width",
+        "aspect_height",
+        "fit_mode",
+        "position_mode",
+        "position",
+        "scale",
+        "rotation"
+      ],
+      "title": "CameraMotionRecipe",
+      "type": "object"
+    },
+    "FrameRate": {
+      "additionalProperties": false,
+      "properties": {
+        "numerator": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        }
+      },
+      "title": "FrameRate",
+      "type": "object"
+    },
+    "MotionSamplingV2": {
+      "additionalProperties": false,
+      "properties": {
+        "samples_per_frame": {
+          "default": 1,
+          "maximum": 16,
+          "minimum": 1,
+          "title": "Samples Per Frame",
+          "type": "integer"
+        },
+        "shutter_fraction": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Shutter Fraction",
+          "type": "number"
+        },
+        "distribution": {
+          "default": "center",
+          "enum": [
+            "center",
+            "uniform"
+          ],
+          "title": "Distribution",
+          "type": "string"
+        }
+      },
+      "title": "MotionSamplingV2",
+      "type": "object"
+    },
+    "PortableCameraMotionRecipeV2": {
+      "additionalProperties": false,
+      "description": "Dense normalized similarity motion that is independent of source dimensions.",
+      "properties": {
+        "schema_version": {
+          "const": "2.0.0",
+          "default": "2.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "duration_frames": {
+          "exclusiveMinimum": 1,
+          "title": "Duration Frames",
+          "type": "integer"
+        },
+        "frame_rate": {
+          "$ref": "#/$defs/FrameRate"
+        },
+        "aspect_width": {
+          "exclusiveMinimum": 0,
+          "title": "Aspect Width",
+          "type": "integer"
+        },
+        "aspect_height": {
+          "exclusiveMinimum": 0,
+          "title": "Aspect Height",
+          "type": "integer"
+        },
+        "fit_mode": {
+          "const": "contain",
+          "default": "contain",
+          "title": "Fit Mode",
+          "type": "string"
+        },
+        "aspect_adaptation": {
+          "const": "normalized_contain_source_aspect_neutral",
+          "default": "normalized_contain_source_aspect_neutral",
+          "title": "Aspect Adaptation",
+          "type": "string"
+        },
+        "centers": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "minItems": 2,
+          "title": "Centers",
+          "type": "array"
+        },
+        "scales_relative_to_contain": {
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "title": "Scales Relative To Contain",
+          "type": "array"
+        },
+        "rotations_degrees": {
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "title": "Rotations Degrees",
+          "type": "array"
+        },
+        "pivot": {
+          "default": [
+            0.5,
+            0.5
+          ],
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Pivot",
+          "type": "array"
+        },
+        "sampling": {
+          "$ref": "#/$defs/MotionSamplingV2"
+        }
+      },
+      "required": [
+        "duration_frames",
+        "frame_rate",
+        "aspect_width",
+        "aspect_height",
+        "centers",
+        "scales_relative_to_contain",
+        "rotations_degrees"
+      ],
+      "title": "PortableCameraMotionRecipeV2",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ScalarKeyframe": {
+      "additionalProperties": false,
+      "properties": {
+        "frame": {
+          "minimum": 0,
+          "title": "Frame",
+          "type": "integer"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "easing": {
+          "default": "linear",
+          "enum": [
+            "linear",
+            "ease_in",
+            "ease_out",
+            "ease_in_out",
+            "hold"
+          ],
+          "title": "Easing",
+          "type": "string"
+        }
+      },
+      "required": [
+        "frame",
+        "value"
+      ],
+      "title": "ScalarKeyframe",
+      "type": "object"
+    },
+    "TechniqueApplicationRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "source_class": {
+          "title": "Source Class",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "pass",
+            "fail",
+            "warn"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "evidence_path": {
+          "title": "Evidence Path",
+          "type": "string"
+        },
+        "metrics": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Metrics",
+          "type": "object"
+        }
+      },
+      "required": [
+        "case_id",
+        "source_class",
+        "outcome",
+        "evidence_path"
+      ],
+      "title": "TechniqueApplicationRecord",
+      "type": "object"
+    },
+    "TechniqueCurveModelV2": {
+      "additionalProperties": false,
+      "description": "Source-neutral temporal meaning retained by a transferable technique.",
+      "properties": {
+        "kind": {
+          "const": "dense_phase_compensated_c1_similarity_v2",
+          "default": "dense_phase_compensated_c1_similarity_v2",
+          "title": "Kind",
+          "type": "string"
+        },
+        "temporal_sampling": {
+          "const": "one_normalized_sample_per_output_frame",
+          "default": "one_normalized_sample_per_output_frame",
+          "title": "Temporal Sampling",
+          "type": "string"
+        },
+        "interpolation": {
+          "const": "cubic_hermite_c1",
+          "default": "cubic_hermite_c1",
+          "title": "Interpolation",
+          "type": "string"
+        },
+        "position_space": {
+          "const": "normalized_output_center",
+          "default": "normalized_output_center",
+          "title": "Position Space",
+          "type": "string"
+        },
+        "scale_space": {
+          "const": "relative_to_contain_fit",
+          "default": "relative_to_contain_fit",
+          "title": "Scale Space",
+          "type": "string"
+        },
+        "rotation_space": {
+          "const": "unwrapped_degrees",
+          "default": "unwrapped_degrees",
+          "title": "Rotation Space",
+          "type": "string"
+        },
+        "pivot_policy": {
+          "const": "fixed_normalized_source_center",
+          "default": "fixed_normalized_source_center",
+          "title": "Pivot Policy",
+          "type": "string"
+        },
+        "maximum_interpolation_overshoot_fraction": {
+          "default": 0.01,
+          "minimum": 0,
+          "title": "Maximum Interpolation Overshoot Fraction",
+          "type": "number"
+        },
+        "transform_order": {
+          "items": {
+            "enum": [
+              "fit",
+              "scale",
+              "rotate",
+              "affine",
+              "homography",
+              "translate"
+            ],
+            "type": "string"
+          },
+          "title": "Transform Order",
+          "type": "array"
+        }
+      },
+      "title": "TechniqueCurveModelV2",
+      "type": "object"
+    },
+    "TechniquePhaseModelV2": {
+      "additionalProperties": false,
+      "description": "Portable editorial phases without retaining reference identities.",
+      "properties": {
+        "onset_frame": {
+          "minimum": 0,
+          "title": "Onset Frame",
+          "type": "integer"
+        },
+        "twist_start_frame": {
+          "minimum": 0,
+          "title": "Twist Start Frame",
+          "type": "integer"
+        },
+        "twist_peak_frame": {
+          "minimum": 0,
+          "title": "Twist Peak Frame",
+          "type": "integer"
+        },
+        "twist_end_frame": {
+          "minimum": 0,
+          "title": "Twist End Frame",
+          "type": "integer"
+        },
+        "settle_frame": {
+          "minimum": 0,
+          "title": "Settle Frame",
+          "type": "integer"
+        },
+        "center_phase_relation": {
+          "const": "center_lags",
+          "title": "Center Phase Relation",
+          "type": "string"
+        },
+        "scale_rotation_relation": {
+          "const": "synchronized",
+          "title": "Scale Rotation Relation",
+          "type": "string"
+        },
+        "scale_rotation_progress_tolerance": {
+          "minimum": 0,
+          "title": "Scale Rotation Progress Tolerance",
+          "type": "number"
+        },
+        "maximum_center_phase_offset": {
+          "minimum": 0,
+          "title": "Maximum Center Phase Offset",
+          "type": "number"
+        }
+      },
+      "required": [
+        "onset_frame",
+        "twist_start_frame",
+        "twist_peak_frame",
+        "twist_end_frame",
+        "settle_frame",
+        "center_phase_relation",
+        "scale_rotation_relation",
+        "scale_rotation_progress_tolerance",
+        "maximum_center_phase_offset"
+      ],
+      "title": "TechniquePhaseModelV2",
+      "type": "object"
+    },
+    "TechniqueResolutionConstraintV2": {
+      "additionalProperties": false,
+      "description": "Fail-closed pixel-density guard evaluated on the canonical canvas.",
+      "properties": {
+        "measurement": {
+          "const": "maximum_output_pixels_per_source_pixel_after_contain",
+          "default": "maximum_output_pixels_per_source_pixel_after_contain",
+          "title": "Measurement",
+          "type": "string"
+        },
+        "maximum_effective_upscale": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Effective Upscale",
+          "type": "number"
+        },
+        "violation_policy": {
+          "const": "refuse_without_render",
+          "default": "refuse_without_render",
+          "title": "Violation Policy",
+          "type": "string"
+        },
+        "refusal_code": {
+          "const": "insufficient_source_resolution",
+          "default": "insufficient_source_resolution",
+          "title": "Refusal Code",
+          "type": "string"
+        }
+      },
+      "required": [
+        "maximum_effective_upscale"
+      ],
+      "title": "TechniqueResolutionConstraintV2",
+      "type": "object"
+    },
+    "Vec2Keyframe": {
+      "additionalProperties": false,
+      "properties": {
+        "frame": {
+          "minimum": 0,
+          "title": "Frame",
+          "type": "integer"
+        },
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        },
+        "easing": {
+          "default": "linear",
+          "enum": [
+            "linear",
+            "ease_in",
+            "ease_out",
+            "ease_in_out",
+            "hold"
+          ],
+          "title": "Easing",
+          "type": "string"
+        }
+      },
+      "required": [
+        "frame",
+        "x",
+        "y"
+      ],
+      "title": "Vec2Keyframe",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "1.0.0",
+      "enum": [
+        "1.0.0",
+        "2.0.0"
+      ],
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "revision": {
+      "default": 1,
+      "exclusiveMinimum": 0,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "intent": {
+      "title": "Intent",
+      "type": "string"
+    },
+    "applicability": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Applicability",
+      "type": "array"
+    },
+    "contraindications": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Contraindications",
+      "type": "array"
+    },
+    "required_evidence": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Required Evidence",
+      "type": "array"
+    },
+    "allowed_operations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Allowed Operations",
+      "type": "array"
+    },
+    "rules": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Rules",
+      "type": "array"
+    },
+    "heuristics": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Heuristics",
+      "type": "array"
+    },
+    "creative_variants": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Creative Variants",
+      "type": "array"
+    },
+    "constraints": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Constraints",
+      "type": "array"
+    },
+    "failure_modes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Failure Modes",
+      "type": "array"
+    },
+    "qc": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Qc",
+      "type": "array"
+    },
+    "positive_examples": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Positive Examples",
+      "type": "array"
+    },
+    "negative_examples": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Negative Examples",
+      "type": "array"
+    },
+    "application_history": {
+      "items": {
+        "$ref": "#/$defs/TechniqueApplicationRecord"
+      },
+      "title": "Application History",
+      "type": "array"
+    },
+    "status": {
+      "default": "candidate",
+      "enum": [
+        "candidate",
+        "evaluated",
+        "canonical"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "camera_motion": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CameraMotionRecipe"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "curve_model_v2": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TechniqueCurveModelV2"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "phase_model_v2": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TechniquePhaseModelV2"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "resolution_constraint_v2": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TechniqueResolutionConstraintV2"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "portable_camera_motion_v2": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PortableCameraMotionRecipeV2"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "promotion_questions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Promotion Questions",
+      "type": "array"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "intent",
+    "applicability",
+    "contraindications",
+    "required_evidence",
+    "allowed_operations",
+    "rules",
+    "heuristics",
+    "creative_variants",
+    "constraints",
+    "failure_modes",
+    "qc",
+    "positive_examples",
+    "negative_examples",
+    "application_history",
+    "promotion_questions",
+    "provenance"
+  ],
+  "title": "TechniquePacket",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/technique-packet.schema.json"
+}

@@ -1,0 +1,247 @@
+{
+  "$defs": {
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ReconstructionStudyPassPlanV2": {
+      "additionalProperties": false,
+      "description": "Human-authored study intent; objective fields are always re-derived.",
+      "properties": {
+        "sequence": {
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "5r"
+          ],
+          "title": "Sequence",
+          "type": "string"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "pass_kind": {
+          "enum": [
+            "v1_baseline",
+            "timing_easing",
+            "continuous_tangents",
+            "moving_pivot_hypothesis",
+            "coupled_scale_rotation",
+            "phase_compensated_matrix"
+          ],
+          "title": "Pass Kind",
+          "type": "string"
+        },
+        "comparison_path": {
+          "title": "Comparison Path",
+          "type": "string"
+        },
+        "receipt_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Receipt Path"
+        },
+        "motion_gate_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Motion Gate Path"
+        },
+        "disposition": {
+          "enum": [
+            "baseline",
+            "rejected",
+            "retained",
+            "selected"
+          ],
+          "title": "Disposition",
+          "type": "string"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        },
+        "diagnostic_visual_observation": {
+          "minLength": 1,
+          "title": "Diagnostic Visual Observation",
+          "type": "string"
+        },
+        "diagnostic_artifacts": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Diagnostic Artifacts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "sequence",
+        "label",
+        "pass_kind",
+        "comparison_path",
+        "disposition",
+        "rationale",
+        "diagnostic_visual_observation",
+        "diagnostic_artifacts"
+      ],
+      "title": "ReconstructionStudyPassPlanV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Reproducible input joining immutable pass evidence and explicit judgments.",
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "spec_path": {
+      "title": "Spec Path",
+      "type": "string"
+    },
+    "protocol_path": {
+      "title": "Protocol Path",
+      "type": "string"
+    },
+    "passes": {
+      "items": {
+        "$ref": "#/$defs/ReconstructionStudyPassPlanV2"
+      },
+      "maxItems": 6,
+      "minItems": 6,
+      "title": "Passes",
+      "type": "array"
+    },
+    "selected_sequence": {
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "5r"
+      ],
+      "title": "Selected Sequence",
+      "type": "string"
+    },
+    "hypothesis_decisions": {
+      "additionalProperties": {
+        "const": "evidence_rejected_unexecuted",
+        "type": "string"
+      },
+      "propertyNames": {
+        "enum": [
+          "affine_homography",
+          "local_warp"
+        ]
+      },
+      "title": "Hypothesis Decisions",
+      "type": "object"
+    },
+    "supplemental_artifacts": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Supplemental Artifacts",
+      "type": "object"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "spec_path",
+    "protocol_path",
+    "passes",
+    "selected_sequence",
+    "hypothesis_decisions",
+    "provenance"
+  ],
+  "title": "ReferenceReconstructionStudyPlanV2",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/reference-reconstruction-study-plan-v2.schema.json"
+}

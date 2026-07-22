@@ -1,0 +1,214 @@
+{
+  "$defs": {
+    "CheckResult": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "warn",
+            "skip"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "measured": {
+          "additionalProperties": true,
+          "title": "Measured",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "summary"
+      ],
+      "title": "CheckResult",
+      "type": "object"
+    },
+    "StorageRelocationEntry": {
+      "additionalProperties": false,
+      "description": "One measured copy/rebuild unit in a product-home relocation.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "classification": {
+          "title": "Classification",
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "copy_then_verify",
+            "rebuild_from_canonical"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "source_path": {
+          "title": "Source Path",
+          "type": "string"
+        },
+        "destination_path": {
+          "title": "Destination Path",
+          "type": "string"
+        },
+        "file_count": {
+          "minimum": 0,
+          "title": "File Count",
+          "type": "integer"
+        },
+        "logical_bytes": {
+          "minimum": 0,
+          "title": "Logical Bytes",
+          "type": "integer"
+        },
+        "source_tree_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Tree Sha256",
+          "type": "string"
+        },
+        "destination_tree_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Destination Tree Sha256"
+        },
+        "excluded_paths": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Excluded Paths",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "planned",
+            "verified",
+            "rebuilt"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "classification",
+        "method",
+        "source_path",
+        "destination_path",
+        "file_count",
+        "logical_bytes",
+        "source_tree_sha256",
+        "status"
+      ],
+      "title": "StorageRelocationEntry",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Fail-closed receipt for copying legacy product state into one home.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "source_inventory_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Inventory Sha256",
+      "type": "string"
+    },
+    "source_data_root": {
+      "title": "Source Data Root",
+      "type": "string"
+    },
+    "destination_home": {
+      "title": "Destination Home",
+      "type": "string"
+    },
+    "dry_run": {
+      "title": "Dry Run",
+      "type": "boolean"
+    },
+    "entries": {
+      "items": {
+        "$ref": "#/$defs/StorageRelocationEntry"
+      },
+      "title": "Entries",
+      "type": "array"
+    },
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/CheckResult"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
+    "filesystem_links_created": {
+      "const": false,
+      "default": false,
+      "title": "Filesystem Links Created",
+      "type": "boolean"
+    },
+    "legacy_cleanup_authorized": {
+      "const": false,
+      "default": false,
+      "title": "Legacy Cleanup Authorized",
+      "type": "boolean"
+    },
+    "cutover_ready": {
+      "title": "Cutover Ready",
+      "type": "boolean"
+    },
+    "overall": {
+      "enum": [
+        "pass",
+        "fail"
+      ],
+      "title": "Overall",
+      "type": "string"
+    }
+  },
+  "required": [
+    "source_inventory_sha256",
+    "source_data_root",
+    "destination_home",
+    "dry_run",
+    "entries",
+    "checks",
+    "cutover_ready",
+    "overall"
+  ],
+  "title": "StorageRelocationReport",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/storage-relocation.schema.json"
+}

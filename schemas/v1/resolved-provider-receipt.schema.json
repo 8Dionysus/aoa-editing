@@ -1,0 +1,506 @@
+{
+  "$defs": {
+    "ProviderHealthEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "healthy",
+            "unavailable",
+            "stale",
+            "version-mismatch",
+            "malformed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "checked_at": {
+          "format": "date-time",
+          "title": "Checked At",
+          "type": "string"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observed At"
+        },
+        "latency_milliseconds": {
+          "minimum": 0,
+          "title": "Latency Milliseconds",
+          "type": "number"
+        },
+        "source": {
+          "enum": [
+            "command",
+            "localhost-http",
+            "injected-test"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "response_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Response Sha256"
+        },
+        "reported_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reported Status"
+        },
+        "protocol_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Protocol Version"
+        },
+        "backend": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Backend"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "latency_milliseconds",
+        "source",
+        "summary"
+      ],
+      "title": "ProviderHealthEvidence",
+      "type": "object"
+    },
+    "ProviderPrivacyDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "local-only",
+            "explicit-provider-opt-in"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "data_boundary": {
+          "enum": [
+            "local-host",
+            "external",
+            "deterministic-fallback"
+          ],
+          "title": "Data Boundary",
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "allowed",
+            "denied"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "explicit_opt_in": {
+          "title": "Explicit Opt In",
+          "type": "boolean"
+        },
+        "media_paths_persisted": {
+          "const": false,
+          "default": false,
+          "title": "Media Paths Persisted",
+          "type": "boolean"
+        },
+        "secrets_persisted": {
+          "const": false,
+          "default": false,
+          "title": "Secrets Persisted",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "mode",
+        "data_boundary",
+        "decision",
+        "reason",
+        "explicit_opt_in"
+      ],
+      "title": "ProviderPrivacyDecision",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Immutable evidence for one alias resolution and invocation attempt.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "requested_alias": {
+      "title": "Requested Alias",
+      "type": "string"
+    },
+    "capability_id": {
+      "title": "Capability Id",
+      "type": "string"
+    },
+    "resolved_owner": {
+      "anyOf": [
+        {
+          "enum": [
+            "abyss-stack",
+            "abyss-machine",
+            "aoa-editing"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Resolved Owner"
+    },
+    "adapter_kind": {
+      "enum": [
+        "abyss-stack-service",
+        "abyss-machine-cli",
+        "localhost-http",
+        "deterministic-fallback",
+        "disabled",
+        "unavailable",
+        "unbound"
+      ],
+      "title": "Adapter Kind",
+      "type": "string"
+    },
+    "backend": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Backend"
+    },
+    "model_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Id"
+    },
+    "model_revision": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Revision"
+    },
+    "model_hash_authority": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Hash Authority"
+    },
+    "license_authority": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "License Authority"
+    },
+    "metadata_evidence": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Metadata Evidence"
+    },
+    "endpoint": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Endpoint"
+    },
+    "command": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Command",
+      "type": "array"
+    },
+    "parameters": {
+      "additionalProperties": true,
+      "title": "Parameters",
+      "type": "object"
+    },
+    "health_evidence": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ProviderHealthEvidence"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "execution_time_milliseconds": {
+      "minimum": 0,
+      "title": "Execution Time Milliseconds",
+      "type": "number"
+    },
+    "privacy_decision": {
+      "$ref": "#/$defs/ProviderPrivacyDecision"
+    },
+    "output_authority": {
+      "enum": [
+        "evidence",
+        "proposal"
+      ],
+      "title": "Output Authority",
+      "type": "string"
+    },
+    "fallback_status": {
+      "enum": [
+        "not-used",
+        "used",
+        "unavailable",
+        "failed"
+      ],
+      "title": "Fallback Status",
+      "type": "string"
+    },
+    "outcome": {
+      "enum": [
+        "succeeded",
+        "partial",
+        "failed",
+        "refused"
+      ],
+      "title": "Outcome",
+      "type": "string"
+    },
+    "failure_code": {
+      "anyOf": [
+        {
+          "enum": [
+            "provider_missing",
+            "provider_disabled",
+            "provider_unavailable",
+            "provider_stale",
+            "version_mismatch",
+            "provider_timeout",
+            "malformed_response",
+            "privacy_denied",
+            "invalid_request",
+            "fallback_failed"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Failure Code"
+    },
+    "failure_summary": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Failure Summary"
+    },
+    "response_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Response Sha256"
+    },
+    "output_schema_valid": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Output Schema Valid"
+    },
+    "partial": {
+      "default": false,
+      "title": "Partial",
+      "type": "boolean"
+    },
+    "project_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Project Id"
+    },
+    "asset_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Asset Id"
+    }
+  },
+  "required": [
+    "requested_alias",
+    "capability_id",
+    "adapter_kind",
+    "execution_time_milliseconds",
+    "privacy_decision",
+    "output_authority",
+    "fallback_status",
+    "outcome"
+  ],
+  "title": "ResolvedProviderReceipt",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/resolved-provider-receipt.schema.json"
+}

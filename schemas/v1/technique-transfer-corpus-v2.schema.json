@@ -1,0 +1,473 @@
+{
+  "$defs": {
+    "CheckResult": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "warn",
+            "skip"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "measured": {
+          "additionalProperties": true,
+          "title": "Measured",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "summary"
+      ],
+      "title": "CheckResult",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "TechniqueApplicabilityDecisionV2": {
+      "additionalProperties": false,
+      "description": "Typed eligible/refused result emitted before any technique render.",
+      "properties": {
+        "schema_version": {
+          "const": "2.0.0",
+          "default": "2.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "technique_id": {
+          "title": "Technique Id",
+          "type": "string"
+        },
+        "technique_revision": {
+          "exclusiveMinimum": 0,
+          "title": "Technique Revision",
+          "type": "integer"
+        },
+        "outcome": {
+          "enum": [
+            "eligible",
+            "refused"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "refusal_code": {
+          "anyOf": [
+            {
+              "enum": [
+                "insufficient_source_resolution",
+                "inapplicable_composition",
+                "missing_required_evidence",
+                "output_aspect_mismatch"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Refusal Code"
+        },
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/CheckResult"
+          },
+          "minItems": 1,
+          "title": "Checks",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "measured": {
+          "additionalProperties": true,
+          "title": "Measured",
+          "type": "object"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        }
+      },
+      "required": [
+        "project_id",
+        "asset_id",
+        "technique_id",
+        "technique_revision",
+        "outcome",
+        "checks",
+        "evidence_refs",
+        "measured",
+        "provenance"
+      ],
+      "title": "TechniqueApplicabilityDecisionV2",
+      "type": "object"
+    },
+    "TechniqueTransferCaseV2": {
+      "additionalProperties": false,
+      "description": "One applied or honestly refused source-class transfer case.",
+      "properties": {
+        "schema_version": {
+          "const": "2.0.0",
+          "default": "2.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "source_class": {
+          "title": "Source Class",
+          "type": "string"
+        },
+        "expected_application_outcome": {
+          "enum": [
+            "eligible",
+            "refused"
+          ],
+          "title": "Expected Application Outcome",
+          "type": "string"
+        },
+        "application_outcome": {
+          "enum": [
+            "eligible",
+            "refused"
+          ],
+          "title": "Application Outcome",
+          "type": "string"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "source_width": {
+          "exclusiveMinimum": 0,
+          "title": "Source Width",
+          "type": "integer"
+        },
+        "source_height": {
+          "exclusiveMinimum": 0,
+          "title": "Source Height",
+          "type": "integer"
+        },
+        "source_provenance": {
+          "additionalProperties": true,
+          "title": "Source Provenance",
+          "type": "object"
+        },
+        "applicability": {
+          "$ref": "#/$defs/TechniqueApplicabilityDecisionV2"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Version Id"
+        },
+        "motion": {
+          "additionalProperties": true,
+          "title": "Motion",
+          "type": "object"
+        },
+        "profiles": {
+          "additionalProperties": true,
+          "title": "Profiles",
+          "type": "object"
+        },
+        "editable_exports": {
+          "additionalProperties": true,
+          "title": "Editable Exports",
+          "type": "object"
+        },
+        "deterministic_replay": {
+          "additionalProperties": true,
+          "title": "Deterministic Replay",
+          "type": "object"
+        },
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/CheckResult"
+          },
+          "minItems": 1,
+          "title": "Checks",
+          "type": "array"
+        },
+        "artifacts": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Artifacts",
+          "type": "object"
+        },
+        "reference_media_used_as_input": {
+          "const": false,
+          "default": false,
+          "title": "Reference Media Used As Input",
+          "type": "boolean"
+        },
+        "target_specific_branch_used": {
+          "const": false,
+          "default": false,
+          "title": "Target Specific Branch Used",
+          "type": "boolean"
+        },
+        "overall": {
+          "enum": [
+            "pass",
+            "fail"
+          ],
+          "title": "Overall",
+          "type": "string"
+        }
+      },
+      "required": [
+        "case_id",
+        "source_class",
+        "expected_application_outcome",
+        "application_outcome",
+        "source_sha256",
+        "source_width",
+        "source_height",
+        "source_provenance",
+        "applicability",
+        "project_id",
+        "checks",
+        "overall"
+      ],
+      "title": "TechniqueTransferCaseV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Revision-bound transfer gate over heterogeneous positive and negative cases.",
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "implementation_revision": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Implementation Revision",
+      "type": "string"
+    },
+    "git_clean": {
+      "title": "Git Clean",
+      "type": "boolean"
+    },
+    "technique_id": {
+      "title": "Technique Id",
+      "type": "string"
+    },
+    "input_technique_revision": {
+      "exclusiveMinimum": 0,
+      "title": "Input Technique Revision",
+      "type": "integer"
+    },
+    "output_technique_revision": {
+      "exclusiveMinimum": 0,
+      "title": "Output Technique Revision",
+      "type": "integer"
+    },
+    "cases": {
+      "items": {
+        "$ref": "#/$defs/TechniqueTransferCaseV2"
+      },
+      "minItems": 7,
+      "title": "Cases",
+      "type": "array"
+    },
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/CheckResult"
+      },
+      "minItems": 1,
+      "title": "Checks",
+      "type": "array"
+    },
+    "artifacts": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Artifacts",
+      "type": "object"
+    },
+    "packet_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Packet Sha256",
+      "type": "string"
+    },
+    "forbidden_media_hashes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Forbidden Media Hashes",
+      "type": "array"
+    },
+    "mandatory_skips": {
+      "const": 0,
+      "default": 0,
+      "title": "Mandatory Skips",
+      "type": "integer"
+    },
+    "reference_media_used_as_input": {
+      "const": false,
+      "default": false,
+      "title": "Reference Media Used As Input",
+      "type": "boolean"
+    },
+    "target_specific_branch_used": {
+      "const": false,
+      "default": false,
+      "title": "Target Specific Branch Used",
+      "type": "boolean"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "overall": {
+      "enum": [
+        "pass",
+        "fail"
+      ],
+      "title": "Overall",
+      "type": "string"
+    }
+  },
+  "required": [
+    "implementation_revision",
+    "git_clean",
+    "technique_id",
+    "input_technique_revision",
+    "output_technique_revision",
+    "cases",
+    "checks",
+    "artifacts",
+    "packet_sha256",
+    "provenance",
+    "overall"
+  ],
+  "title": "TechniqueTransferCorpusReportV2",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/technique-transfer-corpus-v2.schema.json"
+}

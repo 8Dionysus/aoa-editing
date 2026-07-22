@@ -1,0 +1,740 @@
+{
+  "$defs": {
+    "FrameRange": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "duration": {
+          "exclusiveMinimum": 0,
+          "title": "Duration",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "duration"
+      ],
+      "title": "FrameRange",
+      "type": "object"
+    },
+    "FrameRate": {
+      "additionalProperties": false,
+      "properties": {
+        "numerator": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        }
+      },
+      "title": "FrameRate",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ScreenWorkflowFocus": {
+      "additionalProperties": false,
+      "properties": {
+        "center_x": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Center X",
+          "type": "number"
+        },
+        "center_y": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Center Y",
+          "type": "number"
+        },
+        "scale": {
+          "maximum": 2.0,
+          "minimum": 1.0,
+          "title": "Scale",
+          "type": "number"
+        }
+      },
+      "required": [
+        "center_x",
+        "center_y",
+        "scale"
+      ],
+      "title": "ScreenWorkflowFocus",
+      "type": "object"
+    },
+    "ScreenWorkflowLiveRegion": {
+      "additionalProperties": false,
+      "description": "Reviewed evidence about motion that a hold must not visibly freeze.",
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "region": {
+          "$ref": "#/$defs/ScreenWorkflowRegion"
+        },
+        "signal": {
+          "$ref": "#/$defs/ScreenWorkflowLiveSignal"
+        },
+        "temporal_behavior": {
+          "$ref": "#/$defs/ScreenWorkflowTemporalBehavior"
+        },
+        "loopable": {
+          "default": false,
+          "title": "Loopable",
+          "type": "boolean"
+        },
+        "loop_period_frames": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Loop Period Frames"
+        },
+        "seam_strategy": {
+          "anyOf": [
+            {
+              "enum": [
+                "phase-match",
+                "short-crossfade"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Seam Strategy"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "region",
+        "signal",
+        "temporal_behavior",
+        "rationale"
+      ],
+      "title": "ScreenWorkflowLiveRegion",
+      "type": "object"
+    },
+    "ScreenWorkflowLiveSignal": {
+      "description": "Visible terminal/UI motion that makes a nominally quiet frame live.",
+      "enum": [
+        "cursor-blink",
+        "progress-shimmer",
+        "monotonic-timer",
+        "spinner",
+        "mascot-animation",
+        "directional-motion",
+        "other"
+      ],
+      "title": "ScreenWorkflowLiveSignal",
+      "type": "string"
+    },
+    "ScreenWorkflowPacingRole": {
+      "description": "Editorial meaning of one source-bound screen segment.",
+      "enum": [
+        "prompt-entry",
+        "semantic-action",
+        "agent-progress",
+        "readable-result",
+        "measured-wait"
+      ],
+      "title": "ScreenWorkflowPacingRole",
+      "type": "string"
+    },
+    "ScreenWorkflowRegion": {
+      "additionalProperties": false,
+      "description": "Normalized final-frame region containing a live terminal/UI signal.",
+      "properties": {
+        "x": {
+          "exclusiveMaximum": 1,
+          "minimum": 0,
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "exclusiveMaximum": 1,
+          "minimum": 0,
+          "title": "Y",
+          "type": "number"
+        },
+        "width": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Width",
+          "type": "number"
+        },
+        "height": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Height",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "title": "ScreenWorkflowRegion",
+      "type": "object"
+    },
+    "ScreenWorkflowShotKind": {
+      "enum": [
+        "terminal.establish",
+        "terminal.focus",
+        "terminal.follow",
+        "terminal.result",
+        "terminal.reset",
+        "workflow.step-cut",
+        "workflow.wait-compress"
+      ],
+      "title": "ScreenWorkflowShotKind",
+      "type": "string"
+    },
+    "ScreenWorkflowSourceBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "beat_id": {
+          "title": "Beat Id",
+          "type": "string"
+        },
+        "segment_order": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Segment Order",
+          "type": "integer"
+        },
+        "continuity_group": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Continuity Group"
+        },
+        "source_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "timeline_duration_frames": {
+          "exclusiveMinimum": 0,
+          "title": "Timeline Duration Frames",
+          "type": "integer"
+        },
+        "shot_kind": {
+          "$ref": "#/$defs/ScreenWorkflowShotKind"
+        },
+        "focus_start": {
+          "$ref": "#/$defs/ScreenWorkflowFocus"
+        },
+        "focus_end": {
+          "$ref": "#/$defs/ScreenWorkflowFocus"
+        },
+        "speed": {
+          "default": 1.0,
+          "maximum": 64.0,
+          "minimum": 0.5,
+          "title": "Speed",
+          "type": "number"
+        },
+        "temporal_intent": {
+          "$ref": "#/$defs/ScreenWorkflowTemporalIntent"
+        },
+        "caption_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption Text"
+        },
+        "include_source_audio": {
+          "default": false,
+          "title": "Include Source Audio",
+          "type": "boolean"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "beat_id",
+        "source_range",
+        "timeline_duration_frames",
+        "shot_kind",
+        "rationale"
+      ],
+      "title": "ScreenWorkflowSourceBinding",
+      "type": "object"
+    },
+    "ScreenWorkflowTemporalBehavior": {
+      "enum": [
+        "periodic",
+        "monotonic",
+        "directional",
+        "irregular"
+      ],
+      "title": "ScreenWorkflowTemporalBehavior",
+      "type": "string"
+    },
+    "ScreenWorkflowTemporalIntent": {
+      "additionalProperties": false,
+      "description": "Reviewed pacing and live-state meaning for one bound source segment.",
+      "properties": {
+        "pacing_role": {
+          "$ref": "#/$defs/ScreenWorkflowPacingRole",
+          "default": "semantic-action"
+        },
+        "hold_policy": {
+          "default": "none",
+          "enum": [
+            "none",
+            "natural-source",
+            "rebalance-adjacent-speeds"
+          ],
+          "title": "Hold Policy",
+          "type": "string"
+        },
+        "live_regions": {
+          "items": {
+            "$ref": "#/$defs/ScreenWorkflowLiveRegion"
+          },
+          "title": "Live Regions",
+          "type": "array"
+        },
+        "protected_static_regions": {
+          "items": {
+            "$ref": "#/$defs/ScreenWorkflowRegion"
+          },
+          "title": "Protected Static Regions",
+          "type": "array"
+        },
+        "speed_override_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Speed Override Reason"
+        }
+      },
+      "title": "ScreenWorkflowTemporalIntent",
+      "type": "object"
+    },
+    "ScreenWorkflowVoiceoverCue": {
+      "additionalProperties": false,
+      "properties": {
+        "order": {
+          "minimum": 1,
+          "title": "Order",
+          "type": "integer"
+        },
+        "beat_id": {
+          "minLength": 1,
+          "title": "Beat Id",
+          "type": "string"
+        },
+        "timeline_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "spoken_range": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameRange"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "transcript_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transcript Text"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "alignment_basis": {
+          "enum": [
+            "transcript-segments",
+            "silence-weighted",
+            "human-reviewed"
+          ],
+          "title": "Alignment Basis",
+          "type": "string"
+        },
+        "reviewer_notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reviewer Notes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "order",
+        "beat_id",
+        "timeline_range",
+        "confidence",
+        "alignment_basis"
+      ],
+      "title": "ScreenWorkflowVoiceoverCue",
+      "type": "object"
+    },
+    "ScreenWorkflowVoiceoverTiming": {
+      "additionalProperties": false,
+      "description": "Reviewed narration timing between a capture plan and the final edit binding.",
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "plan_id": {
+          "title": "Plan Id",
+          "type": "string"
+        },
+        "script_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Script Sha256",
+          "type": "string"
+        },
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "source_duration_seconds": {
+          "exclusiveMinimum": 0,
+          "title": "Source Duration Seconds",
+          "type": "number"
+        },
+        "timeline_frame_rate": {
+          "$ref": "#/$defs/FrameRate"
+        },
+        "duration_frames": {
+          "exclusiveMinimum": 0,
+          "title": "Duration Frames",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "alignment-draft",
+            "reviewed-for-edit"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "edit_ready": {
+          "title": "Edit Ready",
+          "type": "boolean"
+        },
+        "draft_alignment_method": {
+          "enum": [
+            "transcript-segments",
+            "silence-weighted"
+          ],
+          "title": "Draft Alignment Method",
+          "type": "string"
+        },
+        "cues": {
+          "items": {
+            "$ref": "#/$defs/ScreenWorkflowVoiceoverCue"
+          },
+          "minItems": 1,
+          "title": "Cues",
+          "type": "array"
+        },
+        "analysis_evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Analysis Evidence Refs",
+          "type": "array"
+        },
+        "normalization_target_lufs": {
+          "default": -16.0,
+          "maximum": -5,
+          "minimum": -40,
+          "title": "Normalization Target Lufs",
+          "type": "number"
+        },
+        "reviewed_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewed By"
+        },
+        "review_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Review Note"
+        },
+        "supersedes_timing_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Supersedes Timing Id"
+        },
+        "source_media_bound": {
+          "const": true,
+          "default": true,
+          "title": "Source Media Bound",
+          "type": "boolean"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        }
+      },
+      "required": [
+        "plan_id",
+        "script_sha256",
+        "asset_id",
+        "source_sha256",
+        "source_duration_seconds",
+        "timeline_frame_rate",
+        "duration_frames",
+        "status",
+        "edit_ready",
+        "draft_alignment_method",
+        "cues",
+        "analysis_evidence_refs",
+        "provenance"
+      ],
+      "title": "ScreenWorkflowVoiceoverTiming",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Human-reviewed binding between a capture plan and one immutable recording.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "plan_id": {
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "script_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Script Sha256",
+      "type": "string"
+    },
+    "asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "bindings": {
+      "items": {
+        "$ref": "#/$defs/ScreenWorkflowSourceBinding"
+      },
+      "minItems": 1,
+      "title": "Bindings",
+      "type": "array"
+    },
+    "voiceover_timing": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ScreenWorkflowVoiceoverTiming"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "human_reviewed": {
+      "const": true,
+      "title": "Human Reviewed",
+      "type": "boolean"
+    },
+    "reviewed_by": {
+      "minLength": 1,
+      "title": "Reviewed By",
+      "type": "string"
+    },
+    "review_note": {
+      "minLength": 1,
+      "title": "Review Note",
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "plan_id",
+    "script_sha256",
+    "asset_id",
+    "bindings",
+    "human_reviewed",
+    "reviewed_by",
+    "review_note",
+    "provenance"
+  ],
+  "title": "ScreenWorkflowEditSpec",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/screen-workflow-edit-spec.schema.json"
+}

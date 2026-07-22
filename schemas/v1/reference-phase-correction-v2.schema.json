@@ -1,0 +1,346 @@
+{
+  "$defs": {
+    "CheckResult": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "warn",
+            "skip"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "measured": {
+          "additionalProperties": true,
+          "title": "Measured",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "summary"
+      ],
+      "title": "CheckResult",
+      "type": "object"
+    },
+    "FrameRange": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "duration": {
+          "exclusiveMinimum": 0,
+          "title": "Duration",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "duration"
+      ],
+      "title": "FrameRange",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "TimeWarpAnchorV2": {
+      "additionalProperties": false,
+      "description": "One monotonic output-time to source-time mapping sample.",
+      "properties": {
+        "output_frame": {
+          "minimum": 0,
+          "title": "Output Frame",
+          "type": "integer"
+        },
+        "source_frame": {
+          "minimum": 0,
+          "title": "Source Frame",
+          "type": "number"
+        }
+      },
+      "required": [
+        "output_frame",
+        "source_frame"
+      ],
+      "title": "TimeWarpAnchorV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Objective, bounded retime proposal derived from a prior v2 comparison.",
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "spec_id": {
+      "title": "Spec Id",
+      "type": "string"
+    },
+    "spec_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Spec Sha256",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "reference_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Reference Sha256",
+      "type": "string"
+    },
+    "comparison_report_id": {
+      "title": "Comparison Report Id",
+      "type": "string"
+    },
+    "comparison_report_path": {
+      "title": "Comparison Report Path",
+      "type": "string"
+    },
+    "comparison_report_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Comparison Report Sha256",
+      "type": "string"
+    },
+    "candidate_motion_report_id": {
+      "title": "Candidate Motion Report Id",
+      "type": "string"
+    },
+    "candidate_motion_path": {
+      "title": "Candidate Motion Path",
+      "type": "string"
+    },
+    "candidate_motion_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Candidate Motion Sha256",
+      "type": "string"
+    },
+    "prior_candidate_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Prior Candidate Sha256",
+      "type": "string"
+    },
+    "duration_frames": {
+      "exclusiveMinimum": 1,
+      "title": "Duration Frames",
+      "type": "integer"
+    },
+    "anchors": {
+      "items": {
+        "$ref": "#/$defs/TimeWarpAnchorV2"
+      },
+      "minItems": 4,
+      "title": "Anchors",
+      "type": "array"
+    },
+    "identity_ranges": {
+      "items": {
+        "$ref": "#/$defs/FrameRange"
+      },
+      "minItems": 1,
+      "title": "Identity Ranges",
+      "type": "array"
+    },
+    "protected_coupling_range": {
+      "$ref": "#/$defs/FrameRange"
+    },
+    "previous_phase": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Previous Phase",
+      "type": "object"
+    },
+    "predicted_phase": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Predicted Phase",
+      "type": "object"
+    },
+    "predicted_metrics": {
+      "additionalProperties": true,
+      "title": "Predicted Metrics",
+      "type": "object"
+    },
+    "predicted_checks": {
+      "items": {
+        "$ref": "#/$defs/CheckResult"
+      },
+      "minItems": 1,
+      "title": "Predicted Checks",
+      "type": "array"
+    },
+    "failed_check_ids": {
+      "items": {
+        "enum": [
+          "temporal-phase-onset",
+          "temporal-phase-duration",
+          "temporal-phase-settle"
+        ],
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Failed Check Ids",
+      "type": "array"
+    },
+    "threshold_revision": {
+      "const": "reference-comparison-v2-frozen-1",
+      "default": "reference-comparison-v2-frozen-1",
+      "title": "Threshold Revision",
+      "type": "string"
+    },
+    "algorithm_revision": {
+      "const": "phase-correction-v2-localized-search-1",
+      "default": "phase-correction-v2-localized-search-1",
+      "title": "Algorithm Revision",
+      "type": "string"
+    },
+    "selection": {
+      "additionalProperties": true,
+      "title": "Selection",
+      "type": "object"
+    },
+    "authority": {
+      "const": "objective_evidence_proposal",
+      "default": "objective_evidence_proposal",
+      "title": "Authority",
+      "type": "string"
+    },
+    "reference_media_used_as_render_input": {
+      "const": false,
+      "default": false,
+      "title": "Reference Media Used As Render Input",
+      "type": "boolean"
+    },
+    "candidate_media_used_as_render_input": {
+      "const": false,
+      "default": false,
+      "title": "Candidate Media Used As Render Input",
+      "type": "boolean"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "spec_id",
+    "spec_sha256",
+    "source_sha256",
+    "reference_sha256",
+    "comparison_report_id",
+    "comparison_report_path",
+    "comparison_report_sha256",
+    "candidate_motion_report_id",
+    "candidate_motion_path",
+    "candidate_motion_sha256",
+    "prior_candidate_sha256",
+    "duration_frames",
+    "anchors",
+    "identity_ranges",
+    "protected_coupling_range",
+    "previous_phase",
+    "predicted_phase",
+    "predicted_metrics",
+    "predicted_checks",
+    "failed_check_ids",
+    "selection",
+    "provenance"
+  ],
+  "title": "ReferencePhaseCorrectionV2",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/reference-phase-correction-v2.schema.json"
+}

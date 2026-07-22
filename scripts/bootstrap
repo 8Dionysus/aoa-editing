@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PYTHON="${AOA_EDITING_BOOTSTRAP_PYTHON:-python3.12}"
+
+command -v "${PYTHON}" >/dev/null 2>&1 || {
+  printf 'Missing %s. Install Python 3.12 or set AOA_EDITING_BOOTSTRAP_PYTHON.\n' "${PYTHON}" >&2
+  exit 2
+}
+
+VENV="$("${PYTHON}" "${ROOT}/scripts/resolve_home.py" runtime)"
+EDITOR_TMP="$("${PYTHON}" "${ROOT}/scripts/resolve_home.py" tmp)"
+export PIP_CACHE_DIR="${PIP_CACHE_DIR:-${ROOT}/var/cache/pip}"
+export TMPDIR="${EDITOR_TMP}"
+
+mkdir -p "$(dirname "${VENV}")" "${PIP_CACHE_DIR}" "${TMPDIR}"
+if [[ ! -x "${VENV}/bin/python" ]]; then
+  "${PYTHON}" -m venv "${VENV}"
+fi
+
+"${VENV}/bin/python" -m pip install "pip==${AOA_EDITING_PIP_VERSION:-26.1.2}"
+"${VENV}/bin/python" -m pip install --requirement "${ROOT}/requirements.lock"
+"${VENV}/bin/python" -m pip install --editable "${ROOT}" --no-deps
+"${VENV}/bin/aoa-editing" doctor --create-roots
+printf 'AoA Editing runtime ready: %s\n' "${VENV}"

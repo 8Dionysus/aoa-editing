@@ -1,0 +1,33 @@
+{
+  "schema": "aoa_editing_environment_manifest_v1",
+  "snapshot_status": "operator_local_template",
+  "captured_at": null,
+  "host": {
+    "os": null,
+    "kernel": null,
+    "architecture": null,
+    "cpu": null,
+    "logical_cpus": null,
+    "ram_gib": null,
+    "gpu": null
+  },
+  "software": {
+    "python": {"version": null, "license": "Python-2.0.1"},
+    "ffmpeg": {"version": null, "license": null, "sha256": null},
+    "ffprobe": {"version": null, "license": null, "sha256": null},
+    "kdenlive": {"version": null, "license": null, "revision": null},
+    "chromium": {"version": null, "sha256": null}
+  },
+  "project_inputs": {
+    "requirements_lock_sha256": null,
+    "bootstrap_sha256": null
+  },
+  "storage": {
+    "repository": "<repository-root>",
+    "runtime": ".venv",
+    "durable_data": "var",
+    "cache": "var/cache",
+    "temporary": "var/tmp"
+  },
+  "authority": "Fill this template into an ignored runtime receipt. Live doctor output governs the current product home; host owner surfaces govern shared runtime facts."
+}

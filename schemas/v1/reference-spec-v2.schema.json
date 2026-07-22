@@ -1,0 +1,544 @@
+{
+  "$defs": {
+    "FrameRate": {
+      "additionalProperties": false,
+      "properties": {
+        "numerator": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        }
+      },
+      "title": "FrameRate",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ReferenceAudioStructure": {
+      "additionalProperties": false,
+      "properties": {
+        "has_audio_stream": {
+          "title": "Has Audio Stream",
+          "type": "boolean"
+        },
+        "codec": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Codec"
+        },
+        "sample_rate": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sample Rate"
+        },
+        "channels": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channels"
+        },
+        "mean_volume_db": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mean Volume Db"
+        },
+        "max_volume_db": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Volume Db"
+        },
+        "silent_for_full_duration": {
+          "title": "Silent For Full Duration",
+          "type": "boolean"
+        },
+        "silence_intervals": {
+          "items": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object"
+          },
+          "title": "Silence Intervals",
+          "type": "array"
+        }
+      },
+      "required": [
+        "has_audio_stream",
+        "silent_for_full_duration"
+      ],
+      "title": "ReferenceAudioStructure",
+      "type": "object"
+    },
+    "ReferenceMotionFrameV2": {
+      "additionalProperties": false,
+      "description": "All-frame observable motion evidence with explicit uncertainty.",
+      "properties": {
+        "frame": {
+          "minimum": 0,
+          "title": "Frame",
+          "type": "integer"
+        },
+        "time_seconds": {
+          "minimum": 0,
+          "title": "Time Seconds",
+          "type": "number"
+        },
+        "selected_model": {
+          "enum": [
+            "similarity",
+            "affine",
+            "homography",
+            "unknown"
+          ],
+          "title": "Selected Model",
+          "type": "string"
+        },
+        "matrix_3x3": {
+          "items": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "title": "Matrix 3X3",
+          "type": "array"
+        },
+        "visible_source_boundary": {
+          "items": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "title": "Visible Source Boundary",
+          "type": "array"
+        },
+        "center_x": {
+          "title": "Center X",
+          "type": "number"
+        },
+        "center_y": {
+          "title": "Center Y",
+          "type": "number"
+        },
+        "scale_relative_to_contain": {
+          "exclusiveMinimum": 0,
+          "title": "Scale Relative To Contain",
+          "type": "number"
+        },
+        "rotation_degrees": {
+          "title": "Rotation Degrees",
+          "type": "number"
+        },
+        "pivot_x": {
+          "default": null,
+          "title": "Pivot X",
+          "type": "null"
+        },
+        "pivot_y": {
+          "default": null,
+          "title": "Pivot Y",
+          "type": "null"
+        },
+        "pivot_identifiability": {
+          "const": "unidentifiable",
+          "default": "unidentifiable",
+          "title": "Pivot Identifiability",
+          "type": "string"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "confidence_interval": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Confidence Interval",
+          "type": "object"
+        },
+        "match_count": {
+          "minimum": 0,
+          "title": "Match Count",
+          "type": "integer"
+        },
+        "inlier_count": {
+          "minimum": 0,
+          "title": "Inlier Count",
+          "type": "integer"
+        },
+        "inlier_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Inlier Ratio",
+          "type": "number"
+        },
+        "reprojection_rmse": {
+          "minimum": 0,
+          "title": "Reprojection Rmse",
+          "type": "number"
+        },
+        "residual_flow_mean": {
+          "minimum": 0,
+          "title": "Residual Flow Mean",
+          "type": "number"
+        },
+        "residual_flow_p95": {
+          "minimum": 0,
+          "title": "Residual Flow P95",
+          "type": "number"
+        },
+        "residual_valid_fraction": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Residual Valid Fraction",
+          "type": "number"
+        },
+        "velocity": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Velocity",
+          "type": "object"
+        },
+        "acceleration": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Acceleration",
+          "type": "object"
+        },
+        "jerk": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Jerk",
+          "type": "object"
+        },
+        "model_scores": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Model Scores",
+          "type": "object"
+        },
+        "outlier": {
+          "title": "Outlier",
+          "type": "boolean"
+        },
+        "uncertainty": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Uncertainty",
+          "type": "array"
+        }
+      },
+      "required": [
+        "frame",
+        "time_seconds",
+        "selected_model",
+        "matrix_3x3",
+        "visible_source_boundary",
+        "center_x",
+        "center_y",
+        "scale_relative_to_contain",
+        "rotation_degrees",
+        "confidence",
+        "confidence_interval",
+        "match_count",
+        "inlier_count",
+        "inlier_ratio",
+        "reprojection_rmse",
+        "residual_flow_mean",
+        "residual_flow_p95",
+        "residual_valid_fraction",
+        "velocity",
+        "acceleration",
+        "jerk",
+        "model_scores",
+        "outlier",
+        "uncertainty"
+      ],
+      "title": "ReferenceMotionFrameV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Frozen reconstruction contract derived from Reference Motion Evidence v2.",
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "evidence_id": {
+      "title": "Evidence Id",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "reference_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Reference Sha256",
+      "type": "string"
+    },
+    "readiness_revision": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Readiness Revision",
+      "type": "string"
+    },
+    "motion_gate_revision": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Motion Gate Revision",
+      "type": "string"
+    },
+    "duration_frames": {
+      "exclusiveMinimum": 0,
+      "title": "Duration Frames",
+      "type": "integer"
+    },
+    "duration_seconds": {
+      "exclusiveMinimum": 0,
+      "title": "Duration Seconds",
+      "type": "number"
+    },
+    "frame_rate": {
+      "$ref": "#/$defs/FrameRate"
+    },
+    "width": {
+      "exclusiveMinimum": 0,
+      "title": "Width",
+      "type": "integer"
+    },
+    "height": {
+      "exclusiveMinimum": 0,
+      "title": "Height",
+      "type": "integer"
+    },
+    "audio": {
+      "$ref": "#/$defs/ReferenceAudioStructure"
+    },
+    "motion_model": {
+      "enum": [
+        "similarity",
+        "affine",
+        "homography",
+        "unknown"
+      ],
+      "title": "Motion Model",
+      "type": "string"
+    },
+    "motion_frames": {
+      "items": {
+        "$ref": "#/$defs/ReferenceMotionFrameV2"
+      },
+      "title": "Motion Frames",
+      "type": "array"
+    },
+    "curve_representation": {
+      "additionalProperties": true,
+      "title": "Curve Representation",
+      "type": "object"
+    },
+    "phase_model": {
+      "additionalProperties": true,
+      "title": "Phase Model",
+      "type": "object"
+    },
+    "transform_order": {
+      "additionalProperties": true,
+      "title": "Transform Order",
+      "type": "object"
+    },
+    "uncertainties": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Uncertainties",
+      "type": "array"
+    },
+    "alternative_explanations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Alternative Explanations",
+      "type": "array"
+    },
+    "comparison_criteria": {
+      "additionalProperties": true,
+      "title": "Comparison Criteria",
+      "type": "object"
+    },
+    "artifacts": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Artifacts",
+      "type": "object"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "frozen_before_first_v2_render": {
+      "const": true,
+      "default": true,
+      "title": "Frozen Before First V2 Render",
+      "type": "boolean"
+    },
+    "reference_media_allowed_in_render": {
+      "const": false,
+      "default": false,
+      "title": "Reference Media Allowed In Render",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "evidence_id",
+    "source_sha256",
+    "reference_sha256",
+    "readiness_revision",
+    "motion_gate_revision",
+    "duration_frames",
+    "duration_seconds",
+    "frame_rate",
+    "width",
+    "height",
+    "audio",
+    "motion_model",
+    "motion_frames",
+    "curve_representation",
+    "phase_model",
+    "transform_order",
+    "uncertainties",
+    "alternative_explanations",
+    "comparison_criteria",
+    "artifacts",
+    "provenance"
+  ],
+  "title": "ReferenceReconstructionSpecV2",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/reference-spec-v2.schema.json"
+}

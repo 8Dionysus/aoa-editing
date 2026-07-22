@@ -1,0 +1,388 @@
+{
+  "$defs": {
+    "FrameRate": {
+      "additionalProperties": false,
+      "properties": {
+        "numerator": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        }
+      },
+      "title": "FrameRate",
+      "type": "object"
+    },
+    "MotionGroundTruthFixture": {
+      "additionalProperties": false,
+      "description": "Independent render truth for one motion family or degradation condition.",
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "content_origin": {
+          "const": "synthetic_ground_truth",
+          "default": "synthetic_ground_truth",
+          "title": "Content Origin",
+          "type": "string"
+        },
+        "source_path": {
+          "title": "Source Path",
+          "type": "string"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "video_path": {
+          "title": "Video Path",
+          "type": "string"
+        },
+        "video_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Video Sha256",
+          "type": "string"
+        },
+        "source_width": {
+          "exclusiveMinimum": 0,
+          "title": "Source Width",
+          "type": "integer"
+        },
+        "source_height": {
+          "exclusiveMinimum": 0,
+          "title": "Source Height",
+          "type": "integer"
+        },
+        "output_width": {
+          "exclusiveMinimum": 0,
+          "title": "Output Width",
+          "type": "integer"
+        },
+        "output_height": {
+          "exclusiveMinimum": 0,
+          "title": "Output Height",
+          "type": "integer"
+        },
+        "frame_count": {
+          "exclusiveMinimum": 0,
+          "title": "Frame Count",
+          "type": "integer"
+        },
+        "frame_rate": {
+          "$ref": "#/$defs/FrameRate"
+        },
+        "expected_model": {
+          "enum": [
+            "similarity",
+            "affine",
+            "homography",
+            "unknown"
+          ],
+          "title": "Expected Model",
+          "type": "string"
+        },
+        "expected_curve": {
+          "enum": [
+            "linear",
+            "ease_in",
+            "ease_out",
+            "ease_in_out",
+            "cubic_bezier",
+            "hermite",
+            "overshoot",
+            "settle",
+            "hold",
+            "underdetermined"
+          ],
+          "title": "Expected Curve",
+          "type": "string"
+        },
+        "requirement_tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Requirement Tags",
+          "type": "array"
+        },
+        "degradations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Degradations",
+          "type": "array"
+        },
+        "expected_uncertainties": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Expected Uncertainties",
+          "type": "array"
+        },
+        "frames": {
+          "items": {
+            "$ref": "#/$defs/MotionGroundTruthFrame"
+          },
+          "title": "Frames",
+          "type": "array"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        }
+      },
+      "required": [
+        "id",
+        "source_path",
+        "source_sha256",
+        "video_path",
+        "video_sha256",
+        "source_width",
+        "source_height",
+        "output_width",
+        "output_height",
+        "frame_count",
+        "frame_rate",
+        "expected_model",
+        "expected_curve",
+        "requirement_tags",
+        "frames",
+        "provenance"
+      ],
+      "title": "MotionGroundTruthFixture",
+      "type": "object"
+    },
+    "MotionGroundTruthFrame": {
+      "additionalProperties": false,
+      "description": "One exact synthetic transform sample before rasterization and encoding.",
+      "properties": {
+        "frame": {
+          "minimum": 0,
+          "title": "Frame",
+          "type": "integer"
+        },
+        "time_seconds": {
+          "minimum": 0,
+          "title": "Time Seconds",
+          "type": "number"
+        },
+        "matrix_3x3": {
+          "items": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "title": "Matrix 3X3",
+          "type": "array"
+        },
+        "center_x": {
+          "title": "Center X",
+          "type": "number"
+        },
+        "center_y": {
+          "title": "Center Y",
+          "type": "number"
+        },
+        "scale_relative_to_contain": {
+          "exclusiveMinimum": 0,
+          "title": "Scale Relative To Contain",
+          "type": "number"
+        },
+        "rotation_degrees": {
+          "title": "Rotation Degrees",
+          "type": "number"
+        },
+        "pivot_x": {
+          "title": "Pivot X",
+          "type": "number"
+        },
+        "pivot_y": {
+          "title": "Pivot Y",
+          "type": "number"
+        },
+        "velocity": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Velocity",
+          "type": "object"
+        },
+        "acceleration": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Acceleration",
+          "type": "object"
+        },
+        "jerk": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Jerk",
+          "type": "object"
+        },
+        "phase": {
+          "title": "Phase",
+          "type": "string"
+        },
+        "transform_order": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Transform Order",
+          "type": "array"
+        }
+      },
+      "required": [
+        "frame",
+        "time_seconds",
+        "matrix_3x3",
+        "center_x",
+        "center_y",
+        "scale_relative_to_contain",
+        "rotation_degrees",
+        "pivot_x",
+        "pivot_y",
+        "velocity",
+        "acceleration",
+        "jerk",
+        "phase",
+        "transform_order"
+      ],
+      "title": "MotionGroundTruthFrame",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Manifest joining all independently rendered motion fixtures.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "content_origin": {
+      "const": "synthetic_ground_truth",
+      "default": "synthetic_ground_truth",
+      "title": "Content Origin",
+      "type": "string"
+    },
+    "fixtures": {
+      "items": {
+        "$ref": "#/$defs/MotionGroundTruthFixture"
+      },
+      "title": "Fixtures",
+      "type": "array"
+    },
+    "requirement_coverage": {
+      "additionalProperties": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "title": "Requirement Coverage",
+      "type": "object"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "fixtures",
+    "requirement_coverage",
+    "provenance"
+  ],
+  "title": "MotionGroundTruthCorpus",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/motion-ground-truth.schema.json"
+}

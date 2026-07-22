@@ -1,0 +1,97 @@
+{
+  "schema": "aoa_editing_storage_layout_v1",
+  "decision": "docs/decisions/ADR-0008-repo-local-home-and-provider-aliases.md",
+  "default_home": "repo-local",
+  "home_resolution_order": [
+    "explicit AOA_EDITING_HOME",
+    "repo-local .aoa-editing.local.toml",
+    "installed launcher or source checkout",
+    "future packaged-install profile"
+  ],
+  "paths": {
+    "runtime": {
+      "relative": ".venv",
+      "owner": "aoa-editing",
+      "tracked": false,
+      "authority": "reproducible project-specific Python environment"
+    },
+    "projects": {
+      "relative": "var/projects",
+      "owner": "aoa-editing",
+      "tracked": false,
+      "authority": "canonical project instances and immutable ingest copies"
+    },
+    "evals": {
+      "relative": "var/evals",
+      "owner": "aoa-editing",
+      "tracked": false,
+      "authority": "runtime evaluation evidence"
+    },
+    "artifacts": {
+      "relative": "var/artifacts",
+      "owner": "aoa-editing",
+      "tracked": false,
+      "authority": "product-owned derived and proof artifacts"
+    },
+    "cache": {
+      "relative": "var/cache",
+      "owner": "aoa-editing",
+      "tracked": false,
+      "authority": "regenerable editor-specific cache"
+    },
+    "tmp": {
+      "relative": "var/tmp",
+      "owner": "aoa-editing",
+      "tracked": false,
+      "authority": "disposable editor-specific work"
+    },
+    "state": {
+      "relative": "var/state",
+      "owner": "aoa-editing",
+      "tracked": false,
+      "authority": "local style profiles, rebuildable indexes, and runtime state"
+    }
+  },
+  "shared_ai": {
+    "owner": "abyss-stack_and_abyss-machine",
+    "binding": "typed_provider_alias",
+    "declaration_catalog": "manifests/ai-capabilities.json",
+    "local_binding_overlay": ".aoa-editing.local.toml",
+    "receipt_root": "var/state/provider-receipts",
+    "filesystem_links_allowed": false,
+    "physical_model_paths_allowed_in_domain": false,
+    "project_model_copy_allowed": false,
+    "resolved_provider_receipt_required": true
+  },
+  "host_boundary": {
+    "abyss_machine_owns": [
+      "host capability facts",
+      "resource gates",
+      "process and health evidence",
+      "host-managed shared runtimes",
+      "physical shared-model locations",
+      "large shared AI, compile, and browser caches"
+    ],
+    "abyss_stack_owns": [
+      "shared AI services",
+      "runtime and model recipes",
+      "service composition",
+      "capability registrations",
+      "shared inference contracts"
+    ]
+  },
+  "legacy": {
+    "receipt_root": "var/artifacts/migrations",
+    "roots_are_defaults": false,
+    "rollback_copy_required": true,
+    "compatibility_symlink_allowed": false,
+    "cleanup_authorized": false
+  },
+  "readiness_recertification": {
+    "runtime_receipt": "var/evals/readiness/latest.json",
+    "revision_bound": true,
+    "required_overall": "pass",
+    "required_before_checkpoint_tag": true
+  },
+  "implementation_state": "cutover_verified"
+}

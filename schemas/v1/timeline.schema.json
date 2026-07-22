@@ -1,0 +1,1573 @@
+{
+  "$defs": {
+    "AudioEffect": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "audio",
+          "default": "audio",
+          "title": "Type",
+          "type": "string"
+        },
+        "gain_db": {
+          "default": 0,
+          "maximum": 24,
+          "minimum": -96,
+          "title": "Gain Db",
+          "type": "number"
+        },
+        "gain_keyframes": {
+          "items": {
+            "$ref": "#/$defs/ScalarKeyframe"
+          },
+          "title": "Gain Keyframes",
+          "type": "array"
+        },
+        "fade_in_frames": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Fade In Frames",
+          "type": "integer"
+        },
+        "fade_out_frames": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Fade Out Frames",
+          "type": "integer"
+        },
+        "normalize_lufs": {
+          "anyOf": [
+            {
+              "maximum": -5,
+              "minimum": -40,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Normalize Lufs"
+        }
+      },
+      "title": "AudioEffect",
+      "type": "object"
+    },
+    "BezierHandleV2": {
+      "additionalProperties": false,
+      "properties": {
+        "time_offset_frames": {
+          "title": "Time Offset Frames",
+          "type": "number"
+        },
+        "value_offset": {
+          "title": "Value Offset",
+          "type": "number"
+        }
+      },
+      "required": [
+        "time_offset_frames",
+        "value_offset"
+      ],
+      "title": "BezierHandleV2",
+      "type": "object"
+    },
+    "BlendEffect": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "blend",
+          "default": "blend",
+          "title": "Type",
+          "type": "string"
+        },
+        "mode": {
+          "default": "normal",
+          "enum": [
+            "normal",
+            "multiply",
+            "screen",
+            "overlay",
+            "addition"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "opacity": {
+          "default": 1.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Opacity",
+          "type": "number"
+        }
+      },
+      "title": "BlendEffect",
+      "type": "object"
+    },
+    "BlurEffect": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "blur",
+          "default": "blur",
+          "title": "Type",
+          "type": "string"
+        },
+        "sigma": {
+          "default": 1.0,
+          "maximum": 50,
+          "minimum": 0,
+          "title": "Sigma",
+          "type": "number"
+        }
+      },
+      "title": "BlurEffect",
+      "type": "object"
+    },
+    "Clip": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "timeline_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "source_range": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameRange"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "role": {
+          "default": "primary",
+          "title": "Role",
+          "type": "string"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "pinned": {
+          "default": false,
+          "title": "Pinned",
+          "type": "boolean"
+        },
+        "effects": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "audio": "#/$defs/AudioEffect",
+                "blend": "#/$defs/BlendEffect",
+                "blur": "#/$defs/BlurEffect",
+                "color": "#/$defs/ColorEffect",
+                "dissolve": "#/$defs/DissolveEffect",
+                "glow": "#/$defs/GlowEffect",
+                "mask": "#/$defs/MaskEffect",
+                "speed": "#/$defs/SpeedEffect",
+                "text": "#/$defs/TextEffect",
+                "transform": "#/$defs/TransformEffect",
+                "transform_v2": "#/$defs/TransformEffectV2"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TransformEffect"
+              },
+              {
+                "$ref": "#/$defs/TransformEffectV2"
+              },
+              {
+                "$ref": "#/$defs/ColorEffect"
+              },
+              {
+                "$ref": "#/$defs/MaskEffect"
+              },
+              {
+                "$ref": "#/$defs/AudioEffect"
+              },
+              {
+                "$ref": "#/$defs/TextEffect"
+              },
+              {
+                "$ref": "#/$defs/SpeedEffect"
+              },
+              {
+                "$ref": "#/$defs/DissolveEffect"
+              },
+              {
+                "$ref": "#/$defs/BlurEffect"
+              },
+              {
+                "$ref": "#/$defs/GlowEffect"
+              },
+              {
+                "$ref": "#/$defs/BlendEffect"
+              }
+            ]
+          },
+          "title": "Effects",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "decision_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Decision Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "asset_id",
+        "timeline_range"
+      ],
+      "title": "Clip",
+      "type": "object"
+    },
+    "ColorEffect": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "color",
+          "default": "color",
+          "title": "Type",
+          "type": "string"
+        },
+        "brightness": {
+          "default": 0,
+          "maximum": 1,
+          "minimum": -1,
+          "title": "Brightness",
+          "type": "number"
+        },
+        "contrast": {
+          "default": 1,
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Contrast",
+          "type": "number"
+        },
+        "saturation": {
+          "default": 1,
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Saturation",
+          "type": "number"
+        },
+        "gamma": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "maximum": 10,
+          "title": "Gamma",
+          "type": "number"
+        },
+        "vignette": {
+          "default": 0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Vignette",
+          "type": "number"
+        }
+      },
+      "title": "ColorEffect",
+      "type": "object"
+    },
+    "DecomposedTransformMotionV2": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "decomposed",
+          "default": "decomposed",
+          "title": "Kind",
+          "type": "string"
+        },
+        "fit_mode": {
+          "default": "contain",
+          "enum": [
+            "contain",
+            "cover"
+          ],
+          "title": "Fit Mode",
+          "type": "string"
+        },
+        "position": {
+          "$ref": "#/$defs/Vec2MotionCurveV2"
+        },
+        "scale": {
+          "$ref": "#/$defs/ScalarMotionCurveV2"
+        },
+        "rotation": {
+          "$ref": "#/$defs/ScalarMotionCurveV2"
+        },
+        "pivot": {
+          "$ref": "#/$defs/Vec2MotionCurveV2"
+        },
+        "affine": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MatrixMotionCurveV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "homography": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MatrixMotionCurveV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "transform_order": {
+          "items": {
+            "enum": [
+              "fit",
+              "scale",
+              "rotate",
+              "affine",
+              "homography",
+              "translate"
+            ],
+            "type": "string"
+          },
+          "title": "Transform Order",
+          "type": "array"
+        }
+      },
+      "required": [
+        "position",
+        "scale",
+        "rotation",
+        "pivot"
+      ],
+      "title": "DecomposedTransformMotionV2",
+      "type": "object"
+    },
+    "DissolveEffect": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "dissolve",
+          "default": "dissolve",
+          "title": "Type",
+          "type": "string"
+        },
+        "fade_in_frames": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Fade In Frames",
+          "type": "integer"
+        },
+        "fade_out_frames": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Fade Out Frames",
+          "type": "integer"
+        }
+      },
+      "title": "DissolveEffect",
+      "type": "object"
+    },
+    "FrameRange": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "duration": {
+          "exclusiveMinimum": 0,
+          "title": "Duration",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "duration"
+      ],
+      "title": "FrameRange",
+      "type": "object"
+    },
+    "FrameRate": {
+      "additionalProperties": false,
+      "properties": {
+        "numerator": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        }
+      },
+      "title": "FrameRate",
+      "type": "object"
+    },
+    "GlowEffect": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "glow",
+          "default": "glow",
+          "title": "Type",
+          "type": "string"
+        },
+        "radius": {
+          "default": 4.0,
+          "maximum": 50,
+          "minimum": 0.1,
+          "title": "Radius",
+          "type": "number"
+        },
+        "intensity": {
+          "default": 0.25,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Intensity",
+          "type": "number"
+        }
+      },
+      "title": "GlowEffect",
+      "type": "object"
+    },
+    "MaskEffect": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "mask",
+          "default": "mask",
+          "title": "Type",
+          "type": "string"
+        },
+        "mask_asset_path": {
+          "title": "Mask Asset Path",
+          "type": "string"
+        },
+        "invert": {
+          "default": false,
+          "title": "Invert",
+          "type": "boolean"
+        },
+        "feather": {
+          "default": 0,
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Feather",
+          "type": "number"
+        }
+      },
+      "required": [
+        "mask_asset_path"
+      ],
+      "title": "MaskEffect",
+      "type": "object"
+    },
+    "MatrixMotionCurveV2": {
+      "additionalProperties": false,
+      "properties": {
+        "keyframes": {
+          "items": {
+            "$ref": "#/$defs/MatrixMotionKeyframeV2"
+          },
+          "minItems": 1,
+          "title": "Keyframes",
+          "type": "array"
+        },
+        "continuity": {
+          "default": "c0",
+          "enum": [
+            "c0",
+            "c1"
+          ],
+          "title": "Continuity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyframes"
+      ],
+      "title": "MatrixMotionCurveV2",
+      "type": "object"
+    },
+    "MatrixMotionKeyframeV2": {
+      "additionalProperties": false,
+      "properties": {
+        "time": {
+          "$ref": "#/$defs/MotionTimeV2"
+        },
+        "matrix_3x3": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            }
+          ],
+          "title": "Matrix 3X3",
+          "type": "array"
+        },
+        "interpolation": {
+          "default": "linear",
+          "enum": [
+            "linear",
+            "hold",
+            "cubic_hermite"
+          ],
+          "title": "Interpolation",
+          "type": "string"
+        },
+        "incoming_tangent_3x3": {
+          "anyOf": [
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "type": "array"
+                },
+                {
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "type": "array"
+                },
+                {
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "type": "array"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Incoming Tangent 3X3"
+        },
+        "outgoing_tangent_3x3": {
+          "anyOf": [
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "type": "array"
+                },
+                {
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "type": "array"
+                },
+                {
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "type": "array"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outgoing Tangent 3X3"
+        }
+      },
+      "required": [
+        "time",
+        "matrix_3x3"
+      ],
+      "title": "MatrixMotionKeyframeV2",
+      "type": "object"
+    },
+    "MatrixTransformMotionV2": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "matrix",
+          "default": "matrix",
+          "title": "Kind",
+          "type": "string"
+        },
+        "coordinate_space": {
+          "const": "source_pixels_to_output_pixels",
+          "default": "source_pixels_to_output_pixels",
+          "title": "Coordinate Space",
+          "type": "string"
+        },
+        "matrix": {
+          "$ref": "#/$defs/MatrixMotionCurveV2"
+        }
+      },
+      "required": [
+        "matrix"
+      ],
+      "title": "MatrixTransformMotionV2",
+      "type": "object"
+    },
+    "MotionCouplingV2": {
+      "additionalProperties": false,
+      "properties": {
+        "driver_channel": {
+          "enum": [
+            "position",
+            "scale",
+            "rotation",
+            "pivot",
+            "matrix"
+          ],
+          "title": "Driver Channel",
+          "type": "string"
+        },
+        "follower_channels": {
+          "items": {
+            "enum": [
+              "position",
+              "scale",
+              "rotation",
+              "pivot",
+              "matrix"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Follower Channels",
+          "type": "array"
+        },
+        "relation": {
+          "enum": [
+            "shared_progress",
+            "phase_lag",
+            "phase_lead",
+            "explicit_matrix"
+          ],
+          "title": "Relation",
+          "type": "string"
+        },
+        "tolerance": {
+          "minimum": 0,
+          "title": "Tolerance",
+          "type": "number"
+        }
+      },
+      "required": [
+        "driver_channel",
+        "follower_channels",
+        "relation",
+        "tolerance"
+      ],
+      "title": "MotionCouplingV2",
+      "type": "object"
+    },
+    "MotionPhaseV2": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "start": {
+          "$ref": "#/$defs/MotionTimeV2"
+        },
+        "end": {
+          "$ref": "#/$defs/MotionTimeV2"
+        },
+        "channels": {
+          "items": {
+            "enum": [
+              "position",
+              "scale",
+              "rotation",
+              "pivot",
+              "matrix"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Channels",
+          "type": "array"
+        },
+        "intent": {
+          "enum": [
+            "onset",
+            "accelerate",
+            "twist",
+            "decelerate",
+            "settle",
+            "custom"
+          ],
+          "title": "Intent",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "start",
+        "end",
+        "channels",
+        "intent"
+      ],
+      "title": "MotionPhaseV2",
+      "type": "object"
+    },
+    "MotionSamplingV2": {
+      "additionalProperties": false,
+      "properties": {
+        "samples_per_frame": {
+          "default": 1,
+          "maximum": 16,
+          "minimum": 1,
+          "title": "Samples Per Frame",
+          "type": "integer"
+        },
+        "shutter_fraction": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Shutter Fraction",
+          "type": "number"
+        },
+        "distribution": {
+          "default": "center",
+          "enum": [
+            "center",
+            "uniform"
+          ],
+          "title": "Distribution",
+          "type": "string"
+        }
+      },
+      "title": "MotionSamplingV2",
+      "type": "object"
+    },
+    "MotionTimeV2": {
+      "additionalProperties": false,
+      "description": "Exact non-negative frame time with a canonical rational subframe.",
+      "properties": {
+        "frame": {
+          "minimum": 0,
+          "title": "Frame",
+          "type": "integer"
+        },
+        "subframe_numerator": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Subframe Numerator",
+          "type": "integer"
+        },
+        "subframe_denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Subframe Denominator",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "frame"
+      ],
+      "title": "MotionTimeV2",
+      "type": "object"
+    },
+    "ScalarKeyframe": {
+      "additionalProperties": false,
+      "properties": {
+        "frame": {
+          "minimum": 0,
+          "title": "Frame",
+          "type": "integer"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "easing": {
+          "default": "linear",
+          "enum": [
+            "linear",
+            "ease_in",
+            "ease_out",
+            "ease_in_out",
+            "hold"
+          ],
+          "title": "Easing",
+          "type": "string"
+        }
+      },
+      "required": [
+        "frame",
+        "value"
+      ],
+      "title": "ScalarKeyframe",
+      "type": "object"
+    },
+    "ScalarMotionCurveV2": {
+      "additionalProperties": false,
+      "properties": {
+        "keyframes": {
+          "items": {
+            "$ref": "#/$defs/ScalarMotionKeyframeV2"
+          },
+          "minItems": 1,
+          "title": "Keyframes",
+          "type": "array"
+        },
+        "continuity": {
+          "default": "c0",
+          "enum": [
+            "c0",
+            "c1",
+            "c2"
+          ],
+          "title": "Continuity",
+          "type": "string"
+        },
+        "monotonicity": {
+          "default": "none",
+          "enum": [
+            "none",
+            "increasing",
+            "decreasing",
+            "auto"
+          ],
+          "title": "Monotonicity",
+          "type": "string"
+        },
+        "overshoot_policy": {
+          "default": "allow",
+          "enum": [
+            "forbid",
+            "bounded",
+            "allow"
+          ],
+          "title": "Overshoot Policy",
+          "type": "string"
+        },
+        "overshoot_limit_fraction": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Overshoot Limit Fraction",
+          "type": "number"
+        },
+        "angle_unwrap": {
+          "default": false,
+          "title": "Angle Unwrap",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "keyframes"
+      ],
+      "title": "ScalarMotionCurveV2",
+      "type": "object"
+    },
+    "ScalarMotionKeyframeV2": {
+      "additionalProperties": false,
+      "properties": {
+        "time": {
+          "$ref": "#/$defs/MotionTimeV2"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "interpolation": {
+          "default": "linear",
+          "enum": [
+            "linear",
+            "hold",
+            "cubic_bezier",
+            "cubic_hermite",
+            "monotone_cubic"
+          ],
+          "title": "Interpolation",
+          "type": "string"
+        },
+        "incoming_tangent": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Incoming Tangent"
+        },
+        "outgoing_tangent": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outgoing Tangent"
+        },
+        "incoming_handle": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BezierHandleV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "outgoing_handle": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BezierHandleV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "time",
+        "value"
+      ],
+      "title": "ScalarMotionKeyframeV2",
+      "type": "object"
+    },
+    "SpeedEffect": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "speed",
+          "default": "speed",
+          "title": "Type",
+          "type": "string"
+        },
+        "rate": {
+          "default": 1.0,
+          "maximum": 64.0,
+          "minimum": 0.5,
+          "title": "Rate",
+          "type": "number"
+        }
+      },
+      "title": "SpeedEffect",
+      "type": "object"
+    },
+    "TextEffect": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "text",
+          "default": "text",
+          "title": "Type",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "x": {
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "default": 0.85,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Y",
+          "type": "number"
+        },
+        "font_size": {
+          "default": 48,
+          "exclusiveMinimum": 0,
+          "title": "Font Size",
+          "type": "integer"
+        },
+        "color": {
+          "default": "#ffffff",
+          "title": "Color",
+          "type": "string"
+        },
+        "background": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "#00000088",
+          "title": "Background"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "TextEffect",
+      "type": "object"
+    },
+    "Track": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/TrackKind"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "clips": {
+          "items": {
+            "$ref": "#/$defs/Clip"
+          },
+          "title": "Clips",
+          "type": "array"
+        },
+        "muted": {
+          "default": false,
+          "title": "Muted",
+          "type": "boolean"
+        },
+        "locked": {
+          "default": false,
+          "title": "Locked",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "name"
+      ],
+      "title": "Track",
+      "type": "object"
+    },
+    "TrackKind": {
+      "enum": [
+        "video",
+        "audio",
+        "caption"
+      ],
+      "title": "TrackKind",
+      "type": "string"
+    },
+    "TransformEffect": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "transform",
+          "default": "transform",
+          "title": "Type",
+          "type": "string"
+        },
+        "fit_mode": {
+          "default": "cover",
+          "enum": [
+            "cover",
+            "contain"
+          ],
+          "title": "Fit Mode",
+          "type": "string"
+        },
+        "position_mode": {
+          "default": "offset",
+          "enum": [
+            "offset",
+            "canvas_center"
+          ],
+          "title": "Position Mode",
+          "type": "string"
+        },
+        "position": {
+          "items": {
+            "$ref": "#/$defs/Vec2Keyframe"
+          },
+          "title": "Position",
+          "type": "array"
+        },
+        "scale": {
+          "items": {
+            "$ref": "#/$defs/ScalarKeyframe"
+          },
+          "title": "Scale",
+          "type": "array"
+        },
+        "rotation": {
+          "items": {
+            "$ref": "#/$defs/ScalarKeyframe"
+          },
+          "title": "Rotation",
+          "type": "array"
+        },
+        "opacity": {
+          "items": {
+            "$ref": "#/$defs/ScalarKeyframe"
+          },
+          "title": "Opacity",
+          "type": "array"
+        },
+        "anchor_x": {
+          "default": 0.5,
+          "title": "Anchor X",
+          "type": "number"
+        },
+        "anchor_y": {
+          "default": 0.5,
+          "title": "Anchor Y",
+          "type": "number"
+        }
+      },
+      "title": "TransformEffect",
+      "type": "object"
+    },
+    "TransformEffectV2": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "transform_v2",
+          "default": "transform_v2",
+          "title": "Type",
+          "type": "string"
+        },
+        "motion_language_version": {
+          "const": "2.0.0",
+          "default": "2.0.0",
+          "title": "Motion Language Version",
+          "type": "string"
+        },
+        "motion": {
+          "discriminator": {
+            "mapping": {
+              "decomposed": "#/$defs/DecomposedTransformMotionV2",
+              "matrix": "#/$defs/MatrixTransformMotionV2"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DecomposedTransformMotionV2"
+            },
+            {
+              "$ref": "#/$defs/MatrixTransformMotionV2"
+            }
+          ],
+          "title": "Motion"
+        },
+        "sampling": {
+          "$ref": "#/$defs/MotionSamplingV2"
+        },
+        "phases": {
+          "items": {
+            "$ref": "#/$defs/MotionPhaseV2"
+          },
+          "title": "Phases",
+          "type": "array"
+        },
+        "couplings": {
+          "items": {
+            "$ref": "#/$defs/MotionCouplingV2"
+          },
+          "title": "Couplings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "motion"
+      ],
+      "title": "TransformEffectV2",
+      "type": "object"
+    },
+    "Vec2BezierHandleV2": {
+      "additionalProperties": false,
+      "properties": {
+        "time_offset_frames": {
+          "title": "Time Offset Frames",
+          "type": "number"
+        },
+        "x_offset": {
+          "title": "X Offset",
+          "type": "number"
+        },
+        "y_offset": {
+          "title": "Y Offset",
+          "type": "number"
+        }
+      },
+      "required": [
+        "time_offset_frames",
+        "x_offset",
+        "y_offset"
+      ],
+      "title": "Vec2BezierHandleV2",
+      "type": "object"
+    },
+    "Vec2Keyframe": {
+      "additionalProperties": false,
+      "properties": {
+        "frame": {
+          "minimum": 0,
+          "title": "Frame",
+          "type": "integer"
+        },
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        },
+        "easing": {
+          "default": "linear",
+          "enum": [
+            "linear",
+            "ease_in",
+            "ease_out",
+            "ease_in_out",
+            "hold"
+          ],
+          "title": "Easing",
+          "type": "string"
+        }
+      },
+      "required": [
+        "frame",
+        "x",
+        "y"
+      ],
+      "title": "Vec2Keyframe",
+      "type": "object"
+    },
+    "Vec2MotionCurveV2": {
+      "additionalProperties": false,
+      "properties": {
+        "keyframes": {
+          "items": {
+            "$ref": "#/$defs/Vec2MotionKeyframeV2"
+          },
+          "minItems": 1,
+          "title": "Keyframes",
+          "type": "array"
+        },
+        "continuity": {
+          "default": "c0",
+          "enum": [
+            "c0",
+            "c1",
+            "c2"
+          ],
+          "title": "Continuity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyframes"
+      ],
+      "title": "Vec2MotionCurveV2",
+      "type": "object"
+    },
+    "Vec2MotionKeyframeV2": {
+      "additionalProperties": false,
+      "properties": {
+        "time": {
+          "$ref": "#/$defs/MotionTimeV2"
+        },
+        "value": {
+          "$ref": "#/$defs/Vec2ValueV2"
+        },
+        "interpolation": {
+          "default": "linear",
+          "enum": [
+            "linear",
+            "hold",
+            "cubic_bezier",
+            "cubic_hermite",
+            "monotone_cubic"
+          ],
+          "title": "Interpolation",
+          "type": "string"
+        },
+        "incoming_tangent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Vec2ValueV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "outgoing_tangent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Vec2ValueV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "incoming_handle": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Vec2BezierHandleV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "outgoing_handle": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Vec2BezierHandleV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "time",
+        "value"
+      ],
+      "title": "Vec2MotionKeyframeV2",
+      "type": "object"
+    },
+    "Vec2ValueV2": {
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "title": "Vec2ValueV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "width": {
+      "default": 1920,
+      "exclusiveMinimum": 0,
+      "title": "Width",
+      "type": "integer"
+    },
+    "height": {
+      "default": 1080,
+      "exclusiveMinimum": 0,
+      "title": "Height",
+      "type": "integer"
+    },
+    "frame_rate": {
+      "$ref": "#/$defs/FrameRate"
+    },
+    "duration_frames": {
+      "exclusiveMinimum": 0,
+      "title": "Duration Frames",
+      "type": "integer"
+    },
+    "background": {
+      "default": "#000000",
+      "title": "Background",
+      "type": "string"
+    },
+    "audio_sample_rate": {
+      "default": 48000,
+      "exclusiveMinimum": 0,
+      "title": "Audio Sample Rate",
+      "type": "integer"
+    },
+    "tracks": {
+      "items": {
+        "$ref": "#/$defs/Track"
+      },
+      "title": "Tracks",
+      "type": "array"
+    }
+  },
+  "required": [
+    "duration_frames"
+  ],
+  "title": "Timeline",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/timeline.schema.json"
+}

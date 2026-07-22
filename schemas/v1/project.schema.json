@@ -1,0 +1,232 @@
+{
+  "$defs": {
+    "Intent": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "scenario": {
+          "$ref": "#/$defs/Scenario"
+        },
+        "target_duration_seconds": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Duration Seconds"
+        },
+        "audience": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Audience"
+        },
+        "frame_format": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frame Format"
+        },
+        "tempo": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tempo"
+        },
+        "mood": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mood"
+        },
+        "required_elements": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Elements",
+          "type": "array"
+        },
+        "forbidden_elements": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Forbidden Elements",
+          "type": "array"
+        },
+        "sound_requirements": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Sound Requirements",
+          "type": "array"
+        },
+        "privacy_mode": {
+          "default": "local-only",
+          "enum": [
+            "local-only",
+            "explicit-provider-opt-in"
+          ],
+          "title": "Privacy Mode",
+          "type": "string"
+        },
+        "automation_level": {
+          "default": "review-before-apply",
+          "enum": [
+            "suggest",
+            "review-before-apply",
+            "approved-auto"
+          ],
+          "title": "Automation Level",
+          "type": "string"
+        },
+        "preferences": {
+          "additionalProperties": true,
+          "title": "Preferences",
+          "type": "object"
+        },
+        "constraints": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Constraints",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "scenario"
+      ],
+      "title": "Intent",
+      "type": "object"
+    },
+    "Scenario": {
+      "enum": [
+        "speech.clean",
+        "memory.montage",
+        "still.motion",
+        "screen.workflow",
+        "reference.reconstruct"
+      ],
+      "title": "Scenario",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "name": {
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    },
+    "intent": {
+      "$ref": "#/$defs/Intent"
+    },
+    "brief_revision_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Brief Revision Ids",
+      "type": "array"
+    },
+    "assets": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Assets",
+      "type": "array"
+    },
+    "versions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Versions",
+      "type": "array"
+    },
+    "current_version_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Current Version Id"
+    },
+    "sealed_reference_hashes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Sealed Reference Hashes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "name",
+    "intent"
+  ],
+  "title": "ProjectManifest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/project.schema.json"
+}

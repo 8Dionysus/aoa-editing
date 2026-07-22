@@ -1,0 +1,413 @@
+{
+  "$defs": {
+    "CompositorFrameV2": {
+      "additionalProperties": false,
+      "properties": {
+        "output_frame": {
+          "minimum": 0,
+          "title": "Output Frame",
+          "type": "integer"
+        },
+        "timeline_frame": {
+          "minimum": 0,
+          "title": "Timeline Frame",
+          "type": "integer"
+        },
+        "matrices_3x3": {
+          "items": {
+            "maxItems": 3,
+            "minItems": 3,
+            "prefixItems": [
+              {
+                "maxItems": 3,
+                "minItems": 3,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "maxItems": 3,
+                "minItems": 3,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "maxItems": 3,
+                "minItems": 3,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              }
+            ],
+            "type": "array"
+          },
+          "minItems": 1,
+          "title": "Matrices 3X3",
+          "type": "array"
+        }
+      },
+      "required": [
+        "output_frame",
+        "timeline_frame",
+        "matrices_3x3"
+      ],
+      "title": "CompositorFrameV2",
+      "type": "object"
+    },
+    "CompositorJobV2": {
+      "additionalProperties": false,
+      "properties": {
+        "motion_language_version": {
+          "const": "2.0.0",
+          "default": "2.0.0",
+          "title": "Motion Language Version",
+          "type": "string"
+        },
+        "clip_id": {
+          "title": "Clip Id",
+          "type": "string"
+        },
+        "source_path": {
+          "format": "path",
+          "title": "Source Path",
+          "type": "string"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "output_path": {
+          "format": "path",
+          "title": "Output Path",
+          "type": "string"
+        },
+        "width": {
+          "exclusiveMinimum": 0,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "exclusiveMinimum": 0,
+          "title": "Height",
+          "type": "integer"
+        },
+        "frame_rate": {
+          "$ref": "#/$defs/FrameRate"
+        },
+        "frames": {
+          "items": {
+            "$ref": "#/$defs/CompositorFrameV2"
+          },
+          "minItems": 1,
+          "title": "Frames",
+          "type": "array"
+        },
+        "interpolation": {
+          "default": "lanczos4",
+          "enum": [
+            "linear",
+            "cubic",
+            "lanczos4"
+          ],
+          "title": "Interpolation",
+          "type": "string"
+        },
+        "encoder_command": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Encoder Command",
+          "type": "array"
+        }
+      },
+      "required": [
+        "clip_id",
+        "source_path",
+        "source_sha256",
+        "output_path",
+        "width",
+        "height",
+        "frame_rate",
+        "frames",
+        "encoder_command"
+      ],
+      "title": "CompositorJobV2",
+      "type": "object"
+    },
+    "FrameRange": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "duration": {
+          "exclusiveMinimum": 0,
+          "title": "Duration",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "duration"
+      ],
+      "title": "FrameRange",
+      "type": "object"
+    },
+    "FrameRate": {
+      "additionalProperties": false,
+      "properties": {
+        "numerator": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        }
+      },
+      "title": "FrameRate",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "RenderProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "enum": [
+            "preview",
+            "final"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "width": {
+          "exclusiveMinimum": 0,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "exclusiveMinimum": 0,
+          "title": "Height",
+          "type": "integer"
+        },
+        "video_codec": {
+          "default": "libx264",
+          "title": "Video Codec",
+          "type": "string"
+        },
+        "audio_codec": {
+          "default": "aac",
+          "title": "Audio Codec",
+          "type": "string"
+        },
+        "pixel_format": {
+          "default": "yuv420p",
+          "title": "Pixel Format",
+          "type": "string"
+        },
+        "crf": {
+          "maximum": 51,
+          "minimum": 0,
+          "title": "Crf",
+          "type": "integer"
+        },
+        "preset": {
+          "title": "Preset",
+          "type": "string"
+        },
+        "audio_bitrate": {
+          "default": "192k",
+          "title": "Audio Bitrate",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "width",
+        "height",
+        "crf",
+        "preset"
+      ],
+      "title": "RenderProfile",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "version_id": {
+      "title": "Version Id",
+      "type": "string"
+    },
+    "command": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Command",
+      "type": "array"
+    },
+    "filter_graph": {
+      "title": "Filter Graph",
+      "type": "string"
+    },
+    "output_path": {
+      "format": "path",
+      "title": "Output Path",
+      "type": "string"
+    },
+    "input_hashes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Input Hashes",
+      "type": "array"
+    },
+    "profile": {
+      "$ref": "#/$defs/RenderProfile"
+    },
+    "frame_range": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FrameRange"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "compositor_jobs": {
+      "items": {
+        "$ref": "#/$defs/CompositorJobV2"
+      },
+      "title": "Compositor Jobs",
+      "type": "array"
+    },
+    "compiler": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "project_id",
+    "version_id",
+    "command",
+    "filter_graph",
+    "output_path",
+    "input_hashes",
+    "profile",
+    "compiler"
+  ],
+  "title": "RenderPlan",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/render-plan.schema.json"
+}

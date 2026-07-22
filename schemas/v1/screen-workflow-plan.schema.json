@@ -1,0 +1,351 @@
+{
+  "$defs": {
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ScreenWorkflowBeat": {
+      "additionalProperties": false,
+      "properties": {
+        "narration": {
+          "minLength": 1,
+          "title": "Narration",
+          "type": "string"
+        },
+        "purpose": {
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "capture_action": {
+          "minLength": 1,
+          "title": "Capture Action",
+          "type": "string"
+        },
+        "expected_result": {
+          "minLength": 1,
+          "title": "Expected Result",
+          "type": "string"
+        },
+        "shot_kind": {
+          "$ref": "#/$defs/ScreenWorkflowShotKind"
+        },
+        "estimated_duration_seconds": {
+          "maximum": 30.0,
+          "minimum": 0.5,
+          "title": "Estimated Duration Seconds",
+          "type": "number"
+        },
+        "operator_notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Operator Notes",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "order": {
+          "minimum": 1,
+          "title": "Order",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "narration",
+        "purpose",
+        "capture_action",
+        "expected_result",
+        "shot_kind",
+        "estimated_duration_seconds",
+        "order"
+      ],
+      "title": "ScreenWorkflowBeat",
+      "type": "object"
+    },
+    "ScreenWorkflowShotKind": {
+      "enum": [
+        "terminal.establish",
+        "terminal.focus",
+        "terminal.follow",
+        "terminal.result",
+        "terminal.reset",
+        "workflow.step-cut",
+        "workflow.wait-compress"
+      ],
+      "title": "ScreenWorkflowShotKind",
+      "type": "string"
+    },
+    "ScreenWorkflowShotTemplate": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/ScreenWorkflowShotKind"
+        },
+        "purpose": {
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "default_scale": {
+          "maximum": 2.0,
+          "minimum": 1.0,
+          "title": "Default Scale",
+          "type": "number"
+        },
+        "camera_transition_seconds": {
+          "maximum": 1.0,
+          "minimum": 0,
+          "title": "Camera Transition Seconds",
+          "type": "number"
+        },
+        "minimum_hold_seconds": {
+          "maximum": 10.0,
+          "minimum": 0.5,
+          "title": "Minimum Hold Seconds",
+          "type": "number"
+        },
+        "camera_policy": {
+          "minLength": 1,
+          "title": "Camera Policy",
+          "type": "string"
+        },
+        "cut_policy": {
+          "enum": [
+            "continuous-camera",
+            "hard-cut"
+          ],
+          "title": "Cut Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "purpose",
+        "default_scale",
+        "camera_transition_seconds",
+        "minimum_hold_seconds",
+        "camera_policy",
+        "cut_policy"
+      ],
+      "title": "ScreenWorkflowShotTemplate",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Pre-capture contract; it deliberately has no source-media binding.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "title": {
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    },
+    "script": {
+      "minLength": 1,
+      "title": "Script",
+      "type": "string"
+    },
+    "script_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Script Sha256",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "editorial-draft",
+        "reviewed-for-capture"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "capture_ready": {
+      "title": "Capture Ready",
+      "type": "boolean"
+    },
+    "reviewed_by": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reviewed By"
+    },
+    "template_revision": {
+      "default": "terminal-workflow-temporal-integrity-v2",
+      "enum": [
+        "terminal-workflow-candidate-v1",
+        "terminal-workflow-temporal-integrity-v2"
+      ],
+      "title": "Template Revision",
+      "type": "string"
+    },
+    "templates": {
+      "items": {
+        "$ref": "#/$defs/ScreenWorkflowShotTemplate"
+      },
+      "minItems": 7,
+      "title": "Templates",
+      "type": "array"
+    },
+    "beats": {
+      "items": {
+        "$ref": "#/$defs/ScreenWorkflowBeat"
+      },
+      "minItems": 1,
+      "title": "Beats",
+      "type": "array"
+    },
+    "capture_rules": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Capture Rules",
+      "type": "array"
+    },
+    "framing_rules": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Framing Rules",
+      "type": "array"
+    },
+    "forbidden_content": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Forbidden Content",
+      "type": "array"
+    },
+    "unresolved_questions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Unresolved Questions",
+      "type": "array"
+    },
+    "reference_study_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Reference Study Ids",
+      "type": "array"
+    },
+    "style_profile_written": {
+      "const": false,
+      "default": false,
+      "title": "Style Profile Written",
+      "type": "boolean"
+    },
+    "source_media_bound": {
+      "const": false,
+      "default": false,
+      "title": "Source Media Bound",
+      "type": "boolean"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "title",
+    "script",
+    "script_sha256",
+    "status",
+    "capture_ready",
+    "templates",
+    "beats",
+    "capture_rules",
+    "framing_rules",
+    "forbidden_content",
+    "provenance"
+  ],
+  "title": "ScreenWorkflowPlan",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/screen-workflow-plan.schema.json"
+}

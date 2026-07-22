@@ -1,0 +1,81 @@
+# Copy only the bindings that are actually proven on the local host into
+# .aoa-editing.local.toml. The destination file is intentionally ignored by Git.
+# Replace inventory placeholders from owner receipts; never add credentials or
+# physical model paths.
+
+[ai.bindings."local-ai://speech/transcript/default"]
+state = "enabled"
+resolved_owner = "abyss-machine"
+adapter_kind = "abyss-machine-cli"
+backend = "REPLACE_FROM_HOST_INVENTORY"
+model_id = "REPLACE_FROM_HOST_INVENTORY"
+model_revision = "REPLACE_WITH_HOST_STT_ADAPTER_HEALTH_MODEL_REVISION"
+model_hash_authority = "sha256 fingerprint of selected abyss-machine ai models entry"
+license_authority = "owner model card and inventory receipt"
+metadata_evidence = "abyss-machine ai capabilities + dictation status + ai models"
+command = [
+  "/path/to/aoa-editing/scripts/host-stt-adapter",
+  "transcribe",
+  "{media_path}",
+  "--profile",
+  "{profile}",
+  "--json",
+]
+data_boundary = "local-host"
+timeout_seconds = 1800
+
+[ai.bindings."local-ai://speech/transcript/default".health]
+command = ["/path/to/aoa-editing/scripts/host-stt-adapter", "health"]
+status_field = "status"
+ready_values = ["ready"]
+timeout_seconds = 8
+
+[ai.bindings."local-ai://vision/describe/default"]
+state = "enabled"
+resolved_owner = "abyss-stack"
+adapter_kind = "abyss-stack-service"
+backend = "REPLACE_FROM_STACK_REGISTRATION"
+model_id = "REPLACE_FROM_STACK_REGISTRATION"
+model_revision = "REPLACE_FROM_STACK_REGISTRATION"
+model_hash_authority = "abyss-stack registration backed by host inventory"
+license_authority = "owner model card and registration"
+metadata_evidence = "REPLACE_WITH_STACK_REGISTRATION_ID"
+endpoint = "http://127.0.0.1:19081/v1/vision/describe"
+data_boundary = "local-host"
+timeout_seconds = 900
+
+[ai.bindings."local-ai://vision/describe/default".health]
+endpoint = "http://127.0.0.1:19081/health"
+status_field = "status"
+ready_values = ["ready", "healthy"]
+timeout_seconds = 8
+
+[ai.bindings."local-ai://editorial/plan/default"]
+state = "enabled"
+resolved_owner = "abyss-stack"
+adapter_kind = "localhost-http"
+backend = "REPLACE_FROM_LOCAL_REGISTRATION"
+model_id = "REPLACE_FROM_LOCAL_REGISTRATION"
+model_revision = "REPLACE_FROM_LOCAL_REGISTRATION"
+model_hash_authority = "external owner inventory receipt"
+license_authority = "external owner model card"
+metadata_evidence = "REPLACE_WITH_OWNER_RECEIPT_ID"
+endpoint = "http://127.0.0.1:19082/v1/editorial/plan"
+data_boundary = "local-host"
+timeout_seconds = 120
+
+[ai.bindings."local-ai://editorial/plan/default".health]
+endpoint = "http://127.0.0.1:19082/health"
+status_field = "status"
+ready_values = ["ready", "healthy"]
+timeout_seconds = 8
+
+[ai.bindings."local-ai://speech/diarization/default"]
+state = "unavailable"
+adapter_kind = "unavailable"
+reason = "No owner-verified local diarization capability is registered."
+
+[ai.bindings."local-ai://vision/segment/default"]
+state = "disabled"
+adapter_kind = "disabled"
+reason = "Operator disabled this optional capability for the current product home."

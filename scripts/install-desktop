@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+TARGET="${HOME}/.local/share/applications/aoa-editing.desktop"
+mkdir -p "$(dirname "${TARGET}")"
+sed "s|@ROOT@|${ROOT}|g" "${ROOT}/packaging/aoa-editing.desktop.in" > "${TARGET}"
+chmod 0644 "${TARGET}"
+command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database "$(dirname "${TARGET}")" >/dev/null 2>&1 || true
+printf 'Installed desktop launcher: %s\n' "${TARGET}"
+

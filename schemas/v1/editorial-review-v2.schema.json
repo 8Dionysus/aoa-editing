@@ -1,0 +1,125 @@
+{
+  "$defs": {
+    "EditorialRubricAssessmentV2": {
+      "additionalProperties": false,
+      "properties": {
+        "criterion": {
+          "enum": [
+            "smoothness",
+            "weight",
+            "natural_acceleration",
+            "rotation_character",
+            "twist_character",
+            "settle_timing",
+            "absence_of_mechanical_linearity",
+            "compositional_match",
+            "reference_overlay_absence",
+            "encoding_defect_separation"
+          ],
+          "title": "Criterion",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "notes": {
+          "minLength": 1,
+          "title": "Notes",
+          "type": "string"
+        }
+      },
+      "required": [
+        "criterion",
+        "status",
+        "notes"
+      ],
+      "title": "EditorialRubricAssessmentV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "protocol_id": {
+      "title": "Protocol Id",
+      "type": "string"
+    },
+    "candidate_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Candidate Sha256",
+      "type": "string"
+    },
+    "reviewer": {
+      "minLength": 1,
+      "title": "Reviewer",
+      "type": "string"
+    },
+    "reviewer_role": {
+      "const": "human_operator",
+      "default": "human_operator",
+      "title": "Reviewer Role",
+      "type": "string"
+    },
+    "verdict": {
+      "enum": [
+        "perceptually_and_editorially_indistinguishable",
+        "revision_required"
+      ],
+      "title": "Verdict",
+      "type": "string"
+    },
+    "rubric": {
+      "items": {
+        "$ref": "#/$defs/EditorialRubricAssessmentV2"
+      },
+      "minItems": 1,
+      "title": "Rubric",
+      "type": "array"
+    },
+    "reviewed_artifacts": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "title": "Reviewed Artifacts",
+      "type": "array"
+    },
+    "reference_media_role": {
+      "const": "comparison_only",
+      "default": "comparison_only",
+      "title": "Reference Media Role",
+      "type": "string"
+    }
+  },
+  "required": [
+    "protocol_id",
+    "candidate_sha256",
+    "reviewer",
+    "verdict",
+    "rubric",
+    "reviewed_artifacts"
+  ],
+  "title": "EditorialReviewV2",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/editorial-review-v2.schema.json"
+}

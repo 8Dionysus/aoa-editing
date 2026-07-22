@@ -1,0 +1,629 @@
+{
+  "$defs": {
+    "CheckResult": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "warn",
+            "skip"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "measured": {
+          "additionalProperties": true,
+          "title": "Measured",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "summary"
+      ],
+      "title": "CheckResult",
+      "type": "object"
+    },
+    "FrameRange": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "duration": {
+          "exclusiveMinimum": 0,
+          "title": "Duration",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "duration"
+      ],
+      "title": "FrameRange",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ReconstructionHypothesisDecisionV2": {
+      "additionalProperties": false,
+      "description": "Evidence gate for one bounded reconstruction-complexity hypothesis.",
+      "properties": {
+        "schema_version": {
+          "const": "2.0.0",
+          "default": "2.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "hypothesis": {
+          "enum": [
+            "moving_pivot",
+            "affine_homography",
+            "local_warp"
+          ],
+          "title": "Hypothesis",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "evidence_supported",
+            "experimental_gauge_only",
+            "rejected_by_evidence"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        },
+        "measurements": {
+          "additionalProperties": true,
+          "title": "Measurements",
+          "type": "object"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "permitted_execution": {
+          "enum": [
+            "render_as_bounded_hypothesis",
+            "render_observable_matrix_only",
+            "do_not_add_operation"
+          ],
+          "title": "Permitted Execution",
+          "type": "string"
+        }
+      },
+      "required": [
+        "hypothesis",
+        "status",
+        "rationale",
+        "measurements",
+        "evidence_refs",
+        "permitted_execution"
+      ],
+      "title": "ReconstructionHypothesisDecisionV2",
+      "type": "object"
+    },
+    "ReferencePhaseCorrectionV2": {
+      "additionalProperties": false,
+      "description": "Objective, bounded retime proposal derived from a prior v2 comparison.",
+      "properties": {
+        "schema_version": {
+          "const": "2.0.0",
+          "default": "2.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "spec_id": {
+          "title": "Spec Id",
+          "type": "string"
+        },
+        "spec_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Spec Sha256",
+          "type": "string"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "reference_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Reference Sha256",
+          "type": "string"
+        },
+        "comparison_report_id": {
+          "title": "Comparison Report Id",
+          "type": "string"
+        },
+        "comparison_report_path": {
+          "title": "Comparison Report Path",
+          "type": "string"
+        },
+        "comparison_report_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Comparison Report Sha256",
+          "type": "string"
+        },
+        "candidate_motion_report_id": {
+          "title": "Candidate Motion Report Id",
+          "type": "string"
+        },
+        "candidate_motion_path": {
+          "title": "Candidate Motion Path",
+          "type": "string"
+        },
+        "candidate_motion_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Candidate Motion Sha256",
+          "type": "string"
+        },
+        "prior_candidate_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Prior Candidate Sha256",
+          "type": "string"
+        },
+        "duration_frames": {
+          "exclusiveMinimum": 1,
+          "title": "Duration Frames",
+          "type": "integer"
+        },
+        "anchors": {
+          "items": {
+            "$ref": "#/$defs/TimeWarpAnchorV2"
+          },
+          "minItems": 4,
+          "title": "Anchors",
+          "type": "array"
+        },
+        "identity_ranges": {
+          "items": {
+            "$ref": "#/$defs/FrameRange"
+          },
+          "minItems": 1,
+          "title": "Identity Ranges",
+          "type": "array"
+        },
+        "protected_coupling_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "previous_phase": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Previous Phase",
+          "type": "object"
+        },
+        "predicted_phase": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Predicted Phase",
+          "type": "object"
+        },
+        "predicted_metrics": {
+          "additionalProperties": true,
+          "title": "Predicted Metrics",
+          "type": "object"
+        },
+        "predicted_checks": {
+          "items": {
+            "$ref": "#/$defs/CheckResult"
+          },
+          "minItems": 1,
+          "title": "Predicted Checks",
+          "type": "array"
+        },
+        "failed_check_ids": {
+          "items": {
+            "enum": [
+              "temporal-phase-onset",
+              "temporal-phase-duration",
+              "temporal-phase-settle"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Failed Check Ids",
+          "type": "array"
+        },
+        "threshold_revision": {
+          "const": "reference-comparison-v2-frozen-1",
+          "default": "reference-comparison-v2-frozen-1",
+          "title": "Threshold Revision",
+          "type": "string"
+        },
+        "algorithm_revision": {
+          "const": "phase-correction-v2-localized-search-1",
+          "default": "phase-correction-v2-localized-search-1",
+          "title": "Algorithm Revision",
+          "type": "string"
+        },
+        "selection": {
+          "additionalProperties": true,
+          "title": "Selection",
+          "type": "object"
+        },
+        "authority": {
+          "const": "objective_evidence_proposal",
+          "default": "objective_evidence_proposal",
+          "title": "Authority",
+          "type": "string"
+        },
+        "reference_media_used_as_render_input": {
+          "const": false,
+          "default": false,
+          "title": "Reference Media Used As Render Input",
+          "type": "boolean"
+        },
+        "candidate_media_used_as_render_input": {
+          "const": false,
+          "default": false,
+          "title": "Candidate Media Used As Render Input",
+          "type": "boolean"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        }
+      },
+      "required": [
+        "spec_id",
+        "spec_sha256",
+        "source_sha256",
+        "reference_sha256",
+        "comparison_report_id",
+        "comparison_report_path",
+        "comparison_report_sha256",
+        "candidate_motion_report_id",
+        "candidate_motion_path",
+        "candidate_motion_sha256",
+        "prior_candidate_sha256",
+        "duration_frames",
+        "anchors",
+        "identity_ranges",
+        "protected_coupling_range",
+        "previous_phase",
+        "predicted_phase",
+        "predicted_metrics",
+        "predicted_checks",
+        "failed_check_ids",
+        "selection",
+        "provenance"
+      ],
+      "title": "ReferencePhaseCorrectionV2",
+      "type": "object"
+    },
+    "TimeWarpAnchorV2": {
+      "additionalProperties": false,
+      "description": "One monotonic output-time to source-time mapping sample.",
+      "properties": {
+        "output_frame": {
+          "minimum": 0,
+          "title": "Output Frame",
+          "type": "integer"
+        },
+        "source_frame": {
+          "minimum": 0,
+          "title": "Source Frame",
+          "type": "number"
+        }
+      },
+      "required": [
+        "output_frame",
+        "source_frame"
+      ],
+      "title": "TimeWarpAnchorV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Normal application-path proof for one explainable reconstruction pass.",
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "pass_kind": {
+      "enum": [
+        "timing_easing",
+        "continuous_tangents",
+        "moving_pivot_hypothesis",
+        "coupled_scale_rotation",
+        "phase_compensated_matrix"
+      ],
+      "title": "Pass Kind",
+      "type": "string"
+    },
+    "sequence": {
+      "enum": [
+        2,
+        3,
+        4,
+        5,
+        "5r"
+      ],
+      "title": "Sequence"
+    },
+    "spec_id": {
+      "title": "Spec Id",
+      "type": "string"
+    },
+    "spec_path": {
+      "title": "Spec Path",
+      "type": "string"
+    },
+    "spec_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Spec Sha256",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "reference_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Reference Sha256",
+      "type": "string"
+    },
+    "reference_media_used_as_input": {
+      "const": false,
+      "default": false,
+      "title": "Reference Media Used As Input",
+      "type": "boolean"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "project_root": {
+      "title": "Project Root",
+      "type": "string"
+    },
+    "project_manifest": {
+      "title": "Project Manifest",
+      "type": "string"
+    },
+    "asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "frozen_spec_evidence": {
+      "title": "Frozen Spec Evidence",
+      "type": "string"
+    },
+    "treatment_id": {
+      "title": "Treatment Id",
+      "type": "string"
+    },
+    "treatment_path": {
+      "title": "Treatment Path",
+      "type": "string"
+    },
+    "proposed_decision_graph": {
+      "title": "Proposed Decision Graph",
+      "type": "string"
+    },
+    "version_id": {
+      "title": "Version Id",
+      "type": "string"
+    },
+    "approved_edit_graph": {
+      "title": "Approved Edit Graph",
+      "type": "string"
+    },
+    "timeline_projection": {
+      "title": "Timeline Projection",
+      "type": "string"
+    },
+    "profiles": {
+      "additionalProperties": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Profiles",
+      "type": "object"
+    },
+    "editable_exports": {
+      "additionalProperties": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Editable Exports",
+      "type": "object"
+    },
+    "hypotheses": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ReconstructionHypothesisDecisionV2"
+      },
+      "title": "Hypotheses",
+      "type": "object"
+    },
+    "phase_correction": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReferencePhaseCorrectionV2"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "phase_correction_path": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Phase Correction Path"
+    },
+    "phase_correction_evidence": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Phase Correction Evidence"
+    },
+    "hidden_manual_steps": {
+      "items": {},
+      "title": "Hidden Manual Steps",
+      "type": "array"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "overall": {
+      "enum": [
+        "pass",
+        "fail"
+      ],
+      "title": "Overall",
+      "type": "string"
+    }
+  },
+  "required": [
+    "pass_kind",
+    "sequence",
+    "spec_id",
+    "spec_path",
+    "spec_sha256",
+    "source_sha256",
+    "reference_sha256",
+    "project_id",
+    "project_root",
+    "project_manifest",
+    "asset_id",
+    "frozen_spec_evidence",
+    "treatment_id",
+    "treatment_path",
+    "proposed_decision_graph",
+    "version_id",
+    "approved_edit_graph",
+    "timeline_projection",
+    "profiles",
+    "editable_exports",
+    "hypotheses",
+    "provenance",
+    "overall"
+  ],
+  "title": "ReferenceReconstructionPassReceiptV2",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/reference-reconstruction-pass-v2.schema.json"
+}

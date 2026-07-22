@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [[ "$#" -gt 0 ]]; then
+  exec "${ROOT}/scripts/aoa-editing" eval "$@"
+fi
+PYTHON="${AOA_EDITING_BOOTSTRAP_PYTHON:-python3.12}"
+EVAL_ROOT="$("${PYTHON}" "${ROOT}/scripts/resolve_home.py" evals)"
+OUTPUT="${EVAL_ROOT}/generic/manual-$(date -u +%Y%m%dT%H%M%SZ)"
+exec "${ROOT}/scripts/aoa-editing" eval generic --output "${OUTPUT}"

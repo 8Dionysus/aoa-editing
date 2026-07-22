@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PYTHON="${AOA_EDITING_BOOTSTRAP_PYTHON:-python3.12}"
+VENV="$("${PYTHON}" "${ROOT}/scripts/resolve_home.py" runtime)"
+CLI="${VENV}/bin/aoa-editing"
+
+if [[ ! -x "${CLI}" ]]; then
+  printf 'Runtime not found. Run ./scripts/bootstrap first.\n' >&2
+  exit 2
+fi
+exec "${CLI}" "$@"

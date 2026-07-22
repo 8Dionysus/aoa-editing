@@ -1,0 +1,631 @@
+{
+  "$defs": {
+    "CameraFrameMeasurement": {
+      "additionalProperties": false,
+      "properties": {
+        "frame": {
+          "minimum": 0,
+          "title": "Frame",
+          "type": "integer"
+        },
+        "time_seconds": {
+          "minimum": 0,
+          "title": "Time Seconds",
+          "type": "number"
+        },
+        "scale_relative_to_contain": {
+          "exclusiveMinimum": 0,
+          "title": "Scale Relative To Contain",
+          "type": "number"
+        },
+        "rotation_degrees": {
+          "title": "Rotation Degrees",
+          "type": "number"
+        },
+        "center_x": {
+          "title": "Center X",
+          "type": "number"
+        },
+        "center_y": {
+          "title": "Center Y",
+          "type": "number"
+        },
+        "match_count": {
+          "minimum": 0,
+          "title": "Match Count",
+          "type": "integer"
+        },
+        "inlier_count": {
+          "minimum": 0,
+          "title": "Inlier Count",
+          "type": "integer"
+        },
+        "inlier_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Inlier Ratio",
+          "type": "number"
+        },
+        "reprojection_rmse": {
+          "minimum": 0,
+          "title": "Reprojection Rmse",
+          "type": "number"
+        }
+      },
+      "required": [
+        "frame",
+        "time_seconds",
+        "scale_relative_to_contain",
+        "rotation_degrees",
+        "center_x",
+        "center_y",
+        "match_count",
+        "inlier_count",
+        "inlier_ratio",
+        "reprojection_rmse"
+      ],
+      "title": "CameraFrameMeasurement",
+      "type": "object"
+    },
+    "FrameRate": {
+      "additionalProperties": false,
+      "properties": {
+        "numerator": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        }
+      },
+      "title": "FrameRate",
+      "type": "object"
+    },
+    "MediaMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_seconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Seconds"
+        },
+        "width": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Width"
+        },
+        "height": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Height"
+        },
+        "frame_rate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameRate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "sample_rate": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sample Rate"
+        },
+        "channels": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channels"
+        },
+        "format_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Format Name"
+        },
+        "video_codec": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Video Codec"
+        },
+        "audio_codec": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Audio Codec"
+        },
+        "pixel_format": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pixel Format"
+        },
+        "color_space": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Color Space"
+        },
+        "has_video": {
+          "default": false,
+          "title": "Has Video",
+          "type": "boolean"
+        },
+        "has_audio": {
+          "default": false,
+          "title": "Has Audio",
+          "type": "boolean"
+        }
+      },
+      "title": "MediaMetadata",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ReferenceAudioStructure": {
+      "additionalProperties": false,
+      "properties": {
+        "has_audio_stream": {
+          "title": "Has Audio Stream",
+          "type": "boolean"
+        },
+        "codec": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Codec"
+        },
+        "sample_rate": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sample Rate"
+        },
+        "channels": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channels"
+        },
+        "mean_volume_db": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mean Volume Db"
+        },
+        "max_volume_db": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Volume Db"
+        },
+        "silent_for_full_duration": {
+          "title": "Silent For Full Duration",
+          "type": "boolean"
+        },
+        "silence_intervals": {
+          "items": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object"
+          },
+          "title": "Silence Intervals",
+          "type": "array"
+        }
+      },
+      "required": [
+        "has_audio_stream",
+        "silent_for_full_duration"
+      ],
+      "title": "ReferenceAudioStructure",
+      "type": "object"
+    },
+    "ReferenceCameraMotion": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "const": "single_source_similarity_transform",
+          "title": "Model",
+          "type": "string"
+        },
+        "fit_mode": {
+          "const": "contain",
+          "default": "contain",
+          "title": "Fit Mode",
+          "type": "string"
+        },
+        "frame_count": {
+          "exclusiveMinimum": 0,
+          "title": "Frame Count",
+          "type": "integer"
+        },
+        "frame_rate": {
+          "$ref": "#/$defs/FrameRate"
+        },
+        "width": {
+          "exclusiveMinimum": 0,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "exclusiveMinimum": 0,
+          "title": "Height",
+          "type": "integer"
+        },
+        "curve_hint": {
+          "enum": [
+            "linear",
+            "ease_in",
+            "ease_out",
+            "ease_in_out",
+            "hold",
+            "underdetermined"
+          ],
+          "title": "Curve Hint",
+          "type": "string"
+        },
+        "measurements": {
+          "items": {
+            "$ref": "#/$defs/CameraFrameMeasurement"
+          },
+          "title": "Measurements",
+          "type": "array"
+        }
+      },
+      "required": [
+        "model",
+        "frame_count",
+        "frame_rate",
+        "width",
+        "height",
+        "curve_hint",
+        "measurements"
+      ],
+      "title": "ReferenceCameraMotion",
+      "type": "object"
+    },
+    "ReferenceComposition": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "const": "single_source_similarity_transform",
+          "title": "Model",
+          "type": "string"
+        },
+        "visual_source_count": {
+          "const": 1,
+          "default": 1,
+          "title": "Visual Source Count",
+          "type": "integer"
+        },
+        "cut_count": {
+          "minimum": 0,
+          "title": "Cut Count",
+          "type": "integer"
+        },
+        "independent_layer_motion_observed": {
+          "title": "Independent Layer Motion Observed",
+          "type": "boolean"
+        },
+        "masks_observed": {
+          "title": "Masks Observed",
+          "type": "boolean"
+        },
+        "background": {
+          "title": "Background",
+          "type": "string"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "model",
+        "cut_count",
+        "independent_layer_motion_observed",
+        "masks_observed",
+        "background",
+        "notes"
+      ],
+      "title": "ReferenceComposition",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "readiness_revision": {
+      "title": "Readiness Revision",
+      "type": "string"
+    },
+    "readiness_receipt_path": {
+      "title": "Readiness Receipt Path",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "reference_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Reference Sha256",
+      "type": "string"
+    },
+    "reference_metadata": {
+      "$ref": "#/$defs/MediaMetadata"
+    },
+    "duration_frames": {
+      "exclusiveMinimum": 0,
+      "title": "Duration Frames",
+      "type": "integer"
+    },
+    "duration_seconds": {
+      "exclusiveMinimum": 0,
+      "title": "Duration Seconds",
+      "type": "number"
+    },
+    "camera_motion": {
+      "$ref": "#/$defs/ReferenceCameraMotion"
+    },
+    "composition": {
+      "$ref": "#/$defs/ReferenceComposition"
+    },
+    "audio": {
+      "$ref": "#/$defs/ReferenceAudioStructure"
+    },
+    "observed_effects": {
+      "additionalProperties": true,
+      "title": "Observed Effects",
+      "type": "object"
+    },
+    "uncertainties": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Uncertainties",
+      "type": "array"
+    },
+    "alternative_explanations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Alternative Explanations",
+      "type": "array"
+    },
+    "comparison_criteria": {
+      "additionalProperties": true,
+      "title": "Comparison Criteria",
+      "type": "object"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "frozen_before_first_render": {
+      "const": true,
+      "default": true,
+      "title": "Frozen Before First Render",
+      "type": "boolean"
+    },
+    "reference_media_allowed_in_render": {
+      "const": false,
+      "default": false,
+      "title": "Reference Media Allowed In Render",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "readiness_revision",
+    "readiness_receipt_path",
+    "source_sha256",
+    "reference_sha256",
+    "reference_metadata",
+    "duration_frames",
+    "duration_seconds",
+    "camera_motion",
+    "composition",
+    "audio",
+    "observed_effects",
+    "uncertainties",
+    "alternative_explanations",
+    "comparison_criteria",
+    "provenance"
+  ],
+  "title": "ReferenceReconstructionSpec",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/reference-spec.schema.json"
+}

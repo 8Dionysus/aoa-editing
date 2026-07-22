@@ -1,0 +1,1301 @@
+{
+  "$defs": {
+    "AdjustPivotCurveCorrectionV2": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "adjust_pivot_curve",
+          "default": "adjust_pivot_curve",
+          "title": "Kind",
+          "type": "string"
+        },
+        "delta_x": {
+          "maximum": 1,
+          "minimum": -1,
+          "title": "Delta X",
+          "type": "number"
+        },
+        "delta_y": {
+          "maximum": 1,
+          "minimum": -1,
+          "title": "Delta Y",
+          "type": "number"
+        },
+        "affected_range": {
+          "$ref": "#/$defs/FrameRange"
+        }
+      },
+      "required": [
+        "delta_x",
+        "delta_y",
+        "affected_range"
+      ],
+      "title": "AdjustPivotCurveCorrectionV2",
+      "type": "object"
+    },
+    "AdjustRotationCouplingCorrectionV2": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "adjust_rotation_coupling",
+          "default": "adjust_rotation_coupling",
+          "title": "Kind",
+          "type": "string"
+        },
+        "lag_delta_frames": {
+          "maximum": 12,
+          "minimum": -12,
+          "title": "Lag Delta Frames",
+          "type": "integer"
+        },
+        "smoothing_strength": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Smoothing Strength",
+          "type": "number"
+        },
+        "affected_range": {
+          "$ref": "#/$defs/FrameRange"
+        }
+      },
+      "required": [
+        "lag_delta_frames",
+        "smoothing_strength",
+        "affected_range"
+      ],
+      "title": "AdjustRotationCouplingCorrectionV2",
+      "type": "object"
+    },
+    "AdjustTangentCorrectionV2": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "adjust_tangent",
+          "default": "adjust_tangent",
+          "title": "Kind",
+          "type": "string"
+        },
+        "channel": {
+          "enum": [
+            "position",
+            "scale",
+            "rotation",
+            "matrix"
+          ],
+          "title": "Channel",
+          "type": "string"
+        },
+        "anchor_frame": {
+          "minimum": 0,
+          "title": "Anchor Frame",
+          "type": "integer"
+        },
+        "strength": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Strength",
+          "type": "number"
+        },
+        "affected_range": {
+          "$ref": "#/$defs/FrameRange"
+        }
+      },
+      "required": [
+        "channel",
+        "anchor_frame",
+        "strength",
+        "affected_range"
+      ],
+      "title": "AdjustTangentCorrectionV2",
+      "type": "object"
+    },
+    "ChangeEasingCorrectionV2": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "change_easing",
+          "default": "change_easing",
+          "title": "Kind",
+          "type": "string"
+        },
+        "channel": {
+          "enum": [
+            "all",
+            "position",
+            "scale",
+            "rotation",
+            "matrix"
+          ],
+          "title": "Channel",
+          "type": "string"
+        },
+        "easing": {
+          "enum": [
+            "linear",
+            "ease_in",
+            "ease_out",
+            "ease_in_out"
+          ],
+          "title": "Easing",
+          "type": "string"
+        },
+        "strength": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Strength",
+          "type": "number"
+        },
+        "affected_range": {
+          "$ref": "#/$defs/FrameRange"
+        }
+      },
+      "required": [
+        "channel",
+        "easing",
+        "strength",
+        "affected_range"
+      ],
+      "title": "ChangeEasingCorrectionV2",
+      "type": "object"
+    },
+    "FrameRange": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "duration": {
+          "exclusiveMinimum": 0,
+          "title": "Duration",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "duration"
+      ],
+      "title": "FrameRange",
+      "type": "object"
+    },
+    "FrameRate": {
+      "additionalProperties": false,
+      "properties": {
+        "numerator": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        }
+      },
+      "title": "FrameRate",
+      "type": "object"
+    },
+    "MotionCorrectionDiffV2": {
+      "additionalProperties": false,
+      "description": "Compact typed diff; canonical patch value is generated only on approval.",
+      "properties": {
+        "target_path": {
+          "pattern": "^/",
+          "title": "Target Path",
+          "type": "string"
+        },
+        "before_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Before Sha256",
+          "type": "string"
+        },
+        "after_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "After Sha256",
+          "type": "string"
+        },
+        "affected_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "changed_frame_count": {
+          "minimum": 0,
+          "title": "Changed Frame Count",
+          "type": "integer"
+        },
+        "maximum_matrix_coefficient_delta": {
+          "minimum": 0,
+          "title": "Maximum Matrix Coefficient Delta",
+          "type": "number"
+        },
+        "endpoint_preserved": {
+          "title": "Endpoint Preserved",
+          "type": "boolean"
+        },
+        "operation_kinds": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Operation Kinds",
+          "type": "array"
+        }
+      },
+      "required": [
+        "target_path",
+        "before_sha256",
+        "after_sha256",
+        "affected_range",
+        "changed_frame_count",
+        "maximum_matrix_coefficient_delta",
+        "endpoint_preserved",
+        "operation_kinds"
+      ],
+      "title": "MotionCorrectionDiffV2",
+      "type": "object"
+    },
+    "MotionCorrectionProposalItemV2": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "operation": {
+          "discriminator": {
+            "mapping": {
+              "adjust_pivot_curve": "#/$defs/AdjustPivotCurveCorrectionV2",
+              "adjust_rotation_coupling": "#/$defs/AdjustRotationCouplingCorrectionV2",
+              "adjust_tangent": "#/$defs/AdjustTangentCorrectionV2",
+              "change_easing": "#/$defs/ChangeEasingCorrectionV2",
+              "move_phase_boundary": "#/$defs/MovePhaseBoundaryCorrectionV2",
+              "retime_settle": "#/$defs/RetimeSettleCorrectionV2"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/AdjustTangentCorrectionV2"
+            },
+            {
+              "$ref": "#/$defs/MovePhaseBoundaryCorrectionV2"
+            },
+            {
+              "$ref": "#/$defs/RetimeSettleCorrectionV2"
+            },
+            {
+              "$ref": "#/$defs/AdjustPivotCurveCorrectionV2"
+            },
+            {
+              "$ref": "#/$defs/AdjustRotationCouplingCorrectionV2"
+            },
+            {
+              "$ref": "#/$defs/ChangeEasingCorrectionV2"
+            }
+          ],
+          "title": "Operation"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "executable": {
+          "title": "Executable",
+          "type": "boolean"
+        },
+        "blockers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blockers",
+          "type": "array"
+        },
+        "diff": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MotionCorrectionDiffV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "operation",
+        "rationale",
+        "evidence_refs",
+        "executable"
+      ],
+      "title": "MotionCorrectionProposalItemV2",
+      "type": "object"
+    },
+    "MotionCorrectionProposalSetV2": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "2.0.0",
+          "default": "2.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "base_version_id": {
+          "title": "Base Version Id",
+          "type": "string"
+        },
+        "target_effect_path": {
+          "pattern": "^/",
+          "title": "Target Effect Path",
+          "type": "string"
+        },
+        "base_effect_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Base Effect Sha256",
+          "type": "string"
+        },
+        "natural_language_command": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Natural Language Command"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/MotionCorrectionProposalItemV2"
+          },
+          "minItems": 1,
+          "title": "Items",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "requires_confirmation": {
+          "const": true,
+          "default": true,
+          "title": "Requires Confirmation",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "project_id",
+        "workspace_id",
+        "base_version_id",
+        "target_effect_path",
+        "base_effect_sha256",
+        "items",
+        "provenance"
+      ],
+      "title": "MotionCorrectionProposalSetV2",
+      "type": "object"
+    },
+    "MotionCorrectionReviewDecisionV2": {
+      "additionalProperties": false,
+      "properties": {
+        "correction_id": {
+          "title": "Correction Id",
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "approve",
+            "reject"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "correction_id",
+        "decision",
+        "rationale"
+      ],
+      "title": "MotionCorrectionReviewDecisionV2",
+      "type": "object"
+    },
+    "MotionCorrectionReviewV2": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "2.0.0",
+          "default": "2.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "proposal_id": {
+          "title": "Proposal Id",
+          "type": "string"
+        },
+        "base_version_id": {
+          "title": "Base Version Id",
+          "type": "string"
+        },
+        "decisions": {
+          "items": {
+            "$ref": "#/$defs/MotionCorrectionReviewDecisionV2"
+          },
+          "minItems": 1,
+          "title": "Decisions",
+          "type": "array"
+        },
+        "actor": {
+          "const": "human-editor",
+          "default": "human-editor",
+          "title": "Actor",
+          "type": "string"
+        },
+        "applied_patch_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Applied Patch Id"
+        },
+        "created_version_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Created Version Id"
+        },
+        "human_evidence_id": {
+          "title": "Human Evidence Id",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "applied",
+            "rejected"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        }
+      },
+      "required": [
+        "project_id",
+        "workspace_id",
+        "proposal_id",
+        "base_version_id",
+        "decisions",
+        "human_evidence_id",
+        "outcome",
+        "provenance"
+      ],
+      "title": "MotionCorrectionReviewV2",
+      "type": "object"
+    },
+    "MovePhaseBoundaryCorrectionV2": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "move_phase_boundary",
+          "default": "move_phase_boundary",
+          "title": "Kind",
+          "type": "string"
+        },
+        "boundary": {
+          "enum": [
+            "onset",
+            "twist_start",
+            "twist_peak",
+            "twist_end",
+            "settle"
+          ],
+          "title": "Boundary",
+          "type": "string"
+        },
+        "original_frame": {
+          "minimum": 0,
+          "title": "Original Frame",
+          "type": "integer"
+        },
+        "delta_frames": {
+          "maximum": 24,
+          "minimum": -24,
+          "title": "Delta Frames",
+          "type": "integer"
+        },
+        "affected_range": {
+          "$ref": "#/$defs/FrameRange"
+        }
+      },
+      "required": [
+        "boundary",
+        "original_frame",
+        "delta_frames",
+        "affected_range"
+      ],
+      "title": "MovePhaseBoundaryCorrectionV2",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ReferenceCurveSampleV2": {
+      "additionalProperties": false,
+      "properties": {
+        "center_x": {
+          "title": "Center X",
+          "type": "number"
+        },
+        "center_y": {
+          "title": "Center Y",
+          "type": "number"
+        },
+        "scale": {
+          "exclusiveMinimum": 0,
+          "title": "Scale",
+          "type": "number"
+        },
+        "rotation_degrees": {
+          "title": "Rotation Degrees",
+          "type": "number"
+        },
+        "velocity": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Velocity",
+          "type": "object"
+        },
+        "acceleration": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Acceleration",
+          "type": "object"
+        },
+        "jerk": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Jerk",
+          "type": "object"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "residual_flow_mean": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Residual Flow Mean"
+        },
+        "uncertainty": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Uncertainty",
+          "type": "array"
+        }
+      },
+      "required": [
+        "center_x",
+        "center_y",
+        "scale",
+        "rotation_degrees",
+        "velocity",
+        "acceleration",
+        "jerk",
+        "confidence"
+      ],
+      "title": "ReferenceCurveSampleV2",
+      "type": "object"
+    },
+    "ReferenceMotionInterpretationV2": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "supported",
+            "ambiguous",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "editable_operation_kinds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Editable Operation Kinds",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "status",
+        "explanation",
+        "confidence",
+        "evidence_refs"
+      ],
+      "title": "ReferenceMotionInterpretationV2",
+      "type": "object"
+    },
+    "ReferenceWorkbenchSampleV2": {
+      "additionalProperties": false,
+      "properties": {
+        "frame": {
+          "minimum": 0,
+          "title": "Frame",
+          "type": "integer"
+        },
+        "time_seconds": {
+          "minimum": 0,
+          "title": "Time Seconds",
+          "type": "number"
+        },
+        "reference": {
+          "$ref": "#/$defs/ReferenceCurveSampleV2"
+        },
+        "candidate": {
+          "$ref": "#/$defs/ReferenceCurveSampleV2"
+        }
+      },
+      "required": [
+        "frame",
+        "time_seconds",
+        "reference",
+        "candidate"
+      ],
+      "title": "ReferenceWorkbenchSampleV2",
+      "type": "object"
+    },
+    "ReferenceWorkspaceArtifactV2": {
+      "additionalProperties": false,
+      "description": "Hash-addressed workbench artifact that is never a render input.",
+      "properties": {
+        "role": {
+          "pattern": "^[a-z0-9][a-z0-9_.-]*$",
+          "title": "Role",
+          "type": "string"
+        },
+        "scope": {
+          "enum": [
+            "editing_home",
+            "project",
+            "reference_binding"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "relative_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Relative Path"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "media_type": {
+          "minLength": 1,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "authority": {
+          "enum": [
+            "reference_evidence",
+            "candidate_render",
+            "comparison_diagnostic"
+          ],
+          "title": "Authority",
+          "type": "string"
+        },
+        "reference_derived": {
+          "title": "Reference Derived",
+          "type": "boolean"
+        },
+        "evaluation_only": {
+          "const": true,
+          "default": true,
+          "title": "Evaluation Only",
+          "type": "boolean"
+        },
+        "allowed_as_render_input": {
+          "const": false,
+          "default": false,
+          "title": "Allowed As Render Input",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "role",
+        "scope",
+        "sha256",
+        "media_type",
+        "authority",
+        "reference_derived"
+      ],
+      "title": "ReferenceWorkspaceArtifactV2",
+      "type": "object"
+    },
+    "ReferenceWorkspaceRegistrationV2": {
+      "additionalProperties": false,
+      "description": "Immutable project-local registration of one evidence-backed comparison.",
+      "properties": {
+        "schema_version": {
+          "const": "2.0.0",
+          "default": "2.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "base_version_id": {
+          "title": "Base Version Id",
+          "type": "string"
+        },
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "target_effect_path": {
+          "pattern": "^/",
+          "title": "Target Effect Path",
+          "type": "string"
+        },
+        "target_effect_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Target Effect Sha256",
+          "type": "string"
+        },
+        "baseline_evidence_id": {
+          "title": "Baseline Evidence Id",
+          "type": "string"
+        },
+        "study_id": {
+          "title": "Study Id",
+          "type": "string"
+        },
+        "study_path": {
+          "title": "Study Path",
+          "type": "string"
+        },
+        "study_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Study Sha256",
+          "type": "string"
+        },
+        "reference_evidence_id": {
+          "title": "Reference Evidence Id",
+          "type": "string"
+        },
+        "reference_evidence_path": {
+          "title": "Reference Evidence Path",
+          "type": "string"
+        },
+        "reference_evidence_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Reference Evidence Sha256",
+          "type": "string"
+        },
+        "spec_id": {
+          "title": "Spec Id",
+          "type": "string"
+        },
+        "spec_path": {
+          "title": "Spec Path",
+          "type": "string"
+        },
+        "spec_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Spec Sha256",
+          "type": "string"
+        },
+        "comparison_id": {
+          "title": "Comparison Id",
+          "type": "string"
+        },
+        "comparison_path": {
+          "title": "Comparison Path",
+          "type": "string"
+        },
+        "comparison_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Comparison Sha256",
+          "type": "string"
+        },
+        "candidate_motion_id": {
+          "title": "Candidate Motion Id",
+          "type": "string"
+        },
+        "candidate_motion_path": {
+          "title": "Candidate Motion Path",
+          "type": "string"
+        },
+        "candidate_motion_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Candidate Motion Sha256",
+          "type": "string"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "reference_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Reference Sha256",
+          "type": "string"
+        },
+        "candidate_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Candidate Sha256",
+          "type": "string"
+        },
+        "readiness_revision": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Readiness Revision",
+          "type": "string"
+        },
+        "frame_count": {
+          "exclusiveMinimum": 1,
+          "title": "Frame Count",
+          "type": "integer"
+        },
+        "frame_rate": {
+          "$ref": "#/$defs/FrameRate"
+        },
+        "width": {
+          "exclusiveMinimum": 0,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "exclusiveMinimum": 0,
+          "title": "Height",
+          "type": "integer"
+        },
+        "phase_markers": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Phase Markers",
+          "type": "object"
+        },
+        "pivot_identifiable": {
+          "title": "Pivot Identifiable",
+          "type": "boolean"
+        },
+        "artifacts": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ReferenceWorkspaceArtifactV2"
+          },
+          "title": "Artifacts",
+          "type": "object"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "reference_media_role": {
+          "const": "analysis_and_comparison_only",
+          "default": "analysis_and_comparison_only",
+          "title": "Reference Media Role",
+          "type": "string"
+        },
+        "reference_media_allowed_in_render": {
+          "const": false,
+          "default": false,
+          "title": "Reference Media Allowed In Render",
+          "type": "boolean"
+        },
+        "candidate_media_allowed_as_source": {
+          "const": false,
+          "default": false,
+          "title": "Candidate Media Allowed As Source",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "project_id",
+        "base_version_id",
+        "asset_id",
+        "target_effect_path",
+        "target_effect_sha256",
+        "baseline_evidence_id",
+        "study_id",
+        "study_path",
+        "study_sha256",
+        "reference_evidence_id",
+        "reference_evidence_path",
+        "reference_evidence_sha256",
+        "spec_id",
+        "spec_path",
+        "spec_sha256",
+        "comparison_id",
+        "comparison_path",
+        "comparison_sha256",
+        "candidate_motion_id",
+        "candidate_motion_path",
+        "candidate_motion_sha256",
+        "source_sha256",
+        "reference_sha256",
+        "candidate_sha256",
+        "readiness_revision",
+        "frame_count",
+        "frame_rate",
+        "width",
+        "height",
+        "phase_markers",
+        "pivot_identifiable",
+        "artifacts",
+        "provenance"
+      ],
+      "title": "ReferenceWorkspaceRegistrationV2",
+      "type": "object"
+    },
+    "ReferenceWorkspaceVersionV2": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "current": {
+          "title": "Current",
+          "type": "boolean"
+        },
+        "preview_available": {
+          "title": "Preview Available",
+          "type": "boolean"
+        },
+        "final_available": {
+          "title": "Final Available",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "message",
+        "created_at",
+        "current",
+        "preview_available",
+        "final_available"
+      ],
+      "title": "ReferenceWorkspaceVersionV2",
+      "type": "object"
+    },
+    "RetimeSettleCorrectionV2": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "retime_settle",
+          "default": "retime_settle",
+          "title": "Kind",
+          "type": "string"
+        },
+        "direction": {
+          "enum": [
+            "earlier",
+            "later"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "strength": {
+          "exclusiveMinimum": 0,
+          "maximum": 0.75,
+          "title": "Strength",
+          "type": "number"
+        },
+        "affected_range": {
+          "$ref": "#/$defs/FrameRange"
+        }
+      },
+      "required": [
+        "direction",
+        "strength",
+        "affected_range"
+      ],
+      "title": "RetimeSettleCorrectionV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "workspace": {
+      "$ref": "#/$defs/ReferenceWorkspaceRegistrationV2"
+    },
+    "samples": {
+      "items": {
+        "$ref": "#/$defs/ReferenceWorkbenchSampleV2"
+      },
+      "title": "Samples",
+      "type": "array"
+    },
+    "interpretations": {
+      "items": {
+        "$ref": "#/$defs/ReferenceMotionInterpretationV2"
+      },
+      "title": "Interpretations",
+      "type": "array"
+    },
+    "versions": {
+      "items": {
+        "$ref": "#/$defs/ReferenceWorkspaceVersionV2"
+      },
+      "title": "Versions",
+      "type": "array"
+    },
+    "proposals": {
+      "items": {
+        "$ref": "#/$defs/MotionCorrectionProposalSetV2"
+      },
+      "title": "Proposals",
+      "type": "array"
+    },
+    "reviews": {
+      "items": {
+        "$ref": "#/$defs/MotionCorrectionReviewV2"
+      },
+      "title": "Reviews",
+      "type": "array"
+    },
+    "human_correction_evidence_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Human Correction Evidence Ids",
+      "type": "array"
+    },
+    "objective_summary": {
+      "additionalProperties": true,
+      "title": "Objective Summary",
+      "type": "object"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "workspace",
+    "samples",
+    "interpretations",
+    "versions",
+    "proposals",
+    "reviews",
+    "human_correction_evidence_ids",
+    "objective_summary"
+  ],
+  "title": "ReferenceWorkbenchBundleV2",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/reference-workbench-v2.schema.json"
+}

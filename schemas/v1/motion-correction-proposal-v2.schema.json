@@ -1,0 +1,560 @@
+{
+  "$defs": {
+    "AdjustPivotCurveCorrectionV2": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "adjust_pivot_curve",
+          "default": "adjust_pivot_curve",
+          "title": "Kind",
+          "type": "string"
+        },
+        "delta_x": {
+          "maximum": 1,
+          "minimum": -1,
+          "title": "Delta X",
+          "type": "number"
+        },
+        "delta_y": {
+          "maximum": 1,
+          "minimum": -1,
+          "title": "Delta Y",
+          "type": "number"
+        },
+        "affected_range": {
+          "$ref": "#/$defs/FrameRange"
+        }
+      },
+      "required": [
+        "delta_x",
+        "delta_y",
+        "affected_range"
+      ],
+      "title": "AdjustPivotCurveCorrectionV2",
+      "type": "object"
+    },
+    "AdjustRotationCouplingCorrectionV2": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "adjust_rotation_coupling",
+          "default": "adjust_rotation_coupling",
+          "title": "Kind",
+          "type": "string"
+        },
+        "lag_delta_frames": {
+          "maximum": 12,
+          "minimum": -12,
+          "title": "Lag Delta Frames",
+          "type": "integer"
+        },
+        "smoothing_strength": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Smoothing Strength",
+          "type": "number"
+        },
+        "affected_range": {
+          "$ref": "#/$defs/FrameRange"
+        }
+      },
+      "required": [
+        "lag_delta_frames",
+        "smoothing_strength",
+        "affected_range"
+      ],
+      "title": "AdjustRotationCouplingCorrectionV2",
+      "type": "object"
+    },
+    "AdjustTangentCorrectionV2": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "adjust_tangent",
+          "default": "adjust_tangent",
+          "title": "Kind",
+          "type": "string"
+        },
+        "channel": {
+          "enum": [
+            "position",
+            "scale",
+            "rotation",
+            "matrix"
+          ],
+          "title": "Channel",
+          "type": "string"
+        },
+        "anchor_frame": {
+          "minimum": 0,
+          "title": "Anchor Frame",
+          "type": "integer"
+        },
+        "strength": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Strength",
+          "type": "number"
+        },
+        "affected_range": {
+          "$ref": "#/$defs/FrameRange"
+        }
+      },
+      "required": [
+        "channel",
+        "anchor_frame",
+        "strength",
+        "affected_range"
+      ],
+      "title": "AdjustTangentCorrectionV2",
+      "type": "object"
+    },
+    "ChangeEasingCorrectionV2": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "change_easing",
+          "default": "change_easing",
+          "title": "Kind",
+          "type": "string"
+        },
+        "channel": {
+          "enum": [
+            "all",
+            "position",
+            "scale",
+            "rotation",
+            "matrix"
+          ],
+          "title": "Channel",
+          "type": "string"
+        },
+        "easing": {
+          "enum": [
+            "linear",
+            "ease_in",
+            "ease_out",
+            "ease_in_out"
+          ],
+          "title": "Easing",
+          "type": "string"
+        },
+        "strength": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Strength",
+          "type": "number"
+        },
+        "affected_range": {
+          "$ref": "#/$defs/FrameRange"
+        }
+      },
+      "required": [
+        "channel",
+        "easing",
+        "strength",
+        "affected_range"
+      ],
+      "title": "ChangeEasingCorrectionV2",
+      "type": "object"
+    },
+    "FrameRange": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "duration": {
+          "exclusiveMinimum": 0,
+          "title": "Duration",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "duration"
+      ],
+      "title": "FrameRange",
+      "type": "object"
+    },
+    "MotionCorrectionDiffV2": {
+      "additionalProperties": false,
+      "description": "Compact typed diff; canonical patch value is generated only on approval.",
+      "properties": {
+        "target_path": {
+          "pattern": "^/",
+          "title": "Target Path",
+          "type": "string"
+        },
+        "before_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Before Sha256",
+          "type": "string"
+        },
+        "after_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "After Sha256",
+          "type": "string"
+        },
+        "affected_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "changed_frame_count": {
+          "minimum": 0,
+          "title": "Changed Frame Count",
+          "type": "integer"
+        },
+        "maximum_matrix_coefficient_delta": {
+          "minimum": 0,
+          "title": "Maximum Matrix Coefficient Delta",
+          "type": "number"
+        },
+        "endpoint_preserved": {
+          "title": "Endpoint Preserved",
+          "type": "boolean"
+        },
+        "operation_kinds": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Operation Kinds",
+          "type": "array"
+        }
+      },
+      "required": [
+        "target_path",
+        "before_sha256",
+        "after_sha256",
+        "affected_range",
+        "changed_frame_count",
+        "maximum_matrix_coefficient_delta",
+        "endpoint_preserved",
+        "operation_kinds"
+      ],
+      "title": "MotionCorrectionDiffV2",
+      "type": "object"
+    },
+    "MotionCorrectionProposalItemV2": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "operation": {
+          "discriminator": {
+            "mapping": {
+              "adjust_pivot_curve": "#/$defs/AdjustPivotCurveCorrectionV2",
+              "adjust_rotation_coupling": "#/$defs/AdjustRotationCouplingCorrectionV2",
+              "adjust_tangent": "#/$defs/AdjustTangentCorrectionV2",
+              "change_easing": "#/$defs/ChangeEasingCorrectionV2",
+              "move_phase_boundary": "#/$defs/MovePhaseBoundaryCorrectionV2",
+              "retime_settle": "#/$defs/RetimeSettleCorrectionV2"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/AdjustTangentCorrectionV2"
+            },
+            {
+              "$ref": "#/$defs/MovePhaseBoundaryCorrectionV2"
+            },
+            {
+              "$ref": "#/$defs/RetimeSettleCorrectionV2"
+            },
+            {
+              "$ref": "#/$defs/AdjustPivotCurveCorrectionV2"
+            },
+            {
+              "$ref": "#/$defs/AdjustRotationCouplingCorrectionV2"
+            },
+            {
+              "$ref": "#/$defs/ChangeEasingCorrectionV2"
+            }
+          ],
+          "title": "Operation"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "executable": {
+          "title": "Executable",
+          "type": "boolean"
+        },
+        "blockers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blockers",
+          "type": "array"
+        },
+        "diff": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MotionCorrectionDiffV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "operation",
+        "rationale",
+        "evidence_refs",
+        "executable"
+      ],
+      "title": "MotionCorrectionProposalItemV2",
+      "type": "object"
+    },
+    "MovePhaseBoundaryCorrectionV2": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "move_phase_boundary",
+          "default": "move_phase_boundary",
+          "title": "Kind",
+          "type": "string"
+        },
+        "boundary": {
+          "enum": [
+            "onset",
+            "twist_start",
+            "twist_peak",
+            "twist_end",
+            "settle"
+          ],
+          "title": "Boundary",
+          "type": "string"
+        },
+        "original_frame": {
+          "minimum": 0,
+          "title": "Original Frame",
+          "type": "integer"
+        },
+        "delta_frames": {
+          "maximum": 24,
+          "minimum": -24,
+          "title": "Delta Frames",
+          "type": "integer"
+        },
+        "affected_range": {
+          "$ref": "#/$defs/FrameRange"
+        }
+      },
+      "required": [
+        "boundary",
+        "original_frame",
+        "delta_frames",
+        "affected_range"
+      ],
+      "title": "MovePhaseBoundaryCorrectionV2",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "RetimeSettleCorrectionV2": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "retime_settle",
+          "default": "retime_settle",
+          "title": "Kind",
+          "type": "string"
+        },
+        "direction": {
+          "enum": [
+            "earlier",
+            "later"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "strength": {
+          "exclusiveMinimum": 0,
+          "maximum": 0.75,
+          "title": "Strength",
+          "type": "number"
+        },
+        "affected_range": {
+          "$ref": "#/$defs/FrameRange"
+        }
+      },
+      "required": [
+        "direction",
+        "strength",
+        "affected_range"
+      ],
+      "title": "RetimeSettleCorrectionV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "workspace_id": {
+      "title": "Workspace Id",
+      "type": "string"
+    },
+    "base_version_id": {
+      "title": "Base Version Id",
+      "type": "string"
+    },
+    "target_effect_path": {
+      "pattern": "^/",
+      "title": "Target Effect Path",
+      "type": "string"
+    },
+    "base_effect_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Base Effect Sha256",
+      "type": "string"
+    },
+    "natural_language_command": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Natural Language Command"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/MotionCorrectionProposalItemV2"
+      },
+      "minItems": 1,
+      "title": "Items",
+      "type": "array"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "requires_confirmation": {
+      "const": true,
+      "default": true,
+      "title": "Requires Confirmation",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "project_id",
+    "workspace_id",
+    "base_version_id",
+    "target_effect_path",
+    "base_effect_sha256",
+    "items",
+    "provenance"
+  ],
+  "title": "MotionCorrectionProposalSetV2",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/motion-correction-proposal-v2.schema.json"
+}

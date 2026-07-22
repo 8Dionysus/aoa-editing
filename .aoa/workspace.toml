@@ -1,0 +1,11 @@
+schema_version = 1
+
+[layout]
+federation_roots = ["{workspace_parent}", "{workspace_parent}/../.."]
+
+[roots]
+external = ["~/src"]
+
+[repos.aoa-editing]
+role = "local_first_media_owner"
+notes = "Owns evidence-backed AI editing contracts and keeps product runtime/project data repo-local and untracked."

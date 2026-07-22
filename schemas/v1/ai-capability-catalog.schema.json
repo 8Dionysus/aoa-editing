@@ -1,0 +1,299 @@
+{
+  "$defs": {
+    "AICapabilityDeclaration": {
+      "additionalProperties": false,
+      "description": "Tracked, path-free product declaration for one optional AI capability.",
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "capability_id": {
+          "pattern": "^(speech|vision|editorial)\\.[a-z0-9][a-z0-9-]*$",
+          "title": "Capability Id",
+          "type": "string"
+        },
+        "alias": {
+          "pattern": "^local-ai://(speech|vision|editorial)/[a-z0-9][a-z0-9-]*/default$",
+          "title": "Alias",
+          "type": "string"
+        },
+        "input_schema": {
+          "additionalProperties": true,
+          "title": "Input Schema",
+          "type": "object"
+        },
+        "output_schema": {
+          "additionalProperties": true,
+          "title": "Output Schema",
+          "type": "object"
+        },
+        "required": {
+          "title": "Required",
+          "type": "boolean"
+        },
+        "privacy_class": {
+          "enum": [
+            "local-media-sensitive",
+            "project-confidential",
+            "non-sensitive"
+          ],
+          "title": "Privacy Class",
+          "type": "string"
+        },
+        "authority_class": {
+          "enum": [
+            "evidence",
+            "proposal"
+          ],
+          "title": "Authority Class",
+          "type": "string"
+        },
+        "latency": {
+          "$ref": "#/$defs/AILatencyExpectation"
+        },
+        "temporal_precision": {
+          "enum": [
+            "none",
+            "sample",
+            "frame",
+            "millisecond",
+            "segment"
+          ],
+          "title": "Temporal Precision",
+          "type": "string"
+        },
+        "fallback": {
+          "$ref": "#/$defs/AIFallbackContract"
+        },
+        "failure_contract": {
+          "$ref": "#/$defs/AIFailureContract"
+        },
+        "provenance_requirements": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Provenance Requirements",
+          "type": "array"
+        },
+        "health_contract": {
+          "$ref": "#/$defs/AIHealthContract"
+        }
+      },
+      "required": [
+        "capability_id",
+        "alias",
+        "input_schema",
+        "output_schema",
+        "required",
+        "privacy_class",
+        "authority_class",
+        "latency",
+        "temporal_precision",
+        "fallback",
+        "failure_contract",
+        "provenance_requirements",
+        "health_contract"
+      ],
+      "title": "AICapabilityDeclaration",
+      "type": "object"
+    },
+    "AIFailureContract": {
+      "additionalProperties": false,
+      "properties": {
+        "localized": {
+          "const": true,
+          "default": true,
+          "title": "Localized",
+          "type": "boolean"
+        },
+        "sibling_evidence_survives": {
+          "const": true,
+          "default": true,
+          "title": "Sibling Evidence Survives",
+          "type": "boolean"
+        },
+        "retryable_codes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Retryable Codes",
+          "type": "array"
+        },
+        "non_retryable_codes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Non Retryable Codes",
+          "type": "array"
+        }
+      },
+      "title": "AIFailureContract",
+      "type": "object"
+    },
+    "AIFallbackContract": {
+      "additionalProperties": false,
+      "properties": {
+        "strategy_id": {
+          "pattern": "^[a-z0-9][a-z0-9_.-]*$",
+          "title": "Strategy Id",
+          "type": "string"
+        },
+        "behavior": {
+          "enum": [
+            "deterministic",
+            "localized-failure",
+            "disabled"
+          ],
+          "title": "Behavior",
+          "type": "string"
+        },
+        "preserves_baseline": {
+          "const": true,
+          "default": true,
+          "title": "Preserves Baseline",
+          "type": "boolean"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "strategy_id",
+        "behavior",
+        "description"
+      ],
+      "title": "AIFallbackContract",
+      "type": "object"
+    },
+    "AIHealthContract": {
+      "additionalProperties": false,
+      "properties": {
+        "probe_required": {
+          "const": true,
+          "default": true,
+          "title": "Probe Required",
+          "type": "boolean"
+        },
+        "maximum_age_seconds": {
+          "exclusiveMinimum": 0,
+          "title": "Maximum Age Seconds",
+          "type": "integer"
+        },
+        "expected_protocol_version": {
+          "minLength": 1,
+          "title": "Expected Protocol Version",
+          "type": "string"
+        },
+        "model_revision_required": {
+          "title": "Model Revision Required",
+          "type": "boolean"
+        },
+        "fail_closed": {
+          "const": true,
+          "default": true,
+          "title": "Fail Closed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "maximum_age_seconds",
+        "expected_protocol_version",
+        "model_revision_required"
+      ],
+      "title": "AIHealthContract",
+      "type": "object"
+    },
+    "AILatencyExpectation": {
+      "additionalProperties": false,
+      "properties": {
+        "service_class": {
+          "enum": [
+            "interactive",
+            "nearline",
+            "batch"
+          ],
+          "title": "Service Class",
+          "type": "string"
+        },
+        "target_milliseconds": {
+          "exclusiveMinimum": 0,
+          "title": "Target Milliseconds",
+          "type": "integer"
+        },
+        "hard_timeout_seconds": {
+          "exclusiveMinimum": 0,
+          "title": "Hard Timeout Seconds",
+          "type": "number"
+        }
+      },
+      "required": [
+        "service_class",
+        "target_milliseconds",
+        "hard_timeout_seconds"
+      ],
+      "title": "AILatencyExpectation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The complete tracked alias surface owned by AoA Editing.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "const": "aoa-editing-local-ai-capabilities",
+      "default": "aoa-editing-local-ai-capabilities",
+      "title": "Id",
+      "type": "string"
+    },
+    "baseline_requires_ai": {
+      "const": false,
+      "default": false,
+      "title": "Baseline Requires Ai",
+      "type": "boolean"
+    },
+    "declarations": {
+      "items": {
+        "$ref": "#/$defs/AICapabilityDeclaration"
+      },
+      "minItems": 9,
+      "title": "Declarations",
+      "type": "array"
+    },
+    "physical_model_paths_allowed": {
+      "const": false,
+      "default": false,
+      "title": "Physical Model Paths Allowed",
+      "type": "boolean"
+    },
+    "filesystem_links_allowed": {
+      "const": false,
+      "default": false,
+      "title": "Filesystem Links Allowed",
+      "type": "boolean"
+    },
+    "output_authority_contract": {
+      "const": "evidence-or-proposal-only",
+      "default": "evidence-or-proposal-only",
+      "title": "Output Authority Contract",
+      "type": "string"
+    }
+  },
+  "required": [
+    "declarations"
+  ],
+  "title": "AICapabilityCatalog",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/ai-capability-catalog.schema.json"
+}

@@ -1,0 +1,416 @@
+{
+  "$defs": {
+    "CheckResult": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "warn",
+            "skip"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "measured": {
+          "additionalProperties": true,
+          "title": "Measured",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "summary"
+      ],
+      "title": "CheckResult",
+      "type": "object"
+    },
+    "EditorialReviewV2": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "2.0.0",
+          "default": "2.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "protocol_id": {
+          "title": "Protocol Id",
+          "type": "string"
+        },
+        "candidate_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Candidate Sha256",
+          "type": "string"
+        },
+        "reviewer": {
+          "minLength": 1,
+          "title": "Reviewer",
+          "type": "string"
+        },
+        "reviewer_role": {
+          "const": "human_operator",
+          "default": "human_operator",
+          "title": "Reviewer Role",
+          "type": "string"
+        },
+        "verdict": {
+          "enum": [
+            "perceptually_and_editorially_indistinguishable",
+            "revision_required"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        },
+        "rubric": {
+          "items": {
+            "$ref": "#/$defs/EditorialRubricAssessmentV2"
+          },
+          "minItems": 1,
+          "title": "Rubric",
+          "type": "array"
+        },
+        "reviewed_artifacts": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 3,
+          "title": "Reviewed Artifacts",
+          "type": "array"
+        },
+        "reference_media_role": {
+          "const": "comparison_only",
+          "default": "comparison_only",
+          "title": "Reference Media Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_id",
+        "candidate_sha256",
+        "reviewer",
+        "verdict",
+        "rubric",
+        "reviewed_artifacts"
+      ],
+      "title": "EditorialReviewV2",
+      "type": "object"
+    },
+    "EditorialRubricAssessmentV2": {
+      "additionalProperties": false,
+      "properties": {
+        "criterion": {
+          "enum": [
+            "smoothness",
+            "weight",
+            "natural_acceleration",
+            "rotation_character",
+            "twist_character",
+            "settle_timing",
+            "absence_of_mechanical_linearity",
+            "compositional_match",
+            "reference_overlay_absence",
+            "encoding_defect_separation"
+          ],
+          "title": "Criterion",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "notes": {
+          "minLength": 1,
+          "title": "Notes",
+          "type": "string"
+        }
+      },
+      "required": [
+        "criterion",
+        "status",
+        "notes"
+      ],
+      "title": "EditorialRubricAssessmentV2",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "All-frame objective result plus a separately attributable human verdict.",
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "supersedes_report_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Supersedes Report Id"
+    },
+    "protocol_id": {
+      "title": "Protocol Id",
+      "type": "string"
+    },
+    "protocol_path": {
+      "title": "Protocol Path",
+      "type": "string"
+    },
+    "protocol_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Protocol Sha256",
+      "type": "string"
+    },
+    "spec_id": {
+      "title": "Spec Id",
+      "type": "string"
+    },
+    "spec_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Spec Sha256",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "reference_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Reference Sha256",
+      "type": "string"
+    },
+    "candidate_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Candidate Sha256",
+      "type": "string"
+    },
+    "candidate_path": {
+      "title": "Candidate Path",
+      "type": "string"
+    },
+    "technical": {
+      "additionalProperties": true,
+      "title": "Technical",
+      "type": "object"
+    },
+    "geometric": {
+      "additionalProperties": true,
+      "title": "Geometric",
+      "type": "object"
+    },
+    "temporal": {
+      "additionalProperties": true,
+      "title": "Temporal",
+      "type": "object"
+    },
+    "perceptual": {
+      "additionalProperties": true,
+      "title": "Perceptual",
+      "type": "object"
+    },
+    "editorial": {
+      "additionalProperties": true,
+      "title": "Editorial",
+      "type": "object"
+    },
+    "lineage": {
+      "additionalProperties": true,
+      "title": "Lineage",
+      "type": "object"
+    },
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/CheckResult"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
+    "artifacts": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Artifacts",
+      "type": "object"
+    },
+    "human_review": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EditorialReviewV2"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "reference_media_used_only_for_comparison": {
+      "const": true,
+      "default": true,
+      "title": "Reference Media Used Only For Comparison",
+      "type": "boolean"
+    },
+    "all_frames_compared": {
+      "const": true,
+      "default": true,
+      "title": "All Frames Compared",
+      "type": "boolean"
+    },
+    "mandatory_skips": {
+      "const": 0,
+      "default": 0,
+      "title": "Mandatory Skips",
+      "type": "integer"
+    },
+    "objective_overall": {
+      "enum": [
+        "pass",
+        "fail"
+      ],
+      "title": "Objective Overall",
+      "type": "string"
+    },
+    "overall": {
+      "enum": [
+        "pass",
+        "fail",
+        "warn"
+      ],
+      "title": "Overall",
+      "type": "string"
+    }
+  },
+  "required": [
+    "protocol_id",
+    "protocol_path",
+    "protocol_sha256",
+    "spec_id",
+    "spec_sha256",
+    "source_sha256",
+    "reference_sha256",
+    "candidate_sha256",
+    "candidate_path",
+    "technical",
+    "geometric",
+    "temporal",
+    "perceptual",
+    "editorial",
+    "lineage",
+    "checks",
+    "artifacts",
+    "provenance",
+    "objective_overall",
+    "overall"
+  ],
+  "title": "ReferenceComparisonReportV2",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/comparison-v2.schema.json"
+}

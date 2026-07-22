@@ -1,0 +1,264 @@
+{
+  "$defs": {
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ReferenceWorkflowCandidateRule": {
+      "additionalProperties": false,
+      "properties": {
+        "statement": {
+          "minLength": 1,
+          "title": "Statement",
+          "type": "string"
+        },
+        "evidence_range_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Range Refs",
+          "type": "array"
+        },
+        "authority": {
+          "const": "candidate-observation",
+          "default": "candidate-observation",
+          "title": "Authority",
+          "type": "string"
+        }
+      },
+      "required": [
+        "statement",
+        "evidence_range_refs"
+      ],
+      "title": "ReferenceWorkflowCandidateRule",
+      "type": "object"
+    },
+    "ReferenceWorkflowRangePlan": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "start_seconds": {
+          "minimum": 0,
+          "title": "Start Seconds",
+          "type": "number"
+        },
+        "end_seconds": {
+          "exclusiveMinimum": 0,
+          "title": "End Seconds",
+          "type": "number"
+        },
+        "content_class": {
+          "enum": [
+            "terminal",
+            "ide",
+            "browser-workflow",
+            "workflow-ui",
+            "diagram",
+            "human",
+            "title-card",
+            "other"
+          ],
+          "title": "Content Class",
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "include",
+            "exclude"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "human_present": {
+          "title": "Human Present",
+          "type": "boolean"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "start_seconds",
+        "end_seconds",
+        "content_class",
+        "decision",
+        "human_present",
+        "rationale"
+      ],
+      "title": "ReferenceWorkflowRangePlan",
+      "type": "object"
+    },
+    "ReferenceWorkflowSourcePlan": {
+      "additionalProperties": false,
+      "properties": {
+        "alias": {
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Alias",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "expected_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Sha256",
+          "type": "string"
+        },
+        "ranges": {
+          "items": {
+            "$ref": "#/$defs/ReferenceWorkflowRangePlan"
+          },
+          "minItems": 1,
+          "title": "Ranges",
+          "type": "array"
+        },
+        "reviewed_by": {
+          "minLength": 1,
+          "title": "Reviewed By",
+          "type": "string"
+        }
+      },
+      "required": [
+        "alias",
+        "path",
+        "expected_sha256",
+        "ranges",
+        "reviewed_by"
+      ],
+      "title": "ReferenceWorkflowSourcePlan",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "title": {
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    },
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/ReferenceWorkflowSourcePlan"
+      },
+      "minItems": 1,
+      "title": "Sources",
+      "type": "array"
+    },
+    "candidate_rules": {
+      "items": {
+        "$ref": "#/$defs/ReferenceWorkflowCandidateRule"
+      },
+      "title": "Candidate Rules",
+      "type": "array"
+    },
+    "manual_review_complete": {
+      "const": true,
+      "title": "Manual Review Complete",
+      "type": "boolean"
+    },
+    "reference_media_role": {
+      "const": "analysis-and-evaluation-only",
+      "default": "analysis-and-evaluation-only",
+      "title": "Reference Media Role",
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "title",
+    "sources",
+    "manual_review_complete",
+    "provenance"
+  ],
+  "title": "ReferenceWorkflowStudyPlan",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/reference-workflow-study-plan.schema.json"
+}

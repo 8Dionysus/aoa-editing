@@ -1,0 +1,68 @@
+{
+  "additionalProperties": false,
+  "description": "Explicit human interpretation evidence; it never mutates the frozen spec.",
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "workspace_id": {
+      "title": "Workspace Id",
+      "type": "string"
+    },
+    "proposal_id": {
+      "title": "Proposal Id",
+      "type": "string"
+    },
+    "phase_markers": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Phase Markers",
+      "type": "object"
+    },
+    "pivot_assessment": {
+      "enum": [
+        "identified",
+        "unidentifiable",
+        "uncertain"
+      ],
+      "title": "Pivot Assessment",
+      "type": "string"
+    },
+    "accepted_correction_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Accepted Correction Ids",
+      "type": "array"
+    },
+    "rejected_correction_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Rejected Correction Ids",
+      "type": "array"
+    },
+    "note": {
+      "minLength": 1,
+      "title": "Note",
+      "type": "string"
+    }
+  },
+  "required": [
+    "workspace_id",
+    "proposal_id",
+    "phase_markers",
+    "pivot_assessment",
+    "accepted_correction_ids",
+    "rejected_correction_ids",
+    "note"
+  ],
+  "title": "ReferenceMotionHumanCorrectionV2",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/reference-motion-human-correction-v2.schema.json"
+}

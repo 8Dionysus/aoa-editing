@@ -1,0 +1,391 @@
+{
+  "$defs": {
+    "FrameRate": {
+      "additionalProperties": false,
+      "properties": {
+        "numerator": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        }
+      },
+      "title": "FrameRate",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ReferenceWorkspaceArtifactV2": {
+      "additionalProperties": false,
+      "description": "Hash-addressed workbench artifact that is never a render input.",
+      "properties": {
+        "role": {
+          "pattern": "^[a-z0-9][a-z0-9_.-]*$",
+          "title": "Role",
+          "type": "string"
+        },
+        "scope": {
+          "enum": [
+            "editing_home",
+            "project",
+            "reference_binding"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "relative_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Relative Path"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "media_type": {
+          "minLength": 1,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "authority": {
+          "enum": [
+            "reference_evidence",
+            "candidate_render",
+            "comparison_diagnostic"
+          ],
+          "title": "Authority",
+          "type": "string"
+        },
+        "reference_derived": {
+          "title": "Reference Derived",
+          "type": "boolean"
+        },
+        "evaluation_only": {
+          "const": true,
+          "default": true,
+          "title": "Evaluation Only",
+          "type": "boolean"
+        },
+        "allowed_as_render_input": {
+          "const": false,
+          "default": false,
+          "title": "Allowed As Render Input",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "role",
+        "scope",
+        "sha256",
+        "media_type",
+        "authority",
+        "reference_derived"
+      ],
+      "title": "ReferenceWorkspaceArtifactV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Immutable project-local registration of one evidence-backed comparison.",
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "base_version_id": {
+      "title": "Base Version Id",
+      "type": "string"
+    },
+    "asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "target_effect_path": {
+      "pattern": "^/",
+      "title": "Target Effect Path",
+      "type": "string"
+    },
+    "target_effect_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Target Effect Sha256",
+      "type": "string"
+    },
+    "baseline_evidence_id": {
+      "title": "Baseline Evidence Id",
+      "type": "string"
+    },
+    "study_id": {
+      "title": "Study Id",
+      "type": "string"
+    },
+    "study_path": {
+      "title": "Study Path",
+      "type": "string"
+    },
+    "study_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Study Sha256",
+      "type": "string"
+    },
+    "reference_evidence_id": {
+      "title": "Reference Evidence Id",
+      "type": "string"
+    },
+    "reference_evidence_path": {
+      "title": "Reference Evidence Path",
+      "type": "string"
+    },
+    "reference_evidence_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Reference Evidence Sha256",
+      "type": "string"
+    },
+    "spec_id": {
+      "title": "Spec Id",
+      "type": "string"
+    },
+    "spec_path": {
+      "title": "Spec Path",
+      "type": "string"
+    },
+    "spec_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Spec Sha256",
+      "type": "string"
+    },
+    "comparison_id": {
+      "title": "Comparison Id",
+      "type": "string"
+    },
+    "comparison_path": {
+      "title": "Comparison Path",
+      "type": "string"
+    },
+    "comparison_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Comparison Sha256",
+      "type": "string"
+    },
+    "candidate_motion_id": {
+      "title": "Candidate Motion Id",
+      "type": "string"
+    },
+    "candidate_motion_path": {
+      "title": "Candidate Motion Path",
+      "type": "string"
+    },
+    "candidate_motion_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Candidate Motion Sha256",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "reference_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Reference Sha256",
+      "type": "string"
+    },
+    "candidate_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Candidate Sha256",
+      "type": "string"
+    },
+    "readiness_revision": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Readiness Revision",
+      "type": "string"
+    },
+    "frame_count": {
+      "exclusiveMinimum": 1,
+      "title": "Frame Count",
+      "type": "integer"
+    },
+    "frame_rate": {
+      "$ref": "#/$defs/FrameRate"
+    },
+    "width": {
+      "exclusiveMinimum": 0,
+      "title": "Width",
+      "type": "integer"
+    },
+    "height": {
+      "exclusiveMinimum": 0,
+      "title": "Height",
+      "type": "integer"
+    },
+    "phase_markers": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Phase Markers",
+      "type": "object"
+    },
+    "pivot_identifiable": {
+      "title": "Pivot Identifiable",
+      "type": "boolean"
+    },
+    "artifacts": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ReferenceWorkspaceArtifactV2"
+      },
+      "title": "Artifacts",
+      "type": "object"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "reference_media_role": {
+      "const": "analysis_and_comparison_only",
+      "default": "analysis_and_comparison_only",
+      "title": "Reference Media Role",
+      "type": "string"
+    },
+    "reference_media_allowed_in_render": {
+      "const": false,
+      "default": false,
+      "title": "Reference Media Allowed In Render",
+      "type": "boolean"
+    },
+    "candidate_media_allowed_as_source": {
+      "const": false,
+      "default": false,
+      "title": "Candidate Media Allowed As Source",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "project_id",
+    "base_version_id",
+    "asset_id",
+    "target_effect_path",
+    "target_effect_sha256",
+    "baseline_evidence_id",
+    "study_id",
+    "study_path",
+    "study_sha256",
+    "reference_evidence_id",
+    "reference_evidence_path",
+    "reference_evidence_sha256",
+    "spec_id",
+    "spec_path",
+    "spec_sha256",
+    "comparison_id",
+    "comparison_path",
+    "comparison_sha256",
+    "candidate_motion_id",
+    "candidate_motion_path",
+    "candidate_motion_sha256",
+    "source_sha256",
+    "reference_sha256",
+    "candidate_sha256",
+    "readiness_revision",
+    "frame_count",
+    "frame_rate",
+    "width",
+    "height",
+    "phase_markers",
+    "pivot_identifiable",
+    "artifacts",
+    "provenance"
+  ],
+  "title": "ReferenceWorkspaceRegistrationV2",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/reference-workspace-v2.schema.json"
+}

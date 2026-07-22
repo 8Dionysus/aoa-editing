@@ -1,0 +1,28 @@
+{
+  "schema": "aoa_editing_analyzer_manifest_v2",
+  "port": "aoa_editing.analysis.ports.AnalyzerPort",
+  "failure_contract": "Each capability persists either evidence or localized analysis.failure; sibling evidence survives.",
+  "authority_contract": "Explicit human-correction evidence supersedes analyzer evidence without deleting history.",
+  "capabilities": [
+    {"kind": "media.probe", "status": "implemented", "adapter": "ffprobe", "required": true},
+    {"kind": "image.statistics", "status": "implemented", "adapter": "Pillow/NumPy", "required": false},
+    {"kind": "image.depth_layers", "status": "implemented-nonsemantic", "adapter": "saliency proxy", "required": false},
+    {"kind": "video.scenes", "status": "implemented", "adapter": "FFmpeg scene score", "required": false},
+    {"kind": "audio.silence", "status": "implemented", "adapter": "FFmpeg silencedetect", "required": false},
+    {"kind": "audio.loudness", "status": "implemented", "adapter": "FFmpeg loudnorm analysis", "required": false},
+    {"kind": "speech.transcript", "status": "optional-provider-alias", "alias": "local-ai://speech/transcript/default", "required": false},
+    {"kind": "speech.vad", "status": "declared-unbound", "alias": "local-ai://speech/vad/default", "required": false},
+    {"kind": "speech.diarization", "status": "declared-unbound", "alias": "local-ai://speech/diarization/default", "required": false},
+    {"kind": "vision.describe", "status": "declared-unbound", "alias": "local-ai://vision/describe/default", "required": false},
+    {"kind": "vision.embed", "status": "declared-unbound", "alias": "local-ai://vision/embed/default", "required": false},
+    {"kind": "visual.video_text", "status": "port-reserved", "candidate": "sampled image-text retrieval", "required": false},
+    {"kind": "media.duplicates", "status": "port-reserved", "candidate": "perceptual hash and embeddings", "required": false},
+    {"kind": "video.motion", "status": "port-reserved", "candidate": "OpenCV flow/registration", "required": false},
+    {"kind": "vision.regions", "status": "declared-unbound", "alias": "local-ai://vision/regions/default", "required": false},
+    {"kind": "vision.segment", "status": "declared-unbound", "alias": "local-ai://vision/segment/default", "required": false},
+    {"kind": "video.quality", "status": "port-reserved", "candidate": "sharpness/exposure/stability metrics", "required": false},
+    {"kind": "video.black_freeze", "status": "port-reserved", "candidate": "FFmpeg blackdetect/freezedetect", "required": false},
+    {"kind": "audio.clipping", "status": "port-reserved", "candidate": "FFmpeg astats", "required": false},
+    {"kind": "music.beats", "status": "port-reserved", "candidate": "local onset/beat adapter", "required": false}
+  ]
+}

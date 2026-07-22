@@ -1,0 +1,466 @@
+{
+  "$defs": {
+    "FrameRate": {
+      "additionalProperties": false,
+      "properties": {
+        "numerator": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        }
+      },
+      "title": "FrameRate",
+      "type": "object"
+    },
+    "MotionRecoveryFrame": {
+      "additionalProperties": false,
+      "description": "Observable transform estimate and uncertainty for one decoded frame.",
+      "properties": {
+        "frame": {
+          "minimum": 0,
+          "title": "Frame",
+          "type": "integer"
+        },
+        "time_seconds": {
+          "minimum": 0,
+          "title": "Time Seconds",
+          "type": "number"
+        },
+        "selected_model": {
+          "enum": [
+            "similarity",
+            "affine",
+            "homography",
+            "unknown"
+          ],
+          "title": "Selected Model",
+          "type": "string"
+        },
+        "matrix_3x3": {
+          "items": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "title": "Matrix 3X3",
+          "type": "array"
+        },
+        "scale_relative_to_contain": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scale Relative To Contain"
+        },
+        "rotation_degrees": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rotation Degrees"
+        },
+        "center_x": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Center X"
+        },
+        "center_y": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Center Y"
+        },
+        "affine_anisotropy": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Affine Anisotropy"
+        },
+        "affine_shear": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Affine Shear"
+        },
+        "perspective_strength": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Perspective Strength"
+        },
+        "match_count": {
+          "minimum": 0,
+          "title": "Match Count",
+          "type": "integer"
+        },
+        "inlier_count": {
+          "minimum": 0,
+          "title": "Inlier Count",
+          "type": "integer"
+        },
+        "inlier_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Inlier Ratio",
+          "type": "number"
+        },
+        "reprojection_rmse": {
+          "minimum": 0,
+          "title": "Reprojection Rmse",
+          "type": "number"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "model_scores": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Model Scores",
+          "type": "object"
+        },
+        "velocity": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Velocity",
+          "type": "object"
+        },
+        "acceleration": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Acceleration",
+          "type": "object"
+        },
+        "jerk": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Jerk",
+          "type": "object"
+        },
+        "pivot_x": {
+          "default": null,
+          "title": "Pivot X",
+          "type": "null"
+        },
+        "pivot_y": {
+          "default": null,
+          "title": "Pivot Y",
+          "type": "null"
+        },
+        "pivot_identifiability": {
+          "const": "unidentifiable",
+          "default": "unidentifiable",
+          "title": "Pivot Identifiability",
+          "type": "string"
+        },
+        "outlier": {
+          "default": false,
+          "title": "Outlier",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "frame",
+        "time_seconds",
+        "selected_model",
+        "matrix_3x3",
+        "match_count",
+        "inlier_count",
+        "inlier_ratio",
+        "reprojection_rmse",
+        "confidence",
+        "model_scores"
+      ],
+      "title": "MotionRecoveryFrame",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "All-frame recovery result that preserves failures and alternative models.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "video_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Video Sha256",
+      "type": "string"
+    },
+    "frame_count": {
+      "exclusiveMinimum": 0,
+      "title": "Frame Count",
+      "type": "integer"
+    },
+    "analyzed_frame_count": {
+      "exclusiveMinimum": 0,
+      "title": "Analyzed Frame Count",
+      "type": "integer"
+    },
+    "frame_rate": {
+      "$ref": "#/$defs/FrameRate"
+    },
+    "width": {
+      "exclusiveMinimum": 0,
+      "title": "Width",
+      "type": "integer"
+    },
+    "height": {
+      "exclusiveMinimum": 0,
+      "title": "Height",
+      "type": "integer"
+    },
+    "selected_model": {
+      "enum": [
+        "similarity",
+        "affine",
+        "homography",
+        "unknown"
+      ],
+      "title": "Selected Model",
+      "type": "string"
+    },
+    "model_distribution": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Model Distribution",
+      "type": "object"
+    },
+    "curve_hint": {
+      "enum": [
+        "linear",
+        "ease_in",
+        "ease_out",
+        "ease_in_out",
+        "cubic_bezier",
+        "hermite",
+        "overshoot",
+        "settle",
+        "hold",
+        "underdetermined"
+      ],
+      "title": "Curve Hint",
+      "type": "string"
+    },
+    "curve_confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Curve Confidence",
+      "type": "number"
+    },
+    "mean_confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Mean Confidence",
+      "type": "number"
+    },
+    "model_mismatch": {
+      "title": "Model Mismatch",
+      "type": "boolean"
+    },
+    "outlier_frames": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Outlier Frames",
+      "type": "array"
+    },
+    "phase_boundaries": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Phase Boundaries",
+      "type": "object"
+    },
+    "uncertainties": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Uncertainties",
+      "type": "array"
+    },
+    "alternative_explanations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Alternative Explanations",
+      "type": "array"
+    },
+    "frames": {
+      "items": {
+        "$ref": "#/$defs/MotionRecoveryFrame"
+      },
+      "title": "Frames",
+      "type": "array"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "source_sha256",
+    "video_sha256",
+    "frame_count",
+    "analyzed_frame_count",
+    "frame_rate",
+    "width",
+    "height",
+    "selected_model",
+    "model_distribution",
+    "curve_hint",
+    "curve_confidence",
+    "mean_confidence",
+    "model_mismatch",
+    "outlier_frames",
+    "phase_boundaries",
+    "uncertainties",
+    "alternative_explanations",
+    "frames",
+    "provenance"
+  ],
+  "title": "MotionRecoveryReport",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/motion-recovery.schema.json"
+}

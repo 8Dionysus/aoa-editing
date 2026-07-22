@@ -1,0 +1,338 @@
+{
+  "$defs": {
+    "FrameRange": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "duration": {
+          "exclusiveMinimum": 0,
+          "title": "Duration",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "duration"
+      ],
+      "title": "FrameRange",
+      "type": "object"
+    },
+    "FrameRate": {
+      "additionalProperties": false,
+      "properties": {
+        "numerator": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        }
+      },
+      "title": "FrameRate",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ScreenWorkflowVoiceoverCue": {
+      "additionalProperties": false,
+      "properties": {
+        "order": {
+          "minimum": 1,
+          "title": "Order",
+          "type": "integer"
+        },
+        "beat_id": {
+          "minLength": 1,
+          "title": "Beat Id",
+          "type": "string"
+        },
+        "timeline_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "spoken_range": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameRange"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "transcript_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transcript Text"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "alignment_basis": {
+          "enum": [
+            "transcript-segments",
+            "silence-weighted",
+            "human-reviewed"
+          ],
+          "title": "Alignment Basis",
+          "type": "string"
+        },
+        "reviewer_notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reviewer Notes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "order",
+        "beat_id",
+        "timeline_range",
+        "confidence",
+        "alignment_basis"
+      ],
+      "title": "ScreenWorkflowVoiceoverCue",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Reviewed narration timing between a capture plan and the final edit binding.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "plan_id": {
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "script_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Script Sha256",
+      "type": "string"
+    },
+    "asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "source_duration_seconds": {
+      "exclusiveMinimum": 0,
+      "title": "Source Duration Seconds",
+      "type": "number"
+    },
+    "timeline_frame_rate": {
+      "$ref": "#/$defs/FrameRate"
+    },
+    "duration_frames": {
+      "exclusiveMinimum": 0,
+      "title": "Duration Frames",
+      "type": "integer"
+    },
+    "status": {
+      "enum": [
+        "alignment-draft",
+        "reviewed-for-edit"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "edit_ready": {
+      "title": "Edit Ready",
+      "type": "boolean"
+    },
+    "draft_alignment_method": {
+      "enum": [
+        "transcript-segments",
+        "silence-weighted"
+      ],
+      "title": "Draft Alignment Method",
+      "type": "string"
+    },
+    "cues": {
+      "items": {
+        "$ref": "#/$defs/ScreenWorkflowVoiceoverCue"
+      },
+      "minItems": 1,
+      "title": "Cues",
+      "type": "array"
+    },
+    "analysis_evidence_refs": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Analysis Evidence Refs",
+      "type": "array"
+    },
+    "normalization_target_lufs": {
+      "default": -16.0,
+      "maximum": -5,
+      "minimum": -40,
+      "title": "Normalization Target Lufs",
+      "type": "number"
+    },
+    "reviewed_by": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reviewed By"
+    },
+    "review_note": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Review Note"
+    },
+    "supersedes_timing_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Supersedes Timing Id"
+    },
+    "source_media_bound": {
+      "const": true,
+      "default": true,
+      "title": "Source Media Bound",
+      "type": "boolean"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "plan_id",
+    "script_sha256",
+    "asset_id",
+    "source_sha256",
+    "source_duration_seconds",
+    "timeline_frame_rate",
+    "duration_frames",
+    "status",
+    "edit_ready",
+    "draft_alignment_method",
+    "cues",
+    "analysis_evidence_refs",
+    "provenance"
+  ],
+  "title": "ScreenWorkflowVoiceoverTiming",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/screen-workflow-voiceover-timing.schema.json"
+}

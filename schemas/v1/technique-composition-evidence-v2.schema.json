@@ -1,0 +1,50 @@
+{
+  "additionalProperties": false,
+  "description": "Explicit composition requirement used by the applicability boundary.",
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_class": {
+      "minLength": 1,
+      "title": "Source Class",
+      "type": "string"
+    },
+    "single_global_transform_sufficient": {
+      "title": "Single Global Transform Sufficient",
+      "type": "boolean"
+    },
+    "independent_layer_motion_required": {
+      "title": "Independent Layer Motion Required",
+      "type": "boolean"
+    },
+    "authority": {
+      "enum": [
+        "fixture_ground_truth",
+        "human_assertion",
+        "analyzer_proposal"
+      ],
+      "title": "Authority",
+      "type": "string"
+    },
+    "rationale": {
+      "minLength": 1,
+      "title": "Rationale",
+      "type": "string"
+    }
+  },
+  "required": [
+    "source_class",
+    "single_global_transform_sufficient",
+    "independent_layer_motion_required",
+    "authority",
+    "rationale"
+  ],
+  "title": "TechniqueCompositionEvidenceV2",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/technique-composition-evidence-v2.schema.json"
+}

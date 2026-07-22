@@ -1,0 +1,719 @@
+{
+  "schema_version": "1.0.0",
+  "id": "aoa-editing-local-ai-capabilities",
+  "baseline_requires_ai": false,
+  "physical_model_paths_allowed": false,
+  "filesystem_links_allowed": false,
+  "output_authority_contract": "evidence-or-proposal-only",
+  "declarations": [
+    {
+      "schema_version": "1.0.0",
+      "capability_id": "speech.transcript",
+      "alias": "local-ai://speech/transcript/default",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["media_path"],
+        "properties": {
+          "media_path": {"type": "string", "minLength": 1},
+          "language": {"type": ["string", "null"]},
+          "profile": {"type": "string", "enum": ["auto", "fast", "quality", "long", "command"]}
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["segments"],
+        "properties": {
+          "text": {"type": "string"},
+          "language": {"type": ["string", "null"]},
+          "segments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["start", "end", "text"],
+              "properties": {
+                "start": {"type": "number", "minimum": 0},
+                "end": {"type": "number", "minimum": 0},
+                "text": {"type": "string"},
+                "speaker": {"type": ["string", "null"]}
+              },
+              "additionalProperties": true
+            }
+          },
+          "partial": {"type": "boolean"}
+        },
+        "additionalProperties": true
+      },
+      "required": false,
+      "privacy_class": "local-media-sensitive",
+      "authority_class": "evidence",
+      "latency": {
+        "service_class": "nearline",
+        "target_milliseconds": 30000,
+        "hard_timeout_seconds": 1800
+      },
+      "temporal_precision": "segment",
+      "fallback": {
+        "strategy_id": "localized-transcript-failure",
+        "behavior": "localized-failure",
+        "preserves_baseline": true,
+        "description": "Persist a localized analysis.failure while silence and loudness evidence remain usable."
+      },
+      "failure_contract": {
+        "localized": true,
+        "sibling_evidence_survives": true,
+        "retryable_codes": ["provider_missing", "provider_unavailable", "provider_stale", "provider_timeout"],
+        "non_retryable_codes": ["privacy_denied", "version_mismatch", "malformed_response"]
+      },
+      "provenance_requirements": [
+        "resolved_owner",
+        "adapter_kind",
+        "backend",
+        "model_id",
+        "model_revision",
+        "model_hash_authority",
+        "license_authority",
+        "health_evidence",
+        "privacy_decision",
+        "fallback_status"
+      ],
+      "health_contract": {
+        "probe_required": true,
+        "maximum_age_seconds": 300,
+        "expected_protocol_version": "aoa-local-ai-v1",
+        "model_revision_required": true,
+        "fail_closed": true
+      }
+    },
+    {
+      "schema_version": "1.0.0",
+      "capability_id": "speech.vad",
+      "alias": "local-ai://speech/vad/default",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["media_path"],
+        "properties": {
+          "media_path": {"type": "string", "minLength": 1},
+          "minimum_speech_milliseconds": {"type": "integer", "minimum": 1}
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["speech_ranges"],
+        "properties": {
+          "speech_ranges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["start", "end"],
+              "properties": {
+                "start": {"type": "number", "minimum": 0},
+                "end": {"type": "number", "minimum": 0},
+                "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+              },
+              "additionalProperties": false
+            }
+          },
+          "partial": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      },
+      "required": false,
+      "privacy_class": "local-media-sensitive",
+      "authority_class": "evidence",
+      "latency": {
+        "service_class": "nearline",
+        "target_milliseconds": 10000,
+        "hard_timeout_seconds": 600
+      },
+      "temporal_precision": "millisecond",
+      "fallback": {
+        "strategy_id": "ffmpeg-silence-boundary",
+        "behavior": "deterministic",
+        "preserves_baseline": true,
+        "description": "Use measured FFmpeg silence intervals as a non-equivalent baseline boundary signal."
+      },
+      "failure_contract": {
+        "localized": true,
+        "sibling_evidence_survives": true,
+        "retryable_codes": ["provider_missing", "provider_unavailable", "provider_stale", "provider_timeout"],
+        "non_retryable_codes": ["privacy_denied", "version_mismatch", "malformed_response"]
+      },
+      "provenance_requirements": [
+        "resolved_owner",
+        "adapter_kind",
+        "backend",
+        "model_id",
+        "model_revision",
+        "model_hash_authority",
+        "license_authority",
+        "health_evidence",
+        "privacy_decision",
+        "fallback_status"
+      ],
+      "health_contract": {
+        "probe_required": true,
+        "maximum_age_seconds": 300,
+        "expected_protocol_version": "aoa-local-ai-v1",
+        "model_revision_required": true,
+        "fail_closed": true
+      }
+    },
+    {
+      "schema_version": "1.0.0",
+      "capability_id": "speech.diarization",
+      "alias": "local-ai://speech/diarization/default",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["media_path"],
+        "properties": {
+          "media_path": {"type": "string", "minLength": 1},
+          "minimum_speakers": {"type": ["integer", "null"], "minimum": 1},
+          "maximum_speakers": {"type": ["integer", "null"], "minimum": 1}
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["speaker_segments"],
+        "properties": {
+          "speaker_segments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["start", "end", "speaker"],
+              "properties": {
+                "start": {"type": "number", "minimum": 0},
+                "end": {"type": "number", "minimum": 0},
+                "speaker": {"type": "string", "minLength": 1},
+                "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+              },
+              "additionalProperties": false
+            }
+          },
+          "partial": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      },
+      "required": false,
+      "privacy_class": "local-media-sensitive",
+      "authority_class": "evidence",
+      "latency": {
+        "service_class": "batch",
+        "target_milliseconds": 60000,
+        "hard_timeout_seconds": 3600
+      },
+      "temporal_precision": "segment",
+      "fallback": {
+        "strategy_id": "localized-diarization-failure",
+        "behavior": "localized-failure",
+        "preserves_baseline": true,
+        "description": "Record absence honestly; do not invent speakers."
+      },
+      "failure_contract": {
+        "localized": true,
+        "sibling_evidence_survives": true,
+        "retryable_codes": ["provider_missing", "provider_unavailable", "provider_stale", "provider_timeout"],
+        "non_retryable_codes": ["privacy_denied", "version_mismatch", "malformed_response"]
+      },
+      "provenance_requirements": [
+        "resolved_owner",
+        "adapter_kind",
+        "backend",
+        "model_id",
+        "model_revision",
+        "model_hash_authority",
+        "license_authority",
+        "health_evidence",
+        "privacy_decision",
+        "fallback_status"
+      ],
+      "health_contract": {
+        "probe_required": true,
+        "maximum_age_seconds": 300,
+        "expected_protocol_version": "aoa-local-ai-v1",
+        "model_revision_required": true,
+        "fail_closed": true
+      }
+    },
+    {
+      "schema_version": "1.0.0",
+      "capability_id": "vision.describe",
+      "alias": "local-ai://vision/describe/default",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["media_path"],
+        "properties": {
+          "media_path": {"type": "string", "minLength": 1},
+          "sample_times_seconds": {
+            "type": "array",
+            "items": {"type": "number", "minimum": 0}
+          },
+          "prompt": {"type": ["string", "null"]}
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["descriptions"],
+        "properties": {
+          "descriptions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["text"],
+              "properties": {
+                "time_seconds": {"type": ["number", "null"], "minimum": 0},
+                "text": {"type": "string"},
+                "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+              },
+              "additionalProperties": false
+            }
+          },
+          "partial": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      },
+      "required": false,
+      "privacy_class": "local-media-sensitive",
+      "authority_class": "evidence",
+      "latency": {
+        "service_class": "nearline",
+        "target_milliseconds": 15000,
+        "hard_timeout_seconds": 900
+      },
+      "temporal_precision": "sample",
+      "fallback": {
+        "strategy_id": "localized-vision-description-failure",
+        "behavior": "localized-failure",
+        "preserves_baseline": true,
+        "description": "Retain technical image evidence without fabricating a semantic description."
+      },
+      "failure_contract": {
+        "localized": true,
+        "sibling_evidence_survives": true,
+        "retryable_codes": ["provider_missing", "provider_unavailable", "provider_stale", "provider_timeout"],
+        "non_retryable_codes": ["privacy_denied", "version_mismatch", "malformed_response"]
+      },
+      "provenance_requirements": [
+        "resolved_owner",
+        "adapter_kind",
+        "backend",
+        "model_id",
+        "model_revision",
+        "model_hash_authority",
+        "license_authority",
+        "health_evidence",
+        "privacy_decision",
+        "fallback_status"
+      ],
+      "health_contract": {
+        "probe_required": true,
+        "maximum_age_seconds": 300,
+        "expected_protocol_version": "aoa-local-ai-v1",
+        "model_revision_required": true,
+        "fail_closed": true
+      }
+    },
+    {
+      "schema_version": "1.0.0",
+      "capability_id": "vision.regions",
+      "alias": "local-ai://vision/regions/default",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["media_path"],
+        "properties": {
+          "media_path": {"type": "string", "minLength": 1},
+          "time_seconds": {"type": ["number", "null"], "minimum": 0},
+          "labels": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["regions"],
+        "properties": {
+          "regions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["label", "box_normalized"],
+              "properties": {
+                "label": {"type": "string"},
+                "box_normalized": {
+                  "type": "array",
+                  "prefixItems": [
+                    {"type": "number"},
+                    {"type": "number"},
+                    {"type": "number"},
+                    {"type": "number"}
+                  ],
+                  "minItems": 4,
+                  "maxItems": 4
+                },
+                "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+              },
+              "additionalProperties": false
+            }
+          },
+          "partial": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      },
+      "required": false,
+      "privacy_class": "local-media-sensitive",
+      "authority_class": "evidence",
+      "latency": {
+        "service_class": "nearline",
+        "target_milliseconds": 10000,
+        "hard_timeout_seconds": 600
+      },
+      "temporal_precision": "frame",
+      "fallback": {
+        "strategy_id": "nonsemantic-depth-layers",
+        "behavior": "deterministic",
+        "preserves_baseline": true,
+        "description": "Use explicitly nonsemantic saliency layers without claiming detected objects."
+      },
+      "failure_contract": {
+        "localized": true,
+        "sibling_evidence_survives": true,
+        "retryable_codes": ["provider_missing", "provider_unavailable", "provider_stale", "provider_timeout"],
+        "non_retryable_codes": ["privacy_denied", "version_mismatch", "malformed_response"]
+      },
+      "provenance_requirements": [
+        "resolved_owner",
+        "adapter_kind",
+        "backend",
+        "model_id",
+        "model_revision",
+        "model_hash_authority",
+        "license_authority",
+        "health_evidence",
+        "privacy_decision",
+        "fallback_status"
+      ],
+      "health_contract": {
+        "probe_required": true,
+        "maximum_age_seconds": 300,
+        "expected_protocol_version": "aoa-local-ai-v1",
+        "model_revision_required": true,
+        "fail_closed": true
+      }
+    },
+    {
+      "schema_version": "1.0.0",
+      "capability_id": "vision.segment",
+      "alias": "local-ai://vision/segment/default",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["media_path"],
+        "properties": {
+          "media_path": {"type": "string", "minLength": 1},
+          "time_seconds": {"type": ["number", "null"], "minimum": 0},
+          "prompt": {"type": ["string", "null"]}
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["segments"],
+        "properties": {
+          "segments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["label", "mask_artifact"],
+              "properties": {
+                "label": {"type": "string"},
+                "mask_artifact": {"type": "string", "minLength": 1},
+                "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+              },
+              "additionalProperties": false
+            }
+          },
+          "partial": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      },
+      "required": false,
+      "privacy_class": "local-media-sensitive",
+      "authority_class": "evidence",
+      "latency": {
+        "service_class": "batch",
+        "target_milliseconds": 30000,
+        "hard_timeout_seconds": 1800
+      },
+      "temporal_precision": "frame",
+      "fallback": {
+        "strategy_id": "localized-segmentation-failure",
+        "behavior": "localized-failure",
+        "preserves_baseline": true,
+        "description": "Proceed without semantic masks; do not relabel saliency as segmentation."
+      },
+      "failure_contract": {
+        "localized": true,
+        "sibling_evidence_survives": true,
+        "retryable_codes": ["provider_missing", "provider_unavailable", "provider_stale", "provider_timeout"],
+        "non_retryable_codes": ["privacy_denied", "version_mismatch", "malformed_response"]
+      },
+      "provenance_requirements": [
+        "resolved_owner",
+        "adapter_kind",
+        "backend",
+        "model_id",
+        "model_revision",
+        "model_hash_authority",
+        "license_authority",
+        "health_evidence",
+        "privacy_decision",
+        "fallback_status"
+      ],
+      "health_contract": {
+        "probe_required": true,
+        "maximum_age_seconds": 300,
+        "expected_protocol_version": "aoa-local-ai-v1",
+        "model_revision_required": true,
+        "fail_closed": true
+      }
+    },
+    {
+      "schema_version": "1.0.0",
+      "capability_id": "vision.embed",
+      "alias": "local-ai://vision/embed/default",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["media_path"],
+        "properties": {
+          "media_path": {"type": "string", "minLength": 1},
+          "sample_times_seconds": {
+            "type": "array",
+            "items": {"type": "number", "minimum": 0}
+          }
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["embeddings"],
+        "properties": {
+          "embeddings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["vector"],
+              "properties": {
+                "time_seconds": {"type": ["number", "null"], "minimum": 0},
+                "vector": {"type": "array", "items": {"type": "number"}, "minItems": 1}
+              },
+              "additionalProperties": false
+            }
+          },
+          "partial": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      },
+      "required": false,
+      "privacy_class": "local-media-sensitive",
+      "authority_class": "evidence",
+      "latency": {
+        "service_class": "batch",
+        "target_milliseconds": 20000,
+        "hard_timeout_seconds": 1200
+      },
+      "temporal_precision": "sample",
+      "fallback": {
+        "strategy_id": "localized-embedding-failure",
+        "behavior": "localized-failure",
+        "preserves_baseline": true,
+        "description": "Retain chronological and technical evidence without inventing retrieval similarity."
+      },
+      "failure_contract": {
+        "localized": true,
+        "sibling_evidence_survives": true,
+        "retryable_codes": ["provider_missing", "provider_unavailable", "provider_stale", "provider_timeout"],
+        "non_retryable_codes": ["privacy_denied", "version_mismatch", "malformed_response"]
+      },
+      "provenance_requirements": [
+        "resolved_owner",
+        "adapter_kind",
+        "backend",
+        "model_id",
+        "model_revision",
+        "model_hash_authority",
+        "license_authority",
+        "health_evidence",
+        "privacy_decision",
+        "fallback_status"
+      ],
+      "health_contract": {
+        "probe_required": true,
+        "maximum_age_seconds": 300,
+        "expected_protocol_version": "aoa-local-ai-v1",
+        "model_revision_required": true,
+        "fail_closed": true
+      }
+    },
+    {
+      "schema_version": "1.0.0",
+      "capability_id": "editorial.plan",
+      "alias": "local-ai://editorial/plan/default",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["brief", "evidence"],
+        "properties": {
+          "brief": {"type": "object"},
+          "evidence": {"type": "array", "items": {"type": "object"}},
+          "constraints": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["proposal"],
+        "properties": {
+          "proposal": {"type": "object"},
+          "rationale": {"type": "array", "items": {"type": "string"}},
+          "evidence_refs": {"type": "array", "items": {"type": "string"}},
+          "partial": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      },
+      "required": false,
+      "privacy_class": "project-confidential",
+      "authority_class": "proposal",
+      "latency": {
+        "service_class": "interactive",
+        "target_milliseconds": 5000,
+        "hard_timeout_seconds": 120
+      },
+      "temporal_precision": "none",
+      "fallback": {
+        "strategy_id": "deterministic-scenario-planner",
+        "behavior": "deterministic",
+        "preserves_baseline": true,
+        "description": "Use the checked-in deterministic scenario planner and normal Treatment review."
+      },
+      "failure_contract": {
+        "localized": true,
+        "sibling_evidence_survives": true,
+        "retryable_codes": ["provider_missing", "provider_unavailable", "provider_stale", "provider_timeout"],
+        "non_retryable_codes": ["privacy_denied", "version_mismatch", "malformed_response"]
+      },
+      "provenance_requirements": [
+        "resolved_owner",
+        "adapter_kind",
+        "backend",
+        "model_id",
+        "model_revision",
+        "model_hash_authority",
+        "license_authority",
+        "health_evidence",
+        "privacy_decision",
+        "fallback_status"
+      ],
+      "health_contract": {
+        "probe_required": true,
+        "maximum_age_seconds": 120,
+        "expected_protocol_version": "aoa-local-ai-v1",
+        "model_revision_required": true,
+        "fail_closed": true
+      }
+    },
+    {
+      "schema_version": "1.0.0",
+      "capability_id": "editorial.critique",
+      "alias": "local-ai://editorial/critique/default",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["proposal", "evidence"],
+        "properties": {
+          "proposal": {"type": "object"},
+          "evidence": {"type": "array", "items": {"type": "object"}},
+          "rubric": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": ["findings"],
+        "properties": {
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["severity", "summary"],
+              "properties": {
+                "severity": {"type": "string", "enum": ["info", "warn", "block"]},
+                "summary": {"type": "string"},
+                "evidence_refs": {"type": "array", "items": {"type": "string"}}
+              },
+              "additionalProperties": false
+            }
+          },
+          "partial": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      },
+      "required": false,
+      "privacy_class": "project-confidential",
+      "authority_class": "proposal",
+      "latency": {
+        "service_class": "interactive",
+        "target_milliseconds": 5000,
+        "hard_timeout_seconds": 120
+      },
+      "temporal_precision": "none",
+      "fallback": {
+        "strategy_id": "deterministic-quality-gates",
+        "behavior": "deterministic",
+        "preserves_baseline": true,
+        "description": "Use typed QC and require human review; never auto-approve the proposal."
+      },
+      "failure_contract": {
+        "localized": true,
+        "sibling_evidence_survives": true,
+        "retryable_codes": ["provider_missing", "provider_unavailable", "provider_stale", "provider_timeout"],
+        "non_retryable_codes": ["privacy_denied", "version_mismatch", "malformed_response"]
+      },
+      "provenance_requirements": [
+        "resolved_owner",
+        "adapter_kind",
+        "backend",
+        "model_id",
+        "model_revision",
+        "model_hash_authority",
+        "license_authority",
+        "health_evidence",
+        "privacy_decision",
+        "fallback_status"
+      ],
+      "health_contract": {
+        "probe_required": true,
+        "maximum_age_seconds": 120,
+        "expected_protocol_version": "aoa-local-ai-v1",
+        "model_revision_required": true,
+        "fail_closed": true
+      }
+    }
+  ]
+}

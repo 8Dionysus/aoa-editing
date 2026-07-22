@@ -1,0 +1,330 @@
+{
+  "$defs": {
+    "LocalProviderHealthBinding": {
+      "additionalProperties": false,
+      "description": "Untracked instructions for proving one local provider is live.",
+      "properties": {
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "endpoint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Endpoint"
+        },
+        "selector": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Selector",
+          "type": "array"
+        },
+        "status_field": {
+          "default": "status",
+          "title": "Status Field",
+          "type": "string"
+        },
+        "ready_values": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Ready Values",
+          "type": "array"
+        },
+        "observed_at_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "observed_at",
+          "title": "Observed At Field"
+        },
+        "protocol_version_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "protocol_version",
+          "title": "Protocol Version Field"
+        },
+        "model_id_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "model_id",
+          "title": "Model Id Field"
+        },
+        "model_revision_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "model_revision",
+          "title": "Model Revision Field"
+        },
+        "backend_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "backend",
+          "title": "Backend Field"
+        },
+        "timeout_seconds": {
+          "default": 8.0,
+          "exclusiveMinimum": 0,
+          "title": "Timeout Seconds",
+          "type": "number"
+        }
+      },
+      "title": "LocalProviderHealthBinding",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Untracked alias resolution; never a tracked model or filesystem link.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "alias": {
+      "pattern": "^local-ai://(speech|vision|editorial)/[a-z0-9][a-z0-9-]*/default$",
+      "title": "Alias",
+      "type": "string"
+    },
+    "state": {
+      "enum": [
+        "enabled",
+        "disabled",
+        "unavailable"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "resolved_owner": {
+      "anyOf": [
+        {
+          "enum": [
+            "abyss-stack",
+            "abyss-machine",
+            "aoa-editing"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Resolved Owner"
+    },
+    "adapter_kind": {
+      "enum": [
+        "abyss-stack-service",
+        "abyss-machine-cli",
+        "localhost-http",
+        "disabled",
+        "unavailable"
+      ],
+      "title": "Adapter Kind",
+      "type": "string"
+    },
+    "backend": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Backend"
+    },
+    "model_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Id"
+    },
+    "model_revision": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Revision"
+    },
+    "model_hash_authority": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Hash Authority"
+    },
+    "license_authority": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "License Authority"
+    },
+    "metadata_evidence": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Metadata Evidence"
+    },
+    "command": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Command",
+      "type": "array"
+    },
+    "endpoint": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Endpoint"
+    },
+    "output_selector": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Output Selector",
+      "type": "array"
+    },
+    "partial_field": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "partial",
+      "title": "Partial Field"
+    },
+    "parameters": {
+      "additionalProperties": true,
+      "title": "Parameters",
+      "type": "object"
+    },
+    "health": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LocalProviderHealthBinding"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "data_boundary": {
+      "default": "local-host",
+      "enum": [
+        "local-host",
+        "external"
+      ],
+      "title": "Data Boundary",
+      "type": "string"
+    },
+    "timeout_seconds": {
+      "default": 120.0,
+      "exclusiveMinimum": 0,
+      "title": "Timeout Seconds",
+      "type": "number"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reason"
+    }
+  },
+  "required": [
+    "alias",
+    "state",
+    "adapter_kind"
+  ],
+  "title": "LocalProviderBinding",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/local-provider-binding.schema.json"
+}

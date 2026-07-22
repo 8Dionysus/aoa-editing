@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PYTHON="${AOA_EDITING_BOOTSTRAP_PYTHON:-python3.12}"
+VENV="$("${PYTHON}" "${ROOT}/scripts/resolve_home.py" runtime)"
+if [[ ! -x "${VENV}/bin/aoa-editing" ]]; then
+  "${ROOT}/scripts/bootstrap"
+fi
+exec "${ROOT}/scripts/aoa-editing" serve --open

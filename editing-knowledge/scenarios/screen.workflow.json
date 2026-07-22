@@ -1,0 +1,181 @@
+{
+  "schema_version": "1.0.0",
+  "id": "scenario_screen_workflow",
+  "revision": 3,
+  "title": "Script-bound terminal workflow",
+  "intent": "Turn a reviewed script and a later screen recording into a concise, readable agent-workflow edit with semantic camera moves, source-contiguous pacing, live terminal holds, and explicit proof beats.",
+  "applicability": [
+    "The story is demonstrated through terminal, IDE, browser, or workflow UI states",
+    "A script can be reviewed before capture and every beat can later be bound to the immutable recording"
+  ],
+  "contraindications": [
+    "Presenter or talking-head footage is required",
+    "The workflow cannot be recorded without exposing secrets or private data",
+    "Source ranges and camera targets cannot be reviewed"
+  ],
+  "required_evidence": [
+    "media.probe",
+    "screen.workflow.binding",
+    "screen.workflow.voiceover-timing (when narration is supplied)"
+  ],
+  "allowed_operations": [
+    "select",
+    "trim",
+    "hard-cut",
+    "speed",
+    "source-contiguous-speed-tier",
+    "natural-source-hold",
+    "adjacent-speed-rebalance",
+    "contain",
+    "crop",
+    "scale",
+    "position",
+    "keyframe",
+    "caption",
+    "live-sound",
+    "voiceover",
+    "loudness-normalize"
+  ],
+  "rules": [
+    "Keep script beats, captured source ranges, and final clips linked by stable ids",
+    "Start from the already-open clean terminal rather than showing desktop or workspace switching",
+    "Type every prompt once at real-time speed, then keep the completed prompt readable before the response",
+    "Move the camera only between semantic screen states and hold during reading or typing",
+    "Preserve prompt, action, and result anchors when compressing waits",
+    "Use source-contiguous speed tiers while one agent process remains in progress; do not hide source gaps behind transitions",
+    "Treat cursor blink, progress shimmer, monotonic timers, spinners, and mascot motion as live UI evidence",
+    "Use real source for a live hold or rebalance adjacent speeds; never freeze a full terminal frame that contains live UI",
+    "Keep reference media outside project assets and render lineage",
+    "Require human review of every post-capture source binding",
+    "Require a separate attributable review of machine-drafted voiceover timing"
+  ],
+  "heuristics": [
+    "Establish wide before the first detail",
+    "Use approximately 1.5x to 2.0x focus crops",
+    "Use 0.3s to 0.7s camera transitions and 2s to 5s read holds",
+    "Use smooth moves and gradual speed tiers within one screen context and hard cuts only between distinct states",
+    "Keep ordinary workflow compression at or below 24x; require an explicit reviewed risk override above it",
+    "Render visually complex finals in bounded source-contiguous segments when the full graph exceeds resource admission, then apply the continuous narration mix once",
+    "Place captions after camera transforms in the final-frame safe area"
+  ],
+  "creative_variants": [
+    "Narration-led semantic camera",
+    "Hard-cut-only technical walkthrough",
+    "Long-read proof-focused cut"
+  ],
+  "constraints": [
+    "The pre-capture plan contains no source-media binding",
+    "The executable Treatment requires a reviewed edit spec",
+    "Legacy transform curves remain the video-safe baseline until Motion Language v2 video composition is proven",
+    "Reference-derived rules remain candidate defaults rather than Style Memory",
+    "Full-frame and region-aware temporal loops remain non-executable until their seam, timer, and QC contracts pass a generic evaluator"
+  ],
+  "failure_modes": [
+    "Camera chases the cursor",
+    "Close-up removes necessary workspace context",
+    "Wait compression removes the action or result anchor",
+    "A prompt appears as a flash, is repeated, or is rewound after typing",
+    "A 30x-plus segment reads as a cut even though its source is technically contiguous",
+    "A still hold freezes Working shimmer, cursor blink, elapsed time, or mascot animation",
+    "A full-frame loop repeats a monotonic timer or exposes a phase jump",
+    "Abrupt speed-tier changes make an otherwise continuous process feel cut",
+    "Terminal text is unreadable after scaling",
+    "Private data or notifications appear in capture"
+  ],
+  "qc": [
+    "Verify every plan beat has one or more ordered reviewed bindings",
+    "Review wide, transition, and result frames",
+    "Verify prompt entry appears once at real-time speed and the completed text remains readable",
+    "Verify every continuity group has no omitted or repeated source frame and preserves camera endpoints",
+    "Inspect live terminal regions during every hold; a static frame with a visible live signal is a failure",
+    "Warn on speeds above 24x and on speed-tier ratios that skip intermediate rates",
+    "When rendering in bounded segments, verify video continuity and mix or normalize narration only once",
+    "Check terminal text at delivery resolution",
+    "Check caption safe area after camera transforms",
+    "Check narration boundaries, speech continuity, and output loudness",
+    "Audit source lineage for reference hashes"
+  ],
+  "positive_examples": [
+    "A Codex terminal session structured as problem, prompt, action, diff, test, and result",
+    "An agent workflow where waiting is compressed but commands and proofs remain readable",
+    "A narration-led Codex session whose active work is continuously accelerated while Working shimmer and elapsed time remain alive"
+  ],
+  "negative_examples": [
+    "A presenter-led tutorial with occasional terminal overlays",
+    "An automatic cursor-follow crop with no reviewed semantic targets",
+    "A terminal walkthrough assembled from jump cuts inside one continuous agent response",
+    "A PNG hold that freezes the Working shimmer and elapsed timer"
+  ],
+  "application_history": [
+    {
+      "case_id": "screen-workflow-synthetic-integration",
+      "source_class": "synthetic human-free screen recording fixture",
+      "outcome": "pass",
+      "evidence_path": "test:tests/test_screen_workflow.py#test_reviewed_plan_and_raw_binding_create_renderable_reversible_treatment",
+      "metrics": {
+        "reviewed_binding_pass": 1.0,
+        "preview_render_qc_pass": 1.0
+      }
+    },
+    {
+      "case_id": "screen-workflow-reviewed-voiceover-integration",
+      "source_class": "synthetic human-free screen recording plus synthetic narration",
+      "outcome": "pass",
+      "evidence_path": "test:tests/test_screen_workflow.py#test_reviewed_voiceover_drives_beat_timing_and_renders_as_narration",
+      "metrics": {
+        "reviewed_voiceover_timing_pass": 1.0,
+        "canonical_audio_render_pass": 1.0
+      }
+    },
+    {
+      "case_id": "builder-week-hard-cut-compression-review",
+      "source_class": "real human-free Codex terminal session with delivered narration",
+      "outcome": "fail",
+      "evidence_path": "operator-review:screen-workflow/2026-07-21/hard-cut-compression",
+      "metrics": {
+        "source_process_continuity_preserved": 0.0,
+        "prompt_entry_readable": 0.0,
+        "full_frame_crop_safe": 0.0
+      }
+    },
+    {
+      "case_id": "builder-week-continuous-speed-review",
+      "source_class": "real human-free Codex terminal session with delivered narration",
+      "outcome": "warn",
+      "evidence_path": "operator-review:screen-workflow/2026-07-21/continuous-speed",
+      "metrics": {
+        "operator_score_fraction": 0.87,
+        "delivery_width": 1920.0,
+        "delivery_height": 1080.0,
+        "delivery_duration_seconds": 167.5,
+        "source_process_continuity_preserved": 1.0,
+        "visible_frozen_live_ui_defect": 1.0
+      }
+    }
+  ],
+  "status": "candidate",
+  "camera_motion": null,
+  "promotion_questions": [
+    "Which transcript-to-beat mappings need more than segment-level review across technical narration styles?",
+    "What activity evidence best separates readable holds from non-informative waits?",
+    "When is a floating screen stage preferable to full-bleed capture?",
+    "Can a region-aware temporal hold preserve stable prompt text while phase-matching periodic shimmer and keeping timers monotonic?",
+    "Which visual-activity and semantic-density measurements should author smooth speed ramps rather than constant tiers?",
+    "What render-cost model should choose bounded video segments and one final narration mix before resource admission fails?"
+  ],
+  "provenance": {
+    "tool": "aoa-editing-scenario-authoring",
+    "tool_version": "0.2.0",
+    "command": [],
+    "parameters": {
+      "planner": "screen_workflow",
+      "reference_authority": "candidate-only",
+      "human_free_visuals": true,
+      "reviewed_operator_experience_admitted": "2026-07-21"
+    },
+    "model_id": null,
+    "model_revision": null,
+    "deterministic": true,
+    "generated_at": "2026-07-21T00:00:00Z"
+  }
+}

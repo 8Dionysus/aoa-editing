@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PYTHON="${AOA_EDITING_BOOTSTRAP_PYTHON:-python3.12}"
+VENV="$("${PYTHON}" "${ROOT}/scripts/resolve_home.py" runtime)"
+cd "${ROOT}"
+
+"${VENV}/bin/python" scripts/generate_schemas.py --check
+"${VENV}/bin/ruff" check .
+"${VENV}/bin/mypy"
+"${VENV}/bin/pytest" -q
+"${VENV}/bin/aoa-editing" doctor --json >/dev/null
+"${ROOT}/scripts/ui-smoke" >/dev/null
+printf 'AoA Editing verification passed.\n'

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=AoA Editing
+Comment=Local-first evidence-backed AI video co-editor
+Exec=@ROOT@/scripts/launch
+Icon=video-x-generic
+Terminal=false
+Categories=AudioVideo;Video;Utility;
+StartupNotify=true
+

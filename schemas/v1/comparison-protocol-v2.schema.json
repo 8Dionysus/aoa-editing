@@ -1,0 +1,552 @@
+{
+  "$defs": {
+    "ComparisonCriteriaV2": {
+      "additionalProperties": false,
+      "properties": {
+        "threshold_revision": {
+          "const": "reference-comparison-v2-frozen-1",
+          "title": "Threshold Revision",
+          "type": "string"
+        },
+        "frozen_before_first_v2_render": {
+          "const": true,
+          "title": "Frozen Before First V2 Render",
+          "type": "boolean"
+        },
+        "threshold_basis": {
+          "additionalProperties": true,
+          "title": "Threshold Basis",
+          "type": "object"
+        },
+        "technical": {
+          "$ref": "#/$defs/TechnicalComparisonCriteriaV2"
+        },
+        "geometric": {
+          "$ref": "#/$defs/GeometricComparisonCriteriaV2"
+        },
+        "temporal": {
+          "$ref": "#/$defs/TemporalComparisonCriteriaV2"
+        },
+        "perceptual": {
+          "$ref": "#/$defs/PerceptualComparisonCriteriaV2"
+        },
+        "editorial": {
+          "$ref": "#/$defs/EditorialComparisonCriteriaV2"
+        },
+        "lineage": {
+          "$ref": "#/$defs/ComparisonLineageCriteriaV2"
+        }
+      },
+      "required": [
+        "threshold_revision",
+        "frozen_before_first_v2_render",
+        "threshold_basis",
+        "technical",
+        "geometric",
+        "temporal",
+        "perceptual",
+        "editorial",
+        "lineage"
+      ],
+      "title": "ComparisonCriteriaV2",
+      "type": "object"
+    },
+    "ComparisonLineageCriteriaV2": {
+      "additionalProperties": false,
+      "properties": {
+        "only_visual_source_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Only Visual Source Hash",
+          "type": "string"
+        },
+        "reference_hash_forbidden": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Reference Hash Forbidden",
+          "type": "string"
+        }
+      },
+      "required": [
+        "only_visual_source_hash",
+        "reference_hash_forbidden"
+      ],
+      "title": "ComparisonLineageCriteriaV2",
+      "type": "object"
+    },
+    "EditorialComparisonCriteriaV2": {
+      "additionalProperties": false,
+      "properties": {
+        "human_review_required": {
+          "const": true,
+          "title": "Human Review Required",
+          "type": "boolean"
+        },
+        "rubric": {
+          "items": {
+            "enum": [
+              "smoothness",
+              "weight",
+              "natural_acceleration",
+              "rotation_character",
+              "twist_character",
+              "settle_timing",
+              "absence_of_mechanical_linearity",
+              "compositional_match"
+            ],
+            "type": "string"
+          },
+          "title": "Rubric",
+          "type": "array"
+        },
+        "required_verdict": {
+          "const": "perceptually_and_editorially_indistinguishable",
+          "title": "Required Verdict",
+          "type": "string"
+        }
+      },
+      "required": [
+        "human_review_required",
+        "rubric",
+        "required_verdict"
+      ],
+      "title": "EditorialComparisonCriteriaV2",
+      "type": "object"
+    },
+    "FrameRate": {
+      "additionalProperties": false,
+      "properties": {
+        "numerator": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        }
+      },
+      "title": "FrameRate",
+      "type": "object"
+    },
+    "GeometricComparisonCriteriaV2": {
+      "additionalProperties": false,
+      "properties": {
+        "all_frame_center_rmse_normalized_max": {
+          "exclusiveMinimum": 0,
+          "title": "All Frame Center Rmse Normalized Max",
+          "type": "number"
+        },
+        "all_frame_scale_rmse_max": {
+          "exclusiveMinimum": 0,
+          "title": "All Frame Scale Rmse Max",
+          "type": "number"
+        },
+        "all_frame_rotation_rmse_degrees_max": {
+          "exclusiveMinimum": 0,
+          "title": "All Frame Rotation Rmse Degrees Max",
+          "type": "number"
+        },
+        "visible_boundary_rmse_normalized_max": {
+          "exclusiveMinimum": 0,
+          "title": "Visible Boundary Rmse Normalized Max",
+          "type": "number"
+        },
+        "homography_corner_rmse_normalized_max": {
+          "exclusiveMinimum": 0,
+          "title": "Homography Corner Rmse Normalized Max",
+          "type": "number"
+        }
+      },
+      "required": [
+        "all_frame_center_rmse_normalized_max",
+        "all_frame_scale_rmse_max",
+        "all_frame_rotation_rmse_degrees_max",
+        "visible_boundary_rmse_normalized_max",
+        "homography_corner_rmse_normalized_max"
+      ],
+      "title": "GeometricComparisonCriteriaV2",
+      "type": "object"
+    },
+    "PerceptualComparisonCriteriaV2": {
+      "additionalProperties": false,
+      "properties": {
+        "vmaf_mean_min": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Vmaf Mean Min",
+          "type": "number"
+        },
+        "ssim_all_min": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Ssim All Min",
+          "type": "number"
+        },
+        "psnr_diagnostic_only": {
+          "const": true,
+          "title": "Psnr Diagnostic Only",
+          "type": "boolean"
+        },
+        "no_black_frames": {
+          "const": true,
+          "title": "No Black Frames",
+          "type": "boolean"
+        },
+        "no_edge_exposure": {
+          "const": true,
+          "title": "No Edge Exposure",
+          "type": "boolean"
+        },
+        "no_unwanted_blur": {
+          "const": true,
+          "title": "No Unwanted Blur",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "vmaf_mean_min",
+        "ssim_all_min",
+        "psnr_diagnostic_only",
+        "no_black_frames",
+        "no_edge_exposure",
+        "no_unwanted_blur"
+      ],
+      "title": "PerceptualComparisonCriteriaV2",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "TechnicalComparisonCriteriaV2": {
+      "additionalProperties": false,
+      "properties": {
+        "resolution": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "title": "Resolution",
+          "type": "array"
+        },
+        "frame_rate": {
+          "$ref": "#/$defs/FrameRate"
+        },
+        "frame_count_tolerance": {
+          "const": 0,
+          "title": "Frame Count Tolerance",
+          "type": "integer"
+        },
+        "audio_structure_exact": {
+          "const": true,
+          "title": "Audio Structure Exact",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "resolution",
+        "frame_rate",
+        "frame_count_tolerance",
+        "audio_structure_exact"
+      ],
+      "title": "TechnicalComparisonCriteriaV2",
+      "type": "object"
+    },
+    "TemporalComparisonCriteriaV2": {
+      "additionalProperties": false,
+      "properties": {
+        "position_velocity_rmse_max": {
+          "exclusiveMinimum": 0,
+          "title": "Position Velocity Rmse Max",
+          "type": "number"
+        },
+        "scale_velocity_rmse_max": {
+          "exclusiveMinimum": 0,
+          "title": "Scale Velocity Rmse Max",
+          "type": "number"
+        },
+        "angular_velocity_rmse_degrees_max": {
+          "exclusiveMinimum": 0,
+          "title": "Angular Velocity Rmse Degrees Max",
+          "type": "number"
+        },
+        "position_acceleration_rmse_max": {
+          "exclusiveMinimum": 0,
+          "title": "Position Acceleration Rmse Max",
+          "type": "number"
+        },
+        "scale_acceleration_rmse_max": {
+          "exclusiveMinimum": 0,
+          "title": "Scale Acceleration Rmse Max",
+          "type": "number"
+        },
+        "angular_acceleration_rmse_degrees_max": {
+          "exclusiveMinimum": 0,
+          "title": "Angular Acceleration Rmse Degrees Max",
+          "type": "number"
+        },
+        "jerk_rmse_max": {
+          "exclusiveMinimum": 0,
+          "title": "Jerk Rmse Max",
+          "type": "number"
+        },
+        "phase_onset_tolerance_frames": {
+          "minimum": 0,
+          "title": "Phase Onset Tolerance Frames",
+          "type": "integer"
+        },
+        "phase_settle_tolerance_frames": {
+          "minimum": 0,
+          "title": "Phase Settle Tolerance Frames",
+          "type": "integer"
+        },
+        "temporal_flow_rmse_max": {
+          "exclusiveMinimum": 0,
+          "title": "Temporal Flow Rmse Max",
+          "type": "number"
+        }
+      },
+      "required": [
+        "position_velocity_rmse_max",
+        "scale_velocity_rmse_max",
+        "angular_velocity_rmse_degrees_max",
+        "position_acceleration_rmse_max",
+        "scale_acceleration_rmse_max",
+        "angular_acceleration_rmse_degrees_max",
+        "jerk_rmse_max",
+        "phase_onset_tolerance_frames",
+        "phase_settle_tolerance_frames",
+        "temporal_flow_rmse_max"
+      ],
+      "title": "TemporalComparisonCriteriaV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Revision-bound executable protocol frozen before the first v2 candidate.",
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "spec_id": {
+      "title": "Spec Id",
+      "type": "string"
+    },
+    "spec_path": {
+      "title": "Spec Path",
+      "type": "string"
+    },
+    "spec_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Spec Sha256",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "reference_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Reference Sha256",
+      "type": "string"
+    },
+    "implementation_revision": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Implementation Revision",
+      "type": "string"
+    },
+    "git_clean": {
+      "const": true,
+      "title": "Git Clean",
+      "type": "boolean"
+    },
+    "threshold_revision": {
+      "const": "reference-comparison-v2-frozen-1",
+      "title": "Threshold Revision",
+      "type": "string"
+    },
+    "criteria": {
+      "$ref": "#/$defs/ComparisonCriteriaV2"
+    },
+    "algorithm_revision": {
+      "const": "comparison-v2-all-frame-1",
+      "title": "Algorithm Revision",
+      "type": "string"
+    },
+    "algorithms": {
+      "additionalProperties": true,
+      "title": "Algorithms",
+      "type": "object"
+    },
+    "mandatory_axes": {
+      "items": {
+        "enum": [
+          "technical",
+          "geometric",
+          "temporal",
+          "perceptual",
+          "editorial",
+          "lineage"
+        ],
+        "type": "string"
+      },
+      "title": "Mandatory Axes",
+      "type": "array"
+    },
+    "mandatory_checks": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Mandatory Checks",
+      "type": "array"
+    },
+    "required_artifacts": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Required Artifacts",
+      "type": "array"
+    },
+    "human_rubric": {
+      "items": {
+        "enum": [
+          "smoothness",
+          "weight",
+          "natural_acceleration",
+          "rotation_character",
+          "twist_character",
+          "settle_timing",
+          "absence_of_mechanical_linearity",
+          "compositional_match",
+          "reference_overlay_absence",
+          "encoding_defect_separation"
+        ],
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Human Rubric",
+      "type": "array"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "frozen_before_first_candidate_render": {
+      "const": true,
+      "default": true,
+      "title": "Frozen Before First Candidate Render",
+      "type": "boolean"
+    },
+    "reference_media_allowed_in_render": {
+      "const": false,
+      "default": false,
+      "title": "Reference Media Allowed In Render",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "spec_id",
+    "spec_path",
+    "spec_sha256",
+    "source_sha256",
+    "reference_sha256",
+    "implementation_revision",
+    "git_clean",
+    "threshold_revision",
+    "criteria",
+    "algorithm_revision",
+    "algorithms",
+    "mandatory_axes",
+    "mandatory_checks",
+    "required_artifacts",
+    "human_rubric",
+    "provenance"
+  ],
+  "title": "ReferenceComparisonProtocolV2",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/comparison-protocol-v2.schema.json"
+}
