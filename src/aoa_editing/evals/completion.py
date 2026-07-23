@@ -13,9 +13,13 @@ from typing import Any, Literal
 from aoa_editing.domain.models import (
     CheckResult,
     CompletionAuditReport,
+    MotionGroundTruthCorpus,
+    MotionRecoveryGateReport,
+    MotionRecoveryReport,
     Provenance,
     TechniquePacket,
 )
+from aoa_editing.evals.motion_recovery import REQUIRED_CORPUS_TAGS
 from aoa_editing.infrastructure.media import sha256_file
 
 DONE_REQUIREMENTS = (
@@ -447,6 +451,51 @@ def run_completion_audit(
         for item in fixture_reports.values()
     ]
     fixture_payloads = [_object(path) for path in fixture_paths]
+    motion_validation_errors: dict[str, str] = {}
+    try:
+        gate_contract = MotionRecoveryGateReport.model_validate(motion_gate)
+    except ValueError as error:
+        gate_contract = None
+        motion_validation_errors["gate"] = str(error)
+    try:
+        corpus_contract = MotionGroundTruthCorpus.model_validate(_object(corpus_path))
+    except ValueError as error:
+        corpus_contract = None
+        motion_validation_errors["corpus"] = str(error)
+    recovery_contracts: dict[str, MotionRecoveryReport] = {}
+    for (fixture_id, _), payload in zip(
+        fixture_reports.items(),
+        fixture_payloads,
+        strict=True,
+    ):
+        try:
+            recovery_contracts[fixture_id] = MotionRecoveryReport.model_validate(payload)
+        except ValueError as error:
+            motion_validation_errors[f"recovery:{fixture_id}"] = str(error)
+    truth_by_id = (
+        {item.id: item for item in corpus_contract.fixtures}
+        if corpus_contract is not None
+        else {}
+    )
+    motion_contracts_ok = (
+        gate_contract is not None
+        and corpus_contract is not None
+        and not motion_validation_errors
+        and set(fixture_reports) == set(recovery_contracts) == set(truth_by_id)
+        and len(recovery_contracts) >= 23
+        and set(corpus_contract.requirement_coverage) >= REQUIRED_CORPUS_TAGS
+        and corpus_contract.provenance.parameters.get("selection") == "complete"
+        and gate_contract.provenance.parameters.get("fixture_selection") == "complete"
+        and all(
+            report.source_sha256 == truth_by_id[fixture_id].source_sha256
+            and report.video_sha256 == truth_by_id[fixture_id].video_sha256
+            and report.frame_count
+            == report.analyzed_frame_count
+            == len(report.frames)
+            == truth_by_id[fixture_id].frame_count
+            for fixture_id, report in recovery_contracts.items()
+        )
+    )
     motion_gate_ok = (
         motion_gate.get("overall") == "pass"
         and motion_gate.get("git_clean") is True
@@ -454,7 +503,7 @@ def run_completion_audit(
         and motion_gate.get("mandatory_skips") == 0
         and sha256_file(corpus_path) == motion_gate.get("corpus_sha256")
         and bool(fixture_payloads)
-        and all(item.get("overall") == "pass" for item in fixture_payloads)
+        and motion_contracts_ok
         and _all_checks_pass(motion_gate)
     )
     checks.append(
@@ -466,6 +515,7 @@ def run_completion_audit(
             git_revision=motion_gate.get("git_revision"),
             fixture_count=len(fixture_payloads),
             corpus_sha256=motion_gate.get("corpus_sha256"),
+            validation_errors=motion_validation_errors,
         )
     )
 

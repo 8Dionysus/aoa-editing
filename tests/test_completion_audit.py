@@ -8,6 +8,7 @@ from typing import Any
 
 from aoa_editing.domain.models import CompletionAuditReport
 from aoa_editing.evals.completion import DONE_REQUIREMENTS, run_completion_audit
+from aoa_editing.evals.motion_recovery import REQUIRED_CORPUS_TAGS
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> Path:
@@ -20,8 +21,13 @@ def _digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _check(identifier: str = "fixture") -> dict[str, str]:
-    return {"id": identifier, "status": "pass"}
+def _check(identifier: str = "fixture") -> dict[str, Any]:
+    return {
+        "id": identifier,
+        "status": "pass",
+        "summary": "fixture passed",
+        "measured": {},
+    }
 
 
 def _candidate_packet() -> dict[str, Any]:
@@ -197,11 +203,124 @@ def test_completion_audit_v2_is_fail_closed_and_covers_every_done_row(
         },
     )
 
-    corpus = tmp_path / "motion-corpus.json"
-    corpus.write_text("{}\n", encoding="utf-8")
-    fixture_report = _write_json(
-        tmp_path / "motion-fixture.json",
-        {"overall": "pass"},
+    motion_source = tmp_path / "motion-source.png"
+    motion_video = tmp_path / "motion-video.avi"
+    motion_source.write_bytes(b"synthetic-motion-source")
+    motion_video.write_bytes(b"synthetic-motion-video")
+    motion_source_hash = _digest(motion_source)
+    motion_video_hash = _digest(motion_video)
+    identity_matrix = [
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 0.0, 1.0],
+    ]
+    provenance = {
+        "tool": "fixture",
+        "tool_version": "1",
+        "deterministic": True,
+    }
+    truth_frame = {
+        "frame": 0,
+        "time_seconds": 0.0,
+        "matrix_3x3": identity_matrix,
+        "center_x": 0.5,
+        "center_y": 0.5,
+        "scale_relative_to_contain": 1.0,
+        "rotation_degrees": 0.0,
+        "pivot_x": 0.5,
+        "pivot_y": 0.5,
+        "velocity": {},
+        "acceleration": {},
+        "jerk": {},
+        "phase": "onset",
+        "transform_order": ["translate", "rotate", "scale"],
+    }
+    recovery_frame = {
+        "frame": 0,
+        "time_seconds": 0.0,
+        "selected_model": "similarity",
+        "matrix_3x3": identity_matrix,
+        "scale_relative_to_contain": 1.0,
+        "rotation_degrees": 0.0,
+        "center_x": 0.5,
+        "center_y": 0.5,
+        "match_count": 1,
+        "inlier_count": 1,
+        "inlier_ratio": 1.0,
+        "reprojection_rmse": 0.0,
+        "confidence": 1.0,
+        "model_scores": {"similarity": 0.0},
+        "velocity": {},
+        "acceleration": {},
+        "jerk": {},
+        "pivot_x": None,
+        "pivot_y": None,
+        "pivot_identifiability": "unidentifiable",
+        "outlier": False,
+    }
+    fixture_reports: dict[str, str] = {}
+    truth_fixtures: list[dict[str, Any]] = []
+    for index in range(23):
+        fixture_id = f"fixture-{index:02d}"
+        truth_fixtures.append(
+            {
+                "id": fixture_id,
+                "content_origin": "synthetic_ground_truth",
+                "source_path": str(motion_source),
+                "source_sha256": motion_source_hash,
+                "video_path": str(motion_video),
+                "video_sha256": motion_video_hash,
+                "source_width": 64,
+                "source_height": 64,
+                "output_width": 64,
+                "output_height": 64,
+                "frame_count": 1,
+                "frame_rate": {"numerator": 1, "denominator": 1},
+                "expected_model": "similarity",
+                "expected_curve": "linear",
+                "requirement_tags": sorted(REQUIRED_CORPUS_TAGS),
+                "frames": [truth_frame],
+                "provenance": provenance,
+            }
+        )
+        fixture_report = _write_json(
+            tmp_path / "motion-recoveries" / fixture_id / "motion-recovery.json",
+            {
+                "source_sha256": motion_source_hash,
+                "video_sha256": motion_video_hash,
+                "frame_count": 1,
+                "analyzed_frame_count": 1,
+                "frame_rate": {"numerator": 1, "denominator": 1},
+                "width": 64,
+                "height": 64,
+                "selected_model": "similarity",
+                "model_distribution": {"similarity": 1},
+                "curve_hint": "linear",
+                "curve_confidence": 1.0,
+                "mean_confidence": 1.0,
+                "model_mismatch": False,
+                "outlier_frames": [],
+                "phase_boundaries": {"onset": 0, "settle": 0},
+                "uncertainties": ["fixture"],
+                "alternative_explanations": ["fixture"],
+                "frames": [recovery_frame],
+                "provenance": provenance,
+            },
+        )
+        fixture_reports[fixture_id] = str(fixture_report)
+    corpus = _write_json(
+        tmp_path / "motion-corpus.json",
+        {
+            "content_origin": "synthetic_ground_truth",
+            "fixtures": truth_fixtures,
+            "requirement_coverage": {
+                item: ["fixture-00"] for item in sorted(REQUIRED_CORPUS_TAGS)
+            },
+            "provenance": {
+                **provenance,
+                "parameters": {"selection": "complete"},
+            },
+        },
     )
     motion_gate = _write_json(
         tmp_path / "motion-gate.json",
@@ -212,8 +331,13 @@ def test_completion_audit_v2_is_fail_closed_and_covers_every_done_row(
             "mandatory_skips": 0,
             "corpus_path": str(corpus),
             "corpus_sha256": _digest(corpus),
-            "fixture_reports": {"curve": str(fixture_report)},
+            "fixture_reports": fixture_reports,
+            "metrics": {item: {} for item in fixture_reports},
             "checks": [_check()],
+            "provenance": {
+                **provenance,
+                "parameters": {"fixture_selection": "complete"},
+            },
         },
     )
     motion_plot = tmp_path / "motion.png"
