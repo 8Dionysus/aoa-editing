@@ -90,8 +90,14 @@ The baseline also checks explicit schemas for Brief revisions, evidence
 authority/time ranges/supersession, treatment comparison facts, decision graphs,
 patch previews, render frame ranges, derived media, style confirmations,
 clean-rerun reports, transfer reports, and candidate technique packets. A
-completion-audit schema joins those independent receipts into a fail-closed DoD
-map. A schema-compatible additive field has a default; an incompatible future
+`completion-audit.schema.json` v2 joins every current proof lane into a
+fail-closed DoD map. It records the exact clean Git revision and goal boundary,
+hashes every evidence file, binds Spec/Protocol/Reconstruction/Clean Rerun
+bytes, requires an exact local tag, preserves a separate human editorial
+verdict, and records unresolved checks instead of emitting a partial pass. Its
+publication check accepts a pre-existing remote only after explicit opt-in and
+successful read-only proof that no goal commit or completion tag is published.
+A schema-compatible additive field has a default; an incompatible future
 change requires a new schema version and explicit migration rather than silent
 parsing.
 

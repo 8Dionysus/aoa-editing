@@ -3,52 +3,51 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SPEC=""
+BASELINE=""
 OUTPUT=""
-VISUAL_REVIEW=""
+
+usage() {
+  echo "Usage: scripts/reproduce-reference --spec FILE --baseline FILE --output NEW_DIR"
+}
+
 while [[ "$#" -gt 0 ]]; do
   case "$1" in
-    -h|--help) echo "Usage: scripts/reproduce-reference --spec FILE --output NEW_DIR --visual-review TEXT"; exit 0 ;;
-    --spec) SPEC="$2"; shift 2 ;;
-    --output) OUTPUT="$2"; shift 2 ;;
-    --visual-review) VISUAL_REVIEW="$2"; shift 2 ;;
-    *) echo "Unknown argument: $1" >&2; exit 2 ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --spec)
+      SPEC="$2"
+      shift 2
+      ;;
+    --baseline)
+      BASELINE="$2"
+      shift 2
+      ;;
+    --output)
+      OUTPUT="$2"
+      shift 2
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      usage >&2
+      exit 2
+      ;;
   esac
 done
-if [[ -z "${SPEC}" || -z "${OUTPUT}" || -z "${VISUAL_REVIEW}" ]]; then
-  echo "Usage: scripts/reproduce-reference --spec FILE --output NEW_DIR --visual-review TEXT" >&2
+
+if [[ -z "${SPEC}" || -z "${BASELINE}" || -z "${OUTPUT}" ]]; then
+  usage >&2
   exit 2
 fi
 if [[ -e "${OUTPUT}" ]]; then
   echo "Output must be a new path: ${OUTPUT}" >&2
   exit 2
 fi
-mkdir -p "${OUTPUT}"
-"${ROOT}/scripts/aoa-editing" eval reference-reconstruct \
-  --spec "${SPEC}" --output "${OUTPUT}/reconstruction"
-"${ROOT}/scripts/aoa-editing" eval reference-compare \
+
+"${ROOT}/scripts/aoa-editing" eval clean-rerun-v2 \
   --spec "${SPEC}" \
-  --reconstruction "${OUTPUT}/reconstruction/reconstruction.json" \
-  --output "${OUTPUT}/comparison" \
-  --visual-review "${VISUAL_REVIEW}"
-"${ROOT}/scripts/aoa-editing" eval technique-extract \
-  --spec "${SPEC}" \
-  --comparison "${OUTPUT}/comparison/comparison.json" \
-  --output "${OUTPUT}/technique-candidate.json"
-"${ROOT}/scripts/aoa-editing" eval clean-rerun \
-  --spec "${SPEC}" \
-  --baseline "${OUTPUT}/reconstruction/reconstruction.json" \
-  --output "${OUTPUT}/clean-rerun"
-"${ROOT}/scripts/aoa-editing" eval technique-transfer \
-  --packet "${OUTPUT}/technique-candidate.json" \
-  --output "${OUTPUT}/transfer"
-PYTHON="${AOA_EDITING_BOOTSTRAP_PYTHON:-python3.12}"
-EVAL_ROOT="$("${PYTHON}" "${ROOT}/scripts/resolve_home.py" evals)"
-"${ROOT}/scripts/aoa-editing" eval completion-audit \
-  --readiness "${EVAL_ROOT}/readiness/latest.json" \
-  --reconstruction "${OUTPUT}/reconstruction/reconstruction.json" \
-  --comparison "${OUTPUT}/comparison/comparison.json" \
-  --clean-rerun "${OUTPUT}/clean-rerun/clean-rerun.json" \
-  --transfer "${OUTPUT}/transfer/transfer.json" \
-  --candidate "${OUTPUT}/transfer/technique-candidate-with-transfer.json" \
-  --output "${OUTPUT}/completion"
-echo "Reference reconstruction and all completion proofs passed: ${OUTPUT}"
+  --baseline "${BASELINE}" \
+  --output "${OUTPUT}"
+
+echo "Selected Reference v2 semantics reproduced independently: ${OUTPUT}"

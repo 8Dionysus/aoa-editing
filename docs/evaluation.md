@@ -254,12 +254,22 @@ remains objective `pass` but combined `warn`.
 3. **Transfer:** run a materially different generic source through the same
    scenario without target-specific branches.
 
-`scripts/reproduce-reference` is the documented full-chain runner after a spec
-has been frozen. The clean rerun uses a fresh data/cache/tmp root and compares
-semantic fingerprints, output hashes, inodes, lineages, derivatives, decisions,
-and QC. Transfer generates or accepts an unrelated source, applies the extracted
-packet through normal services, remeasures motion, renders both profiles, checks
-editable exports, and appends application history without promoting status.
+`scripts/reproduce-reference` is the documented selected-result replay after a
+Spec and passing `5r` receipt have been frozen:
+
+```bash
+./scripts/reproduce-reference \
+  --spec /path/to/reference-spec-v2.json \
+  --baseline /path/to/selected/reconstruction-pass-v2.json \
+  --output /new/absent/clean-rerun-v2-root
+```
+
+It delegates to the product-owned Clean Rerun v2 evaluator. The replay uses a
+fresh data/cache/tmp root and compares semantic fingerprints, output hashes,
+inodes, lineages, derivatives, decisions, and QC. The separate transfer command
+generates unrelated sources, applies the extracted packet through normal
+services, remeasures motion, renders both profiles, checks editable exports,
+and appends application history without promoting status.
 
 The selected v2 result has a stricter replay lane:
 
@@ -379,18 +389,36 @@ claim:
 
 ```bash
 ./scripts/aoa-editing eval completion-audit \
+  --storage /path/to/relocation-receipt.json \
   --readiness /path/to/readiness.json \
-  --reconstruction /path/to/reconstruction.json \
-  --comparison /path/to/comparison.json \
-  --clean-rerun /path/to/clean-rerun.json \
-  --transfer /path/to/transfer.json \
-  --candidate /path/to/technique-candidate-with-transfer.json \
+  --motion-gate /path/to/current/motion-recovery-gate.json \
+  --motion-evidence /path/to/reference-motion-evidence-v2.json \
+  --spec /path/to/reference-spec-v2.json \
+  --reconstruction /path/to/selected/reconstruction-pass-v2.json \
+  --comparison /path/to/reviewed-comparison-v2.json \
+  --reference-ui /path/to/reference-ui-smoke.json \
+  --clean-rerun /path/to/clean-rerun-v2.json \
+  --transfer /path/to/transfer-corpus-v2.json \
+  --candidate editing-knowledge/candidates/continuous-contain-reveal.json \
+  --provider-alias /path/to/current/provider-alias-eval.json \
+  --local-ai /path/to/current/local-ai-integration.json \
+  --goal-start-revision FULL_40_HEX_REVISION \
+  --private-history-ref local/private-history-pre-publication-20260721 \
+  --local-tag prototype-v0.3.0 \
   --output /new/completion-audit/root
 ```
 
-It re-hashes both immutable user inputs, requires the readiness revision to
-equal the clean current Git revision, verifies render and evidence paths,
-rejects missing visual review or any nested skip/failure, proves that the
-reference hash is absent from render lineage and tracked files, requires two
-passing candidate applications, and maps every row in
-`docs/definition-of-done.md` to a passing check.
+For an already evolved repository that has a deliberate remote, add
+`--allow-preexisting-remote`. This does not waive non-publication: the audit
+must successfully inspect all remote heads/tags, find no goal commit or final
+tag there, and confirm that the working branch has no upstream. Do not use the
+flag merely to ignore a remote error.
+
+The audit re-hashes both immutable user inputs and every receipt, requires the
+readiness, motion gate, provider gate, and live-AI gate to match the clean
+current Git revision, verifies the exact Spec/Protocol/Reconstruction/Clean
+Rerun chain, rejects a missing human review or any nested skip/failure, proves
+that the reference hash is absent from render lineage and tracked files, and
+maps all 28 rows in `docs/definition-of-done.md` to passing checks. Until the
+human verdict and local tag exist, the report is expected to fail and names
+those unresolved checks; it never upgrades an objective-only comparison.

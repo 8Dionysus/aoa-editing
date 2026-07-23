@@ -4138,17 +4138,38 @@ class TechniqueTransferCorpusReportV2(FrozenModel):
 class CompletionAuditReport(FrozenModel):
     """Fail-closed evidence map for the complete prototype definition of done."""
 
-    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    schema_version: Literal["2.0.0"] = "2.0.0"
     id: str = Field(default_factory=lambda: new_id("completion"))
     generated_at: datetime = Field(default_factory=utc_now)
-    git_revision: str
-    evidence: dict[str, str]
-    requirement_coverage: dict[str, list[str]]
-    checks: list[CheckResult]
-    artifacts: dict[str, str]
-    mandatory_skips: int = Field(ge=0)
+    git_revision: str = Field(pattern=r"^[0-9a-f]{40}$")
+    git_clean: bool
+    goal_start_revision: str = Field(pattern=r"^[0-9a-f]{40}$")
+    local_tag: str | None = None
+    evidence: dict[str, str] = Field(min_length=1)
+    evidence_sha256: dict[str, str] = Field(min_length=1)
+    requirement_coverage: dict[str, list[str]] = Field(min_length=1)
+    checks: list[CheckResult] = Field(min_length=1)
+    artifacts: dict[str, str] = Field(min_length=1)
+    unresolved_requirements: list[str] = Field(default_factory=list)
+    unresolved_checks: list[str] = Field(default_factory=list)
+    mandatory_skips: int = Field(default=0, ge=0)
     provenance: Provenance
-    overall: Literal["pass", "fail", "warn"]
+    overall: Literal["pass", "fail"]
+
+    @model_validator(mode="after")
+    def validate_completion_claim(self) -> CompletionAuditReport:
+        if set(self.evidence) != set(self.evidence_sha256):
+            raise ValueError("completion evidence paths and hashes must have identical keys")
+        if self.overall == "pass" and (
+            self.local_tag is None
+            or not self.git_clean
+            or self.unresolved_requirements
+            or self.unresolved_checks
+            or self.mandatory_skips != 0
+            or any(item.status != "pass" for item in self.checks)
+        ):
+            raise ValueError("passing completion audit contains unresolved evidence")
+        return self
 
 
 class StorageRelocationEntry(FrozenModel):

@@ -1389,30 +1389,104 @@ def eval_local_ai_live(
 @eval_app.command("completion-audit")
 def eval_completion_audit(
     readiness: Annotated[Path, typer.Option("--readiness", help="Passing readiness receipt")],
-    reconstruction: Annotated[
-        Path, typer.Option("--reconstruction", help="Passing reconstruction receipt")
+    storage: Annotated[
+        Path,
+        typer.Option("--storage", help="Passing product-home relocation receipt"),
     ],
-    comparison: Annotated[Path, typer.Option("--comparison", help="Passing comparison report")],
-    clean_rerun: Annotated[Path, typer.Option("--clean-rerun", help="Passing clean-rerun report")],
-    transfer: Annotated[Path, typer.Option("--transfer", help="Passing transfer report")],
+    motion_gate: Annotated[
+        Path,
+        typer.Option("--motion-gate", help="Current passing motion-recovery gate"),
+    ],
+    motion_evidence: Annotated[
+        Path,
+        typer.Option("--motion-evidence", help="All-frame Reference Motion Evidence v2"),
+    ],
+    spec: Annotated[
+        Path,
+        typer.Option("--spec", help="Frozen Reference Reconstruction Spec v2"),
+    ],
+    reconstruction: Annotated[
+        Path,
+        typer.Option("--reconstruction", help="Selected passing reconstruction v2 receipt"),
+    ],
+    comparison: Annotated[
+        Path,
+        typer.Option("--comparison", help="Reviewed passing Comparison v2 report"),
+    ],
+    reference_ui: Annotated[
+        Path,
+        typer.Option("--reference-ui", help="Real Chromium reference-workspace receipt"),
+    ],
+    clean_rerun: Annotated[
+        Path,
+        typer.Option("--clean-rerun", help="Passing clean-rerun v2 report"),
+    ],
+    transfer: Annotated[
+        Path,
+        typer.Option("--transfer", help="Passing seven-case transfer corpus v2"),
+    ],
     candidate: Annotated[
         Path, typer.Option("--candidate", help="Transferred candidate technique packet")
     ],
+    provider_alias: Annotated[
+        Path,
+        typer.Option("--provider-alias", help="Current passing provider-alias eval"),
+    ],
+    local_ai: Annotated[
+        Path,
+        typer.Option("--local-ai", help="Current passing live local-AI admission"),
+    ],
+    goal_start_revision: Annotated[
+        str,
+        typer.Option(
+            "--goal-start-revision",
+            help="Pre-existing revision after which publication is forbidden",
+        ),
+    ],
     output: Annotated[Path, typer.Option("--output", help="New completion-audit root")],
+    private_history_ref: Annotated[
+        str,
+        typer.Option(
+            "--private-history-ref",
+            help="Local pre-publication history whose tip tree equals the public root",
+        ),
+    ] = "local/private-history-pre-publication-20260721",
+    local_tag: Annotated[
+        str | None,
+        typer.Option("--local-tag", help="Local-only final tag that must point at HEAD"),
+    ] = None,
+    allow_preexisting_remote: Annotated[
+        bool,
+        typer.Option(
+            "--allow-preexisting-remote",
+            help="Accept the evolved repo only if no goal commit or tag is published",
+        ),
+    ] = False,
 ) -> None:
-    """Join all proof lanes and fail unless every Definition of Done row is green."""
+    """Join every v2 proof lane and fail closed on human, tag, or publication debt."""
 
     repo = Path(__file__).resolve().parents[2]
     report = run_completion_audit(
         repo=repo,
         lock_path=repo / "evals" / "reference.lock.json",
+        storage_path=storage,
         readiness_path=readiness,
+        motion_gate_path=motion_gate,
+        motion_evidence_path=motion_evidence,
+        spec_path=spec,
         reconstruction_path=reconstruction,
         comparison_path=comparison,
+        reference_ui_path=reference_ui,
         clean_rerun_path=clean_rerun,
         transfer_path=transfer,
         candidate_path=candidate,
+        provider_alias_path=provider_alias,
+        local_ai_path=local_ai,
         output_root=output,
+        private_history_ref=private_history_ref,
+        goal_start_revision=goal_start_revision,
+        local_tag=local_tag,
+        allow_preexisting_remote=allow_preexisting_remote,
     )
     _emit(report)
     if report.overall != "pass":

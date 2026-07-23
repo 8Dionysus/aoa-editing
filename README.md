@@ -117,12 +117,14 @@ into a universal editing rule.
 ## Status
 
 The production-shaped prototype and its fail-closed completion chain are
-executable. Generic readiness, source-only reference reconstruction, objective
-and visual comparison, clean-room replay, unrelated-media transfer, and every
-definition-of-done row have runtime receipts. The extracted reveal technique is
-checked in as a reviewable candidate, not promoted canon. See the
-[completion report](docs/completion-report.md) for the exact evidence boundary
-and measured result.
+executable. Generic readiness, source-only reference reconstruction, all-frame
+objective comparison, clean-room replay, heterogeneous transfer, provider
+aliases, and live existing-ASR admission have runtime proof lanes. A complete
+operator claim additionally requires an attributable human verdict for the
+exact candidate, current revision receipts, and a local-only final tag; prose
+does not substitute for them. The extracted reveal technique is checked in as
+a reviewable candidate, not promoted canon. See the
+[completion report](docs/completion-report.md) for the exact evidence boundary.
 
 The v2 layer now includes a seven-class transfer corpus, normalized phase-aware
 motion, typed pre-render resolution/composition refusals, and the canonical

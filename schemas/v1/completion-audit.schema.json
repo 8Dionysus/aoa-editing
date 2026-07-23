@@ -105,8 +105,8 @@
   "description": "Fail-closed evidence map for the complete prototype definition of done.",
   "properties": {
     "schema_version": {
-      "const": "1.0.0",
-      "default": "1.0.0",
+      "const": "2.0.0",
+      "default": "2.0.0",
       "title": "Schema Version",
       "type": "string"
     },
@@ -120,14 +120,45 @@
       "type": "string"
     },
     "git_revision": {
+      "pattern": "^[0-9a-f]{40}$",
       "title": "Git Revision",
       "type": "string"
+    },
+    "git_clean": {
+      "title": "Git Clean",
+      "type": "boolean"
+    },
+    "goal_start_revision": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Goal Start Revision",
+      "type": "string"
+    },
+    "local_tag": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Local Tag"
     },
     "evidence": {
       "additionalProperties": {
         "type": "string"
       },
+      "minProperties": 1,
       "title": "Evidence",
+      "type": "object"
+    },
+    "evidence_sha256": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "minProperties": 1,
+      "title": "Evidence Sha256",
       "type": "object"
     },
     "requirement_coverage": {
@@ -137,6 +168,7 @@
         },
         "type": "array"
       },
+      "minProperties": 1,
       "title": "Requirement Coverage",
       "type": "object"
     },
@@ -144,6 +176,7 @@
       "items": {
         "$ref": "#/$defs/CheckResult"
       },
+      "minItems": 1,
       "title": "Checks",
       "type": "array"
     },
@@ -151,10 +184,26 @@
       "additionalProperties": {
         "type": "string"
       },
+      "minProperties": 1,
       "title": "Artifacts",
       "type": "object"
     },
+    "unresolved_requirements": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Unresolved Requirements",
+      "type": "array"
+    },
+    "unresolved_checks": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Unresolved Checks",
+      "type": "array"
+    },
     "mandatory_skips": {
+      "default": 0,
       "minimum": 0,
       "title": "Mandatory Skips",
       "type": "integer"
@@ -165,8 +214,7 @@
     "overall": {
       "enum": [
         "pass",
-        "fail",
-        "warn"
+        "fail"
       ],
       "title": "Overall",
       "type": "string"
@@ -174,11 +222,13 @@
   },
   "required": [
     "git_revision",
+    "git_clean",
+    "goal_start_revision",
     "evidence",
+    "evidence_sha256",
     "requirement_coverage",
     "checks",
     "artifacts",
-    "mandatory_skips",
     "provenance",
     "overall"
   ],

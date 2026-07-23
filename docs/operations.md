@@ -126,14 +126,14 @@ host AI capabilities. The product binds to `127.0.0.1:8787` by default.
 | Inspect all-frame reference workspace | `./scripts/aoa-editing reference show --help` |
 | Preview semantic motion correction | `./scripts/aoa-editing reference preview-language --help` |
 | Review individual corrections | `./scripts/aoa-editing reference review --help` |
-| Replay selected v2 semantics in a clean home | `./scripts/aoa-editing eval clean-rerun-v2 --help` |
+| Replay selected v2 semantics in a clean home | `./scripts/reproduce-reference --help` or `./scripts/aoa-editing eval clean-rerun-v2 --help` |
 | Safe cleanup preview/apply | `./scripts/clean` / `./scripts/clean --apply` |
-| Full frozen-spec proof chain | `./scripts/reproduce-reference --help` (usage on missing args) |
 
-`scripts/reproduce-reference` requires a frozen spec, a new output root, and an
-explicit visual-review statement. It performs reconstruction, comparison,
-candidate extraction, clean rerun, and unrelated-source transfer. It cannot run
-against a stale readiness revision.
+`scripts/reproduce-reference` requires a frozen Spec v2, the selected passing
+`5r` reconstruction receipt, and a new output root. It performs the independent
+Clean Rerun v2 only. Objective comparison, human review, transfer, provider
+proof, and final completion remain separate authority lanes and are joined only
+by `eval completion-audit`.
 
 `workflow time-voiceover` requires a reviewed capture plan and an already
 ingested narration asset. It writes a new timing draft and may invoke only the
