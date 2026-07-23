@@ -90,6 +90,7 @@
           "type": "array"
         },
         "reviewed_artifacts": {
+          "description": "Portable comparison artifact roles from the generated review template; literal report artifact paths remain valid for compatibility.",
           "items": {
             "type": "string"
           },

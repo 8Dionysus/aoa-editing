@@ -135,7 +135,10 @@ This re-analyzes every candidate frame and writes the candidate motion receipt,
 frame diagnostics, VMAF/SSIM/PSNR logs, side-by-side and amplified difference
 videos, phase contact sheet, and normalized geometric/derivative plots. An
 objective pass remains `warn` until the operator completes the generated rubric
-and attaches it without changing the objective report:
+and attaches it without changing the objective report. The generated
+`reviewed_artifacts` role names are portable identifiers and are resolved
+against the exact comparison report; literal relative or absolute artifact
+paths remain accepted for compatibility:
 
 ```bash
 ./scripts/aoa-editing eval reference-review-v2 \

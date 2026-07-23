@@ -3785,7 +3785,13 @@ class EditorialReviewV2(FrozenModel):
         "revision_required",
     ]
     rubric: list[EditorialRubricAssessmentV2] = Field(min_length=1)
-    reviewed_artifacts: list[str] = Field(min_length=3)
+    reviewed_artifacts: list[str] = Field(
+        min_length=3,
+        description=(
+            "Portable comparison artifact roles from the generated review template; "
+            "literal report artifact paths remain valid for compatibility."
+        ),
+    )
     reference_media_role: Literal["comparison_only"] = "comparison_only"
 
     @model_validator(mode="after")
