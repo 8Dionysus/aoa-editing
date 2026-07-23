@@ -53,10 +53,10 @@ from aoa_editing.evals.clean_rerun_v2 import run_clean_rerun_v2
 from aoa_editing.evals.comparison import run_comparison
 from aoa_editing.evals.comparison_v2 import (
     freeze_comparison_protocol_v2,
-    record_editorial_review_v2,
     run_comparison_v2,
 )
 from aoa_editing.evals.completion import run_completion_audit
+from aoa_editing.evals.editorial_review_v2 import record_editorial_review_v2
 from aoa_editing.evals.fixtures import create_transfer_fixture
 from aoa_editing.evals.gate import require_readiness, run_readiness_gate
 from aoa_editing.evals.generic import run_generic_suite

@@ -12,9 +12,9 @@ from aoa_editing.domain.models import (
 from aoa_editing.evals.comparison_v2 import (
     ComparisonV2Error,
     freeze_comparison_protocol_v2,
-    record_editorial_review_v2,
     run_comparison_v2,
 )
+from aoa_editing.evals.editorial_review_v2 import record_editorial_review_v2
 from aoa_editing.evals.motion_fixtures import fixture_definitions, render_motion_fixture
 from aoa_editing.evals.reference_v2 import analyze_reference_v2
 from aoa_editing.infrastructure.media import sha256_file

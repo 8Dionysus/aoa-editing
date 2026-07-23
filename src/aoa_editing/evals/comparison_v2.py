@@ -1348,20 +1348,8 @@ def _editorial(
             measured=measured,
         )
     actual = {item.criterion for item in review.rubric}
-    reviewed_tokens = set(review.reviewed_artifacts)
-    reviewed_paths = {
-        str(Path(item).expanduser().resolve(strict=False))
-        for item in review.reviewed_artifacts
-    }
-    reviewed_artifact_roles = {
-        role
-        for role, path in required_artifacts.items()
-        if (
-            role in reviewed_tokens
-            or str(path) in reviewed_tokens
-            or str(path.expanduser().resolve(strict=False)) in reviewed_paths
-        )
-    }
+    artifacts_reviewed = {str(Path(item)) for item in review.reviewed_artifacts}
+    expected_artifacts = {str(path) for path in required_artifacts.values()}
     passed = (
         review.protocol_id == protocol.id
         and review.candidate_sha256 == candidate_sha256
@@ -1370,7 +1358,7 @@ def _editorial(
         and all(item.status == "pass" for item in review.rubric)
         and review.verdict == protocol.criteria.editorial.required_verdict
         and artifacts_exist
-        and set(required_artifacts) <= reviewed_artifact_roles
+        and expected_artifacts <= artifacts_reviewed
     )
     measured = {
         "required": True,
@@ -1381,10 +1369,6 @@ def _editorial(
         "reviewer_role": review.reviewer_role,
         "verdict": review.verdict,
         "reviewed_artifacts": review.reviewed_artifacts,
-        "reviewed_artifact_roles": sorted(reviewed_artifact_roles),
-        "required_artifacts": {
-            role: str(path) for role, path in required_artifacts.items()
-        },
         "artifacts_exist": artifacts_exist,
     }
     return measured, _check(
