@@ -25,4 +25,5 @@ receipt paths are populated in closeout reports rather than committed here.
 | Transfer | transfer corpus v2 | five heterogeneous applications, two typed refusals, source-only lineage, matrix equivalence, QC/exports, distinct-workspace replay |
 | Knowledge candidate | Tree of Editing packet | curve/phase model, evidence and resolution constraints, positive/negative history, non-claims, promotion questions |
 | AI provider boundary | capability catalog, local overlay, resolver, receipts | all failure/privacy/fallback cases, live doctor binding, human supersession, baseline without AI |
+| Live local AI admission | stack registration, machine health, product alias eval | existing ASR revision/license/byte/resource proof, real alias receipt, synthetic WER/CER versus no-AI baseline, zero new model downloads |
 | Honest closeout | completion audit | every row linked, no mandatory skip |

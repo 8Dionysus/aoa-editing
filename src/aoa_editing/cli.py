@@ -60,6 +60,10 @@ from aoa_editing.evals.completion import run_completion_audit
 from aoa_editing.evals.fixtures import create_transfer_fixture
 from aoa_editing.evals.gate import require_readiness, run_readiness_gate
 from aoa_editing.evals.generic import run_generic_suite
+from aoa_editing.evals.local_ai_live import (
+    DEFAULT_FIXTURE_TEXT,
+    run_local_ai_live_eval,
+)
 from aoa_editing.evals.motion_recovery import run_motion_recovery_gate
 from aoa_editing.evals.provider_aliases import run_provider_alias_eval
 from aoa_editing.evals.reconstruction import run_reconstruction
@@ -1299,6 +1303,85 @@ def eval_provider_aliases(
             repository=repo,
             implementation_revision=revision,
             git_clean=not bool(status),
+        )
+    )
+
+
+@eval_app.command("local-ai-live")
+def eval_local_ai_live(
+    output: Annotated[
+        Path,
+        typer.Option("--output", help="New immutable live local-AI evaluation root"),
+    ],
+    model_owner_root: Annotated[
+        Path,
+        typer.Option(
+            "--model-owner-root",
+            help="Owner root that must contain the selected live model",
+        ),
+    ],
+    upstream_revision_file: Annotated[
+        Path,
+        typer.Option(
+            "--upstream-revision-file",
+            help="Local owner ref containing the exact upstream model revision",
+        ),
+    ],
+    upstream_metadata_file: Annotated[
+        Path,
+        typer.Option(
+            "--upstream-metadata-file",
+            help="Captured official model metadata JSON with revision and license",
+        ),
+    ],
+    stack_source_registration: Annotated[
+        Path,
+        typer.Option(
+            "--stack-source-registration",
+            help="Source-owned stack service registration",
+        ),
+    ],
+    stack_deployed_registration: Annotated[
+        Path,
+        typer.Option(
+            "--stack-deployed-registration",
+            help="Deployed stack service registration",
+        ),
+    ],
+    stack_managed_units: Annotated[
+        Path,
+        typer.Option(
+            "--stack-managed-units",
+            help="Stack-managed user-unit allowlist",
+        ),
+    ],
+    fixture_text: Annotated[
+        str,
+        typer.Option(
+            "--fixture-text",
+            help="Known synthetic Russian text; never reference or user media",
+        ),
+    ] = DEFAULT_FIXTURE_TEXT,
+) -> None:
+    """Prove one existing host model through the alias and no-AI baseline."""
+
+    repo = Path(__file__).resolve().parents[2]
+    revision = _git(repo, ["rev-parse", "HEAD"]).strip()
+    status = _git(repo, ["status", "--porcelain"]).strip()
+    _emit(
+        run_local_ai_live_eval(
+            output,
+            settings=Settings.from_env(),
+            repository=repo,
+            implementation_revision=revision,
+            git_clean=not bool(status),
+            expected_model_owner_root=model_owner_root,
+            upstream_revision_file=upstream_revision_file,
+            upstream_metadata_file=upstream_metadata_file,
+            stack_source_registration=stack_source_registration,
+            stack_deployed_registration=stack_deployed_registration,
+            stack_managed_units=stack_managed_units,
+            fixture_text=fixture_text,
         )
     )
 

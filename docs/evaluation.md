@@ -337,6 +337,37 @@ resolution of an untracked fixture binding, and evidence/proposal-only output
 authority. This gate proves the adapter boundary; live host model quality and
 ownership require a separate owner inventory and product invocation receipt.
 
+## Live local-AI admission gate
+
+`aoa-editing eval local-ai-live` closes the separate Phase-15 claim without
+downloading a model or opening the sealed reference. It must run inside
+`abyss-machine resource launch --class medium --kind ai` and against a clean
+revision. Required caller inputs bind the current stack source/deploy unit,
+managed-unit allowlist, model-owner root, local upstream revision ref, and a
+captured official model metadata response.
+
+The gate joins:
+
+- fresh machine capability, dictation, model, and device packets;
+- the ignored alias binding and its live normalized health;
+- byte-equal source/deploy stack registration and the active warm service;
+- upstream revision and MIT license metadata;
+- SHA-256 for every regular OpenVINO export file plus an aggregate tree hash;
+- current/peak service and evaluator-unit memory, device route, health latency,
+  invocation latency, and estimated inference RTF;
+- a real provider receipt for unrelated known-text synthetic Russian speech;
+- frozen WER `<= 0.40` and CER `<= 0.25`;
+- an isolated no-binding product run that retains silence/loudness evidence and
+  localizes the missing transcript.
+
+The report decides all nine declared capability gaps. Only the already-present
+ASR is bound. Inventory-only embeddings, resident text models, and multimodal
+projectors do not become product capabilities; VAD, diarization, vision,
+retrieval, editorial models, and a video-language model remain unbound until
+separate evidence justifies them. `new_models_installed=false`,
+`downloaded_model_bytes=0`, evidence-only authority, no reference input, and
+zero mandatory skips are schema invariants.
+
 ## Completion claim
 
 The goal is complete only when the full definition of done has an evidence row,

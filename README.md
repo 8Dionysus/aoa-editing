@@ -58,6 +58,7 @@ through typed provider aliases. No cloud service or API key is required.
 ./scripts/eval
 ./scripts/aoa-editing gate readiness
 ./scripts/aoa-editing eval provider-aliases --output /new/provider-alias-eval
+./scripts/aoa-editing eval local-ai-live --help
 ```
 
 The readiness gate does not decode the operator-supplied reference. It must pass

@@ -52,6 +52,37 @@ redact runtime media paths and credential-like fields. Disabled, unavailable,
 and unbound capabilities are honest normal states; deterministic editing does
 not depend on them.
 
+The Phase-15 live admission is deliberately separate from the mocked alias
+contract corpus. Capture the small official upstream metadata JSON, then run
+the whole evaluator through the host resource gate:
+
+```bash
+abyss-machine resource launch \
+  --class medium \
+  --kind ai \
+  --memory-demand-mib 1280 \
+  --demand-key aoa-editing-local-ai-live \
+  --demand-owner aoa-editing \
+  --estimate-source warm-owner-service-plus-model-hash \
+  --estimate-confidence high \
+  -- \
+  ./scripts/aoa-editing eval local-ai-live \
+    --output /new/repo-local/eval-root \
+    --model-owner-root /owner/stack/model-root \
+    --upstream-revision-file /owner/cache/model/refs/main \
+    --upstream-metadata-file /local/captured/model-metadata.json \
+    --stack-source-registration /owner/stack/source/dictation.service \
+    --stack-deployed-registration /owner/stack/deploy/dictation.service \
+    --stack-managed-units /owner/stack/deploy/managed-units.txt
+```
+
+The 1280 MiB reservation is the observed client peak rounded up with operating
+margin; it is not a static memory cap. The output hashes every selected
+model-export file but does not copy weights. It generates unrelated known-text
+speech, invokes the real alias, measures WER/CER, service and evaluator-unit
+memory, and runtime fit, then compares against an isolated product home with no
+AI binding. The reference and user media are not inputs.
+
 ## Bootstrap
 
 `scripts/bootstrap` uses CPython 3.12, pinned runtime/dev dependencies, a pinned
@@ -85,6 +116,7 @@ host AI capabilities. The product binds to `127.0.0.1:8787` by default.
 | Review narration timing | `./scripts/aoa-editing workflow review-voiceover --help` |
 | Admit reviewed demo experience | `./scripts/aoa-editing workflow admit-experience --help` |
 | Provider alias contract gate | `./scripts/aoa-editing eval provider-aliases --output /new/root` |
+| Live existing-model admission | `./scripts/aoa-editing eval local-ai-live --help` under the medium AI resource gate |
 | Sealed readiness gate | `./scripts/aoa-editing gate readiness` |
 | Freeze Comparison v2 | `./scripts/aoa-editing eval reference-freeze-comparison-v2 --help` |
 | Run/review Comparison v2 | `./scripts/aoa-editing eval reference-compare-v2 --help` / `reference-review-v2 --help` |

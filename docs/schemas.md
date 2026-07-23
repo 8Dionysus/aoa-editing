@@ -111,6 +111,12 @@ one redacted resolution/invocation attempt and restricts output authority to
 evidence or proposal. `provider-alias-eval.schema.json` joins every failure,
 privacy, fallback, partial-evidence, human-supersession, doctor, and no-AI
 baseline proof into one revision-bound receipt.
+`local-ai-integration.schema.json` is the separate Phase-15 live proof. It
+requires a decision for every declared capability, one owner-registered
+existing ASR, upstream revision/license evidence, a complete OpenVINO export
+tree digest, measured host fit and latency, a real alias receipt, known-text
+WER/CER, and the still-functional no-AI baseline. It forbids model downloads,
+reference input, canonical AI authority, and mandatory skips.
 
 `screen-workflow-plan.schema.json` is the pre-capture boundary: script hash,
 complete terminal template catalog, stable authored beats, capture/framing

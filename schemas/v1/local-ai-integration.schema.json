@@ -1,0 +1,692 @@
+{
+  "$defs": {
+    "CheckResult": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "warn",
+            "skip"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "measured": {
+          "additionalProperties": true,
+          "title": "Measured",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "summary"
+      ],
+      "title": "CheckResult",
+      "type": "object"
+    },
+    "LocalAICapabilityDecision": {
+      "additionalProperties": false,
+      "description": "One Phase-15 capability decision after owner and product-gap review.",
+      "properties": {
+        "capability_id": {
+          "pattern": "^(speech|vision|editorial)\\.[a-z0-9][a-z0-9-]*$",
+          "title": "Capability Id",
+          "type": "string"
+        },
+        "product_gap": {
+          "minLength": 1,
+          "title": "Product Gap",
+          "type": "string"
+        },
+        "host_status": {
+          "minLength": 1,
+          "title": "Host Status",
+          "type": "string"
+        },
+        "stack_registration": {
+          "enum": [
+            "live",
+            "inventory-only",
+            "absent",
+            "not-required"
+          ],
+          "title": "Stack Registration",
+          "type": "string"
+        },
+        "action": {
+          "enum": [
+            "bind-existing",
+            "keep-unbound",
+            "defer"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "alias_state": {
+          "enum": [
+            "enabled",
+            "unbound",
+            "disabled",
+            "unavailable"
+          ],
+          "title": "Alias State",
+          "type": "string"
+        },
+        "candidate_model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Candidate Model Id"
+        },
+        "new_model_required": {
+          "const": false,
+          "default": false,
+          "title": "New Model Required",
+          "type": "boolean"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "capability_id",
+        "product_gap",
+        "host_status",
+        "stack_registration",
+        "action",
+        "alias_state",
+        "rationale"
+      ],
+      "title": "LocalAICapabilityDecision",
+      "type": "object"
+    },
+    "LocalAILiveTranscriptCase": {
+      "additionalProperties": false,
+      "description": "Known-text synthetic speech compared with the no-AI baseline.",
+      "properties": {
+        "case_id": {
+          "minLength": 1,
+          "title": "Case Id",
+          "type": "string"
+        },
+        "fixture_generator": {
+          "minLength": 1,
+          "title": "Fixture Generator",
+          "type": "string"
+        },
+        "expected_text": {
+          "minLength": 1,
+          "title": "Expected Text",
+          "type": "string"
+        },
+        "actual_text": {
+          "minLength": 1,
+          "title": "Actual Text",
+          "type": "string"
+        },
+        "fixture_audio_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Fixture Audio Sha256",
+          "type": "string"
+        },
+        "fixture_duration_seconds": {
+          "exclusiveMinimum": 0,
+          "title": "Fixture Duration Seconds",
+          "type": "number"
+        },
+        "provider_receipt_path": {
+          "minLength": 1,
+          "title": "Provider Receipt Path",
+          "type": "string"
+        },
+        "provider_receipt_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Provider Receipt Sha256",
+          "type": "string"
+        },
+        "provider_outcome": {
+          "enum": [
+            "succeeded",
+            "partial"
+          ],
+          "title": "Provider Outcome",
+          "type": "string"
+        },
+        "word_error_rate": {
+          "minimum": 0,
+          "title": "Word Error Rate",
+          "type": "number"
+        },
+        "character_error_rate": {
+          "minimum": 0,
+          "title": "Character Error Rate",
+          "type": "number"
+        },
+        "baseline_transcript_available": {
+          "const": false,
+          "default": false,
+          "title": "Baseline Transcript Available",
+          "type": "boolean"
+        },
+        "baseline_evidence_kinds": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Baseline Evidence Kinds",
+          "type": "array"
+        },
+        "baseline_failure_code": {
+          "const": "provider_missing",
+          "title": "Baseline Failure Code",
+          "type": "string"
+        },
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/CheckResult"
+          },
+          "minItems": 1,
+          "title": "Checks",
+          "type": "array"
+        },
+        "overall": {
+          "enum": [
+            "pass",
+            "fail"
+          ],
+          "title": "Overall",
+          "type": "string"
+        }
+      },
+      "required": [
+        "case_id",
+        "fixture_generator",
+        "expected_text",
+        "actual_text",
+        "fixture_audio_sha256",
+        "fixture_duration_seconds",
+        "provider_receipt_path",
+        "provider_receipt_sha256",
+        "provider_outcome",
+        "word_error_rate",
+        "character_error_rate",
+        "baseline_evidence_kinds",
+        "baseline_failure_code",
+        "checks",
+        "overall"
+      ],
+      "title": "LocalAILiveTranscriptCase",
+      "type": "object"
+    },
+    "LocalAIModelEvidence": {
+      "additionalProperties": false,
+      "description": "Revision, license, byte, and registration evidence for a selected model.",
+      "properties": {
+        "model_id": {
+          "minLength": 1,
+          "title": "Model Id",
+          "type": "string"
+        },
+        "model_owner": {
+          "const": "abyss-stack",
+          "title": "Model Owner",
+          "type": "string"
+        },
+        "runtime_owner": {
+          "const": "abyss-machine",
+          "title": "Runtime Owner",
+          "type": "string"
+        },
+        "adapter_owner": {
+          "const": "aoa-editing",
+          "title": "Adapter Owner",
+          "type": "string"
+        },
+        "owner_model_root": {
+          "minLength": 1,
+          "title": "Owner Model Root",
+          "type": "string"
+        },
+        "upstream_revision": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Upstream Revision",
+          "type": "string"
+        },
+        "upstream_metadata_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Upstream Metadata Sha256",
+          "type": "string"
+        },
+        "inventory_revision": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Inventory Revision",
+          "type": "string"
+        },
+        "export_tree_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Export Tree Sha256",
+          "type": "string"
+        },
+        "export_file_count": {
+          "exclusiveMinimum": 0,
+          "title": "Export File Count",
+          "type": "integer"
+        },
+        "export_size_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Export Size Bytes",
+          "type": "integer"
+        },
+        "license_id": {
+          "minLength": 1,
+          "title": "License Id",
+          "type": "string"
+        },
+        "license_authority": {
+          "minLength": 1,
+          "title": "License Authority",
+          "type": "string"
+        },
+        "stack_service_unit": {
+          "minLength": 1,
+          "title": "Stack Service Unit",
+          "type": "string"
+        },
+        "stack_source_registration_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Stack Source Registration Sha256",
+          "type": "string"
+        },
+        "stack_deployed_registration_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Stack Deployed Registration Sha256",
+          "type": "string"
+        },
+        "stack_registration_parity": {
+          "const": true,
+          "title": "Stack Registration Parity",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "model_id",
+        "model_owner",
+        "runtime_owner",
+        "adapter_owner",
+        "owner_model_root",
+        "upstream_revision",
+        "upstream_metadata_sha256",
+        "inventory_revision",
+        "export_tree_sha256",
+        "export_file_count",
+        "export_size_bytes",
+        "license_id",
+        "license_authority",
+        "stack_service_unit",
+        "stack_source_registration_sha256",
+        "stack_deployed_registration_sha256",
+        "stack_registration_parity"
+      ],
+      "title": "LocalAIModelEvidence",
+      "type": "object"
+    },
+    "LocalAIResourceEvidence": {
+      "additionalProperties": false,
+      "description": "Measured host fit and latency for one live alias invocation.",
+      "properties": {
+        "resource_class": {
+          "const": "medium",
+          "title": "Resource Class",
+          "type": "string"
+        },
+        "resource_kind": {
+          "const": "ai",
+          "title": "Resource Kind",
+          "type": "string"
+        },
+        "available_devices": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Available Devices",
+          "type": "array"
+        },
+        "selected_backend": {
+          "minLength": 1,
+          "title": "Selected Backend",
+          "type": "string"
+        },
+        "selected_device_route": {
+          "minLength": 1,
+          "title": "Selected Device Route",
+          "type": "string"
+        },
+        "npu_used": {
+          "const": false,
+          "default": false,
+          "title": "Npu Used",
+          "type": "boolean"
+        },
+        "npu_decision": {
+          "minLength": 1,
+          "title": "Npu Decision",
+          "type": "string"
+        },
+        "service_active": {
+          "const": true,
+          "title": "Service Active",
+          "type": "boolean"
+        },
+        "service_memory_current_bytes_before": {
+          "minimum": 0,
+          "title": "Service Memory Current Bytes Before",
+          "type": "integer"
+        },
+        "service_memory_current_bytes_after": {
+          "minimum": 0,
+          "title": "Service Memory Current Bytes After",
+          "type": "integer"
+        },
+        "service_memory_peak_bytes": {
+          "minimum": 0,
+          "title": "Service Memory Peak Bytes",
+          "type": "integer"
+        },
+        "evaluation_unit_memory_current_bytes": {
+          "minimum": 0,
+          "title": "Evaluation Unit Memory Current Bytes",
+          "type": "integer"
+        },
+        "evaluation_unit_memory_peak_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Evaluation Unit Memory Peak Bytes",
+          "type": "integer"
+        },
+        "model_disk_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Model Disk Bytes",
+          "type": "integer"
+        },
+        "health_latency_milliseconds": {
+          "minimum": 0,
+          "title": "Health Latency Milliseconds",
+          "type": "number"
+        },
+        "end_to_end_latency_milliseconds": {
+          "exclusiveMinimum": 0,
+          "title": "End To End Latency Milliseconds",
+          "type": "number"
+        },
+        "estimated_inference_latency_milliseconds": {
+          "minimum": 0,
+          "title": "Estimated Inference Latency Milliseconds",
+          "type": "number"
+        },
+        "audio_duration_seconds": {
+          "exclusiveMinimum": 0,
+          "title": "Audio Duration Seconds",
+          "type": "number"
+        },
+        "estimated_inference_rtf": {
+          "minimum": 0,
+          "title": "Estimated Inference Rtf",
+          "type": "number"
+        },
+        "resource_gate_unit": {
+          "minLength": 1,
+          "title": "Resource Gate Unit",
+          "type": "string"
+        },
+        "resource_gate_admitted": {
+          "const": true,
+          "title": "Resource Gate Admitted",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "resource_class",
+        "resource_kind",
+        "available_devices",
+        "selected_backend",
+        "selected_device_route",
+        "npu_decision",
+        "service_active",
+        "service_memory_current_bytes_before",
+        "service_memory_current_bytes_after",
+        "service_memory_peak_bytes",
+        "evaluation_unit_memory_current_bytes",
+        "evaluation_unit_memory_peak_bytes",
+        "model_disk_bytes",
+        "health_latency_milliseconds",
+        "end_to_end_latency_milliseconds",
+        "estimated_inference_latency_milliseconds",
+        "audio_duration_seconds",
+        "estimated_inference_rtf",
+        "resource_gate_unit",
+        "resource_gate_admitted"
+      ],
+      "title": "LocalAIResourceEvidence",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Fail-closed Phase-15 proof for owner-correct existing local AI.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "implementation_revision": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Implementation Revision",
+      "type": "string"
+    },
+    "git_clean": {
+      "const": true,
+      "title": "Git Clean",
+      "type": "boolean"
+    },
+    "selected_alias": {
+      "const": "local-ai://speech/transcript/default",
+      "title": "Selected Alias",
+      "type": "string"
+    },
+    "capability_decisions": {
+      "items": {
+        "$ref": "#/$defs/LocalAICapabilityDecision"
+      },
+      "minItems": 9,
+      "title": "Capability Decisions",
+      "type": "array"
+    },
+    "model": {
+      "$ref": "#/$defs/LocalAIModelEvidence"
+    },
+    "resources": {
+      "$ref": "#/$defs/LocalAIResourceEvidence"
+    },
+    "cases": {
+      "items": {
+        "$ref": "#/$defs/LocalAILiveTranscriptCase"
+      },
+      "minItems": 1,
+      "title": "Cases",
+      "type": "array"
+    },
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/CheckResult"
+      },
+      "minItems": 1,
+      "title": "Checks",
+      "type": "array"
+    },
+    "artifacts": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Artifacts",
+      "type": "object"
+    },
+    "new_models_installed": {
+      "const": false,
+      "default": false,
+      "title": "New Models Installed",
+      "type": "boolean"
+    },
+    "downloaded_model_bytes": {
+      "const": 0,
+      "default": 0,
+      "title": "Downloaded Model Bytes",
+      "type": "integer"
+    },
+    "baseline_requires_ai": {
+      "const": false,
+      "default": false,
+      "title": "Baseline Requires Ai",
+      "type": "boolean"
+    },
+    "ai_output_authority": {
+      "const": "evidence",
+      "title": "Ai Output Authority",
+      "type": "string"
+    },
+    "mandatory_skips": {
+      "const": 0,
+      "default": 0,
+      "title": "Mandatory Skips",
+      "type": "integer"
+    },
+    "reference_media_used_as_input": {
+      "const": false,
+      "default": false,
+      "title": "Reference Media Used As Input",
+      "type": "boolean"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "overall": {
+      "enum": [
+        "pass",
+        "fail"
+      ],
+      "title": "Overall",
+      "type": "string"
+    }
+  },
+  "required": [
+    "implementation_revision",
+    "git_clean",
+    "selected_alias",
+    "capability_decisions",
+    "model",
+    "resources",
+    "cases",
+    "checks",
+    "artifacts",
+    "ai_output_authority",
+    "provenance",
+    "overall"
+  ],
+  "title": "LocalAIIntegrationReport",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/local-ai-integration.schema.json"
+}
