@@ -53,13 +53,17 @@ from aoa_editing.evals.clean_rerun_v2 import run_clean_rerun_v2
 from aoa_editing.evals.comparison import run_comparison
 from aoa_editing.evals.comparison_v2 import (
     freeze_comparison_protocol_v2,
-    record_editorial_review_v2,
     run_comparison_v2,
 )
 from aoa_editing.evals.completion import run_completion_audit
+from aoa_editing.evals.editorial_review_v2 import record_editorial_review_v2
 from aoa_editing.evals.fixtures import create_transfer_fixture
 from aoa_editing.evals.gate import require_readiness, run_readiness_gate
 from aoa_editing.evals.generic import run_generic_suite
+from aoa_editing.evals.local_ai_live import (
+    DEFAULT_FIXTURE_TEXT,
+    run_local_ai_live_eval,
+)
 from aoa_editing.evals.motion_recovery import run_motion_recovery_gate
 from aoa_editing.evals.provider_aliases import run_provider_alias_eval
 from aoa_editing.evals.reconstruction import run_reconstruction
@@ -1303,33 +1307,186 @@ def eval_provider_aliases(
     )
 
 
+@eval_app.command("local-ai-live")
+def eval_local_ai_live(
+    output: Annotated[
+        Path,
+        typer.Option("--output", help="New immutable live local-AI evaluation root"),
+    ],
+    model_owner_root: Annotated[
+        Path,
+        typer.Option(
+            "--model-owner-root",
+            help="Owner root that must contain the selected live model",
+        ),
+    ],
+    upstream_revision_file: Annotated[
+        Path,
+        typer.Option(
+            "--upstream-revision-file",
+            help="Local owner ref containing the exact upstream model revision",
+        ),
+    ],
+    upstream_metadata_file: Annotated[
+        Path,
+        typer.Option(
+            "--upstream-metadata-file",
+            help="Captured official model metadata JSON with revision and license",
+        ),
+    ],
+    stack_source_registration: Annotated[
+        Path,
+        typer.Option(
+            "--stack-source-registration",
+            help="Source-owned stack service registration",
+        ),
+    ],
+    stack_deployed_registration: Annotated[
+        Path,
+        typer.Option(
+            "--stack-deployed-registration",
+            help="Deployed stack service registration",
+        ),
+    ],
+    stack_managed_units: Annotated[
+        Path,
+        typer.Option(
+            "--stack-managed-units",
+            help="Stack-managed user-unit allowlist",
+        ),
+    ],
+    fixture_text: Annotated[
+        str,
+        typer.Option(
+            "--fixture-text",
+            help="Known synthetic Russian text; never reference or user media",
+        ),
+    ] = DEFAULT_FIXTURE_TEXT,
+) -> None:
+    """Prove one existing host model through the alias and no-AI baseline."""
+
+    repo = Path(__file__).resolve().parents[2]
+    revision = _git(repo, ["rev-parse", "HEAD"]).strip()
+    status = _git(repo, ["status", "--porcelain"]).strip()
+    _emit(
+        run_local_ai_live_eval(
+            output,
+            settings=Settings.from_env(),
+            repository=repo,
+            implementation_revision=revision,
+            git_clean=not bool(status),
+            expected_model_owner_root=model_owner_root,
+            upstream_revision_file=upstream_revision_file,
+            upstream_metadata_file=upstream_metadata_file,
+            stack_source_registration=stack_source_registration,
+            stack_deployed_registration=stack_deployed_registration,
+            stack_managed_units=stack_managed_units,
+            fixture_text=fixture_text,
+        )
+    )
+
+
 @eval_app.command("completion-audit")
 def eval_completion_audit(
     readiness: Annotated[Path, typer.Option("--readiness", help="Passing readiness receipt")],
-    reconstruction: Annotated[
-        Path, typer.Option("--reconstruction", help="Passing reconstruction receipt")
+    storage: Annotated[
+        Path,
+        typer.Option("--storage", help="Passing product-home relocation receipt"),
     ],
-    comparison: Annotated[Path, typer.Option("--comparison", help="Passing comparison report")],
-    clean_rerun: Annotated[Path, typer.Option("--clean-rerun", help="Passing clean-rerun report")],
-    transfer: Annotated[Path, typer.Option("--transfer", help="Passing transfer report")],
+    motion_gate: Annotated[
+        Path,
+        typer.Option("--motion-gate", help="Current passing motion-recovery gate"),
+    ],
+    motion_evidence: Annotated[
+        Path,
+        typer.Option("--motion-evidence", help="All-frame Reference Motion Evidence v2"),
+    ],
+    spec: Annotated[
+        Path,
+        typer.Option("--spec", help="Frozen Reference Reconstruction Spec v2"),
+    ],
+    reconstruction: Annotated[
+        Path,
+        typer.Option("--reconstruction", help="Selected passing reconstruction v2 receipt"),
+    ],
+    comparison: Annotated[
+        Path,
+        typer.Option("--comparison", help="Reviewed passing Comparison v2 report"),
+    ],
+    reference_ui: Annotated[
+        Path,
+        typer.Option("--reference-ui", help="Real Chromium reference-workspace receipt"),
+    ],
+    clean_rerun: Annotated[
+        Path,
+        typer.Option("--clean-rerun", help="Passing clean-rerun v2 report"),
+    ],
+    transfer: Annotated[
+        Path,
+        typer.Option("--transfer", help="Passing seven-case transfer corpus v2"),
+    ],
     candidate: Annotated[
         Path, typer.Option("--candidate", help="Transferred candidate technique packet")
     ],
+    provider_alias: Annotated[
+        Path,
+        typer.Option("--provider-alias", help="Current passing provider-alias eval"),
+    ],
+    local_ai: Annotated[
+        Path,
+        typer.Option("--local-ai", help="Current passing live local-AI admission"),
+    ],
+    goal_start_revision: Annotated[
+        str,
+        typer.Option(
+            "--goal-start-revision",
+            help="Pre-existing revision after which publication is forbidden",
+        ),
+    ],
     output: Annotated[Path, typer.Option("--output", help="New completion-audit root")],
+    private_history_ref: Annotated[
+        str,
+        typer.Option(
+            "--private-history-ref",
+            help="Local pre-publication history whose tip tree equals the public root",
+        ),
+    ] = "local/private-history-pre-publication-20260721",
+    local_tag: Annotated[
+        str | None,
+        typer.Option("--local-tag", help="Local-only final tag that must point at HEAD"),
+    ] = None,
+    allow_preexisting_remote: Annotated[
+        bool,
+        typer.Option(
+            "--allow-preexisting-remote",
+            help="Accept the evolved repo only if no goal commit or tag is published",
+        ),
+    ] = False,
 ) -> None:
-    """Join all proof lanes and fail unless every Definition of Done row is green."""
+    """Join every v2 proof lane and fail closed on human, tag, or publication debt."""
 
     repo = Path(__file__).resolve().parents[2]
     report = run_completion_audit(
         repo=repo,
         lock_path=repo / "evals" / "reference.lock.json",
+        storage_path=storage,
         readiness_path=readiness,
+        motion_gate_path=motion_gate,
+        motion_evidence_path=motion_evidence,
+        spec_path=spec,
         reconstruction_path=reconstruction,
         comparison_path=comparison,
+        reference_ui_path=reference_ui,
         clean_rerun_path=clean_rerun,
         transfer_path=transfer,
         candidate_path=candidate,
+        provider_alias_path=provider_alias,
+        local_ai_path=local_ai,
         output_root=output,
+        private_history_ref=private_history_ref,
+        goal_start_revision=goal_start_revision,
+        local_tag=local_tag,
+        allow_preexisting_remote=allow_preexisting_remote,
     )
     _emit(report)
     if report.overall != "pass":

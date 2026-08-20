@@ -1,6 +1,6 @@
 # Prototype completion report
 
-## Outcome
+## Product outcome and claim boundary
 
 AoA Editing is a working, local-first, production-shaped co-editor prototype.
 The web workbench, CLI, and line-delimited JSON agent surface share one typed
@@ -8,10 +8,14 @@ application core. Media ingest is immutable; evidence, human decisions, edit
 graphs, patches, versions, renders, QC, and editable exports are explicit and
 inspectable.
 
-Completion is not inferred from this document. The executable completion audit
-fails closed if the worktree or readiness revision differs, an input hash
-changes, reference media leaks into render lineage, a mandatory check is
-skipped, or a definition-of-done row lacks passing evidence.
+This document describes the available product and proof architecture; it does
+not certify a particular operator run. Completion is emitted only by
+Completion Audit v2. The audit fails closed if current revision receipts drift,
+an input or evidence hash changes, Spec/Protocol/Reconstruction/Clean Rerun
+bytes do not join, reference media leaks into render lineage, a mandatory check
+is skipped, the attributable human verdict is absent, the final local tag is
+missing, publication cannot be disproved, or a Definition of Done row lacks
+passing evidence.
 
 ## Public evidence boundary
 
@@ -37,10 +41,18 @@ The executable proof order is:
 2. run schemas, Ruff, Mypy, unit/integration tests, UI smoke, and doctor;
 3. create an ignored reference lock from the public template;
 4. pass the revision-bound generic readiness gate;
-5. run independent reference reconstruction and comparison;
-6. replay the selected semantics in a clean home;
-7. transfer the technique to an unrelated synthetic source;
-8. join every receipt with the fail-closed completion audit.
+5. pass the independent ground-truth motion-recovery gate;
+6. freeze all-frame Motion Evidence v2, Reconstruction Spec v2, and Comparison
+   Protocol v2;
+7. run bounded reconstruction passes through normal application services;
+8. compare the selected candidate on all objective axes;
+9. inspect and correct motion through the real Reference Workspace UI;
+10. attach an attributable human review for the exact candidate hash;
+11. replay the selected semantics in a clean home;
+12. transfer the technique across seven heterogeneous source classes;
+13. pass provider-alias and live existing-model admission gates;
+14. create the final local-only tag;
+15. join every receipt with Completion Audit v2.
 
 The reference remains evaluation evidence and is forbidden from render lineage.
 The checked-in reveal technique remains a reviewable candidate rather than
@@ -62,6 +74,15 @@ cp evals/reference.lock.example.json evals/reference.lock.json
 # Replace every placeholder path, size, and hash with operator-owned values.
 ./scripts/aoa-editing gate readiness
 ```
+
+## Current honest boundary
+
+Machine receipts can prove objective similarity, replay, transfer, ownership,
+and provider behavior, but they cannot author the human editorial verdict. An
+objective-only Comparison v2 remains `warn`, and Completion Audit v2 remains
+`fail`, until the operator reviews the final side-by-side, contact sheet, and
+aligned difference and decides every rubric axis. Static documentation must not
+be read as that verdict.
 
 ## Honest growth boundary
 

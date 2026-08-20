@@ -27,3 +27,5 @@ facts.
 - [ADR-0020](ADR-0020-host-stt-normalization-adapter.md): path-free normalization of live abyss-machine Whisper health and transcript evidence
 - [ADR-0021](ADR-0021-terminal-workflow-temporal-integrity.md): source-contiguous agent pacing, live terminal holds, and reviewed speed-risk boundaries
 - [ADR-0022](ADR-0022-reviewed-demo-experience-admission.md): private reviewed demo evidence, source-neutral projection hashes, and a recurring improvement loop
+- [ADR-0023](ADR-0023-existing-asr-only-live-ai-admission.md): one existing live ASR, byte/revision/license/resource proof, and explicit deferral of unproven model expansion
+- [ADR-0024](ADR-0024-revision-bound-completion-in-evolved-repository.md): hash-joined Completion Audit v2, exact private/public tree bridge, and read-only non-publication proof for a pre-existing remote

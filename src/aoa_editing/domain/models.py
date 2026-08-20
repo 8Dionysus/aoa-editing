@@ -2629,6 +2629,161 @@ class ProviderAliasEvalReport(FrozenModel):
         return self
 
 
+class LocalAICapabilityDecision(FrozenModel):
+    """One Phase-15 capability decision after owner and product-gap review."""
+
+    capability_id: str = Field(pattern=r"^(speech|vision|editorial)\.[a-z0-9][a-z0-9-]*$")
+    product_gap: str = Field(min_length=1)
+    host_status: str = Field(min_length=1)
+    stack_registration: Literal[
+        "live",
+        "inventory-only",
+        "absent",
+        "not-required",
+    ]
+    action: Literal[
+        "bind-existing",
+        "keep-unbound",
+        "defer",
+    ]
+    alias_state: Literal["enabled", "unbound", "disabled", "unavailable"]
+    candidate_model_id: str | None = None
+    new_model_required: Literal[False] = False
+    rationale: str = Field(min_length=1)
+
+
+class LocalAIModelEvidence(FrozenModel):
+    """Revision, license, byte, and registration evidence for a selected model."""
+
+    model_id: str = Field(min_length=1)
+    model_owner: Literal["abyss-stack"]
+    runtime_owner: Literal["abyss-machine"]
+    adapter_owner: Literal["aoa-editing"]
+    owner_model_root: str = Field(min_length=1)
+    upstream_revision: str = Field(pattern=r"^[0-9a-f]{40}$")
+    upstream_metadata_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    inventory_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
+    export_tree_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    export_file_count: int = Field(gt=0)
+    export_size_bytes: int = Field(gt=0)
+    license_id: str = Field(min_length=1)
+    license_authority: str = Field(min_length=1)
+    stack_service_unit: str = Field(min_length=1)
+    stack_source_registration_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    stack_deployed_registration_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    stack_registration_parity: Literal[True]
+
+
+class LocalAIResourceEvidence(FrozenModel):
+    """Measured host fit and latency for one live alias invocation."""
+
+    resource_class: Literal["medium"]
+    resource_kind: Literal["ai"]
+    available_devices: list[str] = Field(min_length=1)
+    selected_backend: str = Field(min_length=1)
+    selected_device_route: str = Field(min_length=1)
+    npu_used: Literal[False] = False
+    npu_decision: str = Field(min_length=1)
+    service_active: Literal[True]
+    service_memory_current_bytes_before: int = Field(ge=0)
+    service_memory_current_bytes_after: int = Field(ge=0)
+    service_memory_peak_bytes: int = Field(ge=0)
+    evaluation_unit_memory_current_bytes: int = Field(ge=0)
+    evaluation_unit_memory_peak_bytes: int = Field(gt=0)
+    model_disk_bytes: int = Field(gt=0)
+    health_latency_milliseconds: float = Field(ge=0)
+    end_to_end_latency_milliseconds: float = Field(gt=0)
+    estimated_inference_latency_milliseconds: float = Field(ge=0)
+    audio_duration_seconds: float = Field(gt=0)
+    estimated_inference_rtf: float = Field(ge=0)
+    resource_gate_unit: str = Field(min_length=1)
+    resource_gate_admitted: Literal[True]
+
+
+class LocalAILiveTranscriptCase(FrozenModel):
+    """Known-text synthetic speech compared with the no-AI baseline."""
+
+    case_id: str = Field(min_length=1)
+    fixture_generator: str = Field(min_length=1)
+    expected_text: str = Field(min_length=1)
+    actual_text: str = Field(min_length=1)
+    fixture_audio_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    fixture_duration_seconds: float = Field(gt=0)
+    provider_receipt_path: str = Field(min_length=1)
+    provider_receipt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    provider_outcome: Literal["succeeded", "partial"]
+    word_error_rate: float = Field(ge=0)
+    character_error_rate: float = Field(ge=0)
+    baseline_transcript_available: Literal[False] = False
+    baseline_evidence_kinds: list[str] = Field(min_length=1)
+    baseline_failure_code: Literal["provider_missing"]
+    checks: list[CheckResult] = Field(min_length=1)
+    overall: Literal["pass", "fail"]
+
+    @model_validator(mode="after")
+    def validate_case(self) -> LocalAILiveTranscriptCase:
+        if self.overall == "pass" and any(item.status != "pass" for item in self.checks):
+            raise ValueError("passing live transcript case contains a failed check")
+        return self
+
+
+class LocalAIIntegrationReport(FrozenModel):
+    """Fail-closed Phase-15 proof for owner-correct existing local AI."""
+
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(default_factory=lambda: new_id("localaiintegration"))
+    generated_at: datetime = Field(default_factory=utc_now)
+    implementation_revision: str = Field(pattern=r"^[0-9a-f]{40}$")
+    git_clean: Literal[True]
+    selected_alias: Literal["local-ai://speech/transcript/default"]
+    capability_decisions: list[LocalAICapabilityDecision] = Field(min_length=9)
+    model: LocalAIModelEvidence
+    resources: LocalAIResourceEvidence
+    cases: list[LocalAILiveTranscriptCase] = Field(min_length=1)
+    checks: list[CheckResult] = Field(min_length=1)
+    artifacts: dict[str, str]
+    new_models_installed: Literal[False] = False
+    downloaded_model_bytes: Literal[0] = 0
+    baseline_requires_ai: Literal[False] = False
+    ai_output_authority: Literal["evidence"]
+    mandatory_skips: Literal[0] = 0
+    reference_media_used_as_input: Literal[False] = False
+    provenance: Provenance
+    overall: Literal["pass", "fail"]
+
+    @model_validator(mode="after")
+    def validate_integration(self) -> LocalAIIntegrationReport:
+        required = {
+            "speech.transcript",
+            "speech.vad",
+            "speech.diarization",
+            "vision.describe",
+            "vision.regions",
+            "vision.segment",
+            "vision.embed",
+            "editorial.plan",
+            "editorial.critique",
+        }
+        decisions = {item.capability_id: item for item in self.capability_decisions}
+        if set(decisions) != required or len(decisions) != len(self.capability_decisions):
+            raise ValueError("local-AI integration must decide every declared capability")
+        transcript = decisions["speech.transcript"]
+        if (
+            transcript.action != "bind-existing"
+            or transcript.alias_state != "enabled"
+            or transcript.candidate_model_id != self.model.model_id
+        ):
+            raise ValueError("passing integration requires the selected existing ASR")
+        if any(item.new_model_required for item in self.capability_decisions):
+            raise ValueError("Phase-15 report cannot hide a required model installation")
+        if self.overall == "pass" and (
+            any(item.overall != "pass" for item in self.cases)
+            or any(item.status != "pass" for item in self.checks)
+        ):
+            raise ValueError("passing local-AI integration contains unresolved evidence")
+        return self
+
+
 def _validate_local_endpoint(endpoint: str | None) -> None:
     if endpoint is None:
         return
@@ -3630,7 +3785,13 @@ class EditorialReviewV2(FrozenModel):
         "revision_required",
     ]
     rubric: list[EditorialRubricAssessmentV2] = Field(min_length=1)
-    reviewed_artifacts: list[str] = Field(min_length=3)
+    reviewed_artifacts: list[str] = Field(
+        min_length=3,
+        description=(
+            "Portable comparison artifact roles from the generated review template; "
+            "literal report artifact paths remain valid for compatibility."
+        ),
+    )
     reference_media_role: Literal["comparison_only"] = "comparison_only"
 
     @model_validator(mode="after")
@@ -3983,17 +4144,38 @@ class TechniqueTransferCorpusReportV2(FrozenModel):
 class CompletionAuditReport(FrozenModel):
     """Fail-closed evidence map for the complete prototype definition of done."""
 
-    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    schema_version: Literal["2.0.0"] = "2.0.0"
     id: str = Field(default_factory=lambda: new_id("completion"))
     generated_at: datetime = Field(default_factory=utc_now)
-    git_revision: str
-    evidence: dict[str, str]
-    requirement_coverage: dict[str, list[str]]
-    checks: list[CheckResult]
-    artifacts: dict[str, str]
-    mandatory_skips: int = Field(ge=0)
+    git_revision: str = Field(pattern=r"^[0-9a-f]{40}$")
+    git_clean: bool
+    goal_start_revision: str = Field(pattern=r"^[0-9a-f]{40}$")
+    local_tag: str | None = None
+    evidence: dict[str, str] = Field(min_length=1)
+    evidence_sha256: dict[str, str] = Field(min_length=1)
+    requirement_coverage: dict[str, list[str]] = Field(min_length=1)
+    checks: list[CheckResult] = Field(min_length=1)
+    artifacts: dict[str, str] = Field(min_length=1)
+    unresolved_requirements: list[str] = Field(default_factory=list)
+    unresolved_checks: list[str] = Field(default_factory=list)
+    mandatory_skips: int = Field(default=0, ge=0)
     provenance: Provenance
-    overall: Literal["pass", "fail", "warn"]
+    overall: Literal["pass", "fail"]
+
+    @model_validator(mode="after")
+    def validate_completion_claim(self) -> CompletionAuditReport:
+        if set(self.evidence) != set(self.evidence_sha256):
+            raise ValueError("completion evidence paths and hashes must have identical keys")
+        if self.overall == "pass" and (
+            self.local_tag is None
+            or not self.git_clean
+            or self.unresolved_requirements
+            or self.unresolved_checks
+            or self.mandatory_skips != 0
+            or any(item.status != "pass" for item in self.checks)
+        ):
+            raise ValueError("passing completion audit contains unresolved evidence")
+        return self
 
 
 class StorageRelocationEntry(FrozenModel):
@@ -4223,5 +4405,6 @@ SCHEMA_MODELS: dict[str, type[BaseModel]] = {
     "local-provider-binding": LocalProviderBinding,
     "resolved-provider-receipt": ResolvedProviderReceipt,
     "provider-alias-eval": ProviderAliasEvalReport,
+    "local-ai-integration": LocalAIIntegrationReport,
     "timeline-projection": Timeline,
 }

@@ -19,7 +19,6 @@ command = [
   "{media_path}",
   "--profile",
   "{profile}",
-  "--json",
 ]
 data_boundary = "local-host"
 timeout_seconds = 1800
@@ -28,7 +27,7 @@ timeout_seconds = 1800
 command = ["/path/to/aoa-editing/scripts/host-stt-adapter", "health"]
 status_field = "status"
 ready_values = ["ready"]
-timeout_seconds = 8
+timeout_seconds = 20
 
 [ai.bindings."local-ai://vision/describe/default"]
 state = "enabled"

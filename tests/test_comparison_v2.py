@@ -12,9 +12,9 @@ from aoa_editing.domain.models import (
 from aoa_editing.evals.comparison_v2 import (
     ComparisonV2Error,
     freeze_comparison_protocol_v2,
-    record_editorial_review_v2,
     run_comparison_v2,
 )
+from aoa_editing.evals.editorial_review_v2 import record_editorial_review_v2
 from aoa_editing.evals.motion_fixtures import fixture_definitions, render_motion_fixture
 from aoa_editing.evals.reference_v2 import analyze_reference_v2
 from aoa_editing.infrastructure.media import sha256_file
@@ -128,11 +128,7 @@ def test_comparison_protocol_v2_is_frozen_before_an_objective_identity_run(
             )
             for criterion in protocol.human_rubric
         ],
-        reviewed_artifacts=[
-            report.artifacts["side_by_side"],
-            report.artifacts["phase_contact_sheet"],
-            report.artifacts["aligned_difference"],
-        ],
+        reviewed_artifacts=template["reviewed_artifacts"],
     )
     review_path = tmp_path / "human-review.json"
     review_path.write_text(review.model_dump_json(indent=2) + "\n", encoding="utf-8")
@@ -149,6 +145,34 @@ def test_comparison_protocol_v2_is_frozen_before_an_objective_identity_run(
         next(item for item in reviewed.checks if item.id == "editorial-human-review").status
         == "pass"
     )
+    assert reviewed.editorial["reviewed_artifact_roles"] == [
+        "aligned_difference",
+        "phase_contact_sheet",
+        "side_by_side",
+    ]
+
+    path_review = review.model_copy(
+        update={
+            "id": "editorialreview_" + "e" * 32,
+            "reviewed_artifacts": [
+                str(Path(report.artifacts["side_by_side"]).resolve()),
+                str(Path(report.artifacts["phase_contact_sheet"]).resolve()),
+                str(Path(report.artifacts["aligned_difference"]).resolve()),
+            ],
+        }
+    )
+    path_review_path = tmp_path / "path-human-review.json"
+    path_review_path.write_text(
+        path_review.model_dump_json(indent=2) + "\n",
+        encoding="utf-8",
+    )
+    path_reviewed = record_editorial_review_v2(
+        tmp_path / "comparison" / "comparison-v2.json",
+        protocol_root / "comparison-protocol-v2.json",
+        path_review_path,
+        tmp_path / "comparison" / "comparison-v2-path-reviewed.json",
+    )
+    assert path_reviewed.overall == "pass"
 
     failed_review = review.model_copy(
         update={
