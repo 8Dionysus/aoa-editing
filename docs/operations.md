@@ -83,6 +83,7 @@ host AI capabilities. The product binds to `127.0.0.1:8787` by default.
 | Generic evaluation | `./scripts/eval` |
 | Draft narration timing | `./scripts/aoa-editing workflow time-voiceover --help` |
 | Review narration timing | `./scripts/aoa-editing workflow review-voiceover --help` |
+| Admit reviewed demo experience | `./scripts/aoa-editing workflow admit-experience --help` |
 | Provider alias contract gate | `./scripts/aoa-editing eval provider-aliases --output /new/root` |
 | Sealed readiness gate | `./scripts/aoa-editing gate readiness` |
 | Freeze Comparison v2 | `./scripts/aoa-editing eval reference-freeze-comparison-v2 --help` |

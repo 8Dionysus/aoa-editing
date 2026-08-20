@@ -27,6 +27,16 @@ must fail any loopable claim. Region-aware loop synthesis is not considered
 implemented until a separate media-path evaluator can detect frozen live UI,
 timer repetition/reversal, and loop seams.
 
+Reviewed demo experience is evaluated separately from render correctness. An
+accepted experience claim requires private evidence refs, distinct owner-review
+refs, a public-safe summary and limitation, and named target surfaces. Receipt
+tests prove deterministic projection hashing, idempotent immutable storage, and
+the absence of session ids, raw refs, and private source wording from the public
+projection. Rejected and deferred claims remain in the projection so a proposed
+technique cannot silently appear as implemented. Each later project demo should
+be admitted as a new application or counterexample; cross-project defaults need
+multiple independently reviewed cases.
+
 ## Human-free workflow reference study
 
 After readiness, a batch plan may analyze multiple external terminal/workflow

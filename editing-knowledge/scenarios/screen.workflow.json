@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "id": "scenario_screen_workflow",
-  "revision": 3,
+  "revision": 4,
   "title": "Script-bound terminal workflow",
   "intent": "Turn a reviewed script and a later screen recording into a concise, readable agent-workflow edit with semantic camera moves, source-contiguous pacing, live terminal holds, and explicit proof beats.",
   "applicability": [
@@ -16,7 +16,8 @@
   "required_evidence": [
     "media.probe",
     "screen.workflow.binding",
-    "screen.workflow.voiceover-timing (when narration is supplied)"
+    "screen.workflow.voiceover-timing (when narration is supplied)",
+    "screen.workflow.experience-receipt (when prior demo feedback changes the candidate)"
   ],
   "allowed_operations": [
     "select",
@@ -47,7 +48,8 @@
     "Use real source for a live hold or rebalance adjacent speeds; never freeze a full terminal frame that contains live UI",
     "Keep reference media outside project assets and render lineage",
     "Require human review of every post-capture source binding",
-    "Require a separate attributable review of machine-drafted voiceover timing"
+    "Require a separate attributable review of machine-drafted voiceover timing",
+    "Admit session-derived lessons through a private immutable receipt and cite only its source-neutral projection hash publicly"
   ],
   "heuristics": [
     "Establish wide before the first detail",
@@ -131,7 +133,7 @@
       "case_id": "builder-week-hard-cut-compression-review",
       "source_class": "real human-free Codex terminal session with delivered narration",
       "outcome": "fail",
-      "evidence_path": "operator-review:screen-workflow/2026-07-21/hard-cut-compression",
+      "evidence_path": "private-review-receipt:sha256:2d3f3abaa39ef7d79cc1b854fcffe064f62574550a68bce1c65765b2907ba6df#builder-week-hard-cut-compression-review",
       "metrics": {
         "source_process_continuity_preserved": 0.0,
         "prompt_entry_readable": 0.0,
@@ -142,7 +144,7 @@
       "case_id": "builder-week-continuous-speed-review",
       "source_class": "real human-free Codex terminal session with delivered narration",
       "outcome": "warn",
-      "evidence_path": "operator-review:screen-workflow/2026-07-21/continuous-speed",
+      "evidence_path": "private-review-receipt:sha256:2d3f3abaa39ef7d79cc1b854fcffe064f62574550a68bce1c65765b2907ba6df#builder-week-continuous-speed-review",
       "metrics": {
         "operator_score_fraction": 0.87,
         "delivery_width": 1920.0,
@@ -161,17 +163,20 @@
     "When is a floating screen stage preferable to full-bleed capture?",
     "Can a region-aware temporal hold preserve stable prompt text while phase-matching periodic shimmer and keeping timers monotonic?",
     "Which visual-activity and semantic-density measurements should author smooth speed ramps rather than constant tiers?",
-    "What render-cost model should choose bounded video segments and one final narration mix before resource admission fails?"
+    "What render-cost model should choose bounded video segments and one final narration mix before resource admission fails?",
+    "How many independently reviewed project demos are required before a candidate pacing rule can become a cross-project default?"
   ],
   "provenance": {
     "tool": "aoa-editing-scenario-authoring",
-    "tool_version": "0.2.0",
+    "tool_version": "0.3.0",
     "command": [],
     "parameters": {
       "planner": "screen_workflow",
       "reference_authority": "candidate-only",
       "human_free_visuals": true,
-      "reviewed_operator_experience_admitted": "2026-07-21"
+      "reviewed_operator_experience_admitted": "2026-07-21",
+      "experience_projection_sha256": "2d3f3abaa39ef7d79cc1b854fcffe064f62574550a68bce1c65765b2907ba6df",
+      "experience_truth_status": "owner-reviewed-candidate"
     },
     "model_id": null,
     "model_revision": null,

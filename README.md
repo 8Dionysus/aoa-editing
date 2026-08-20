@@ -99,6 +99,20 @@ drives every visual beat and adds the immutable narration asset as a normalized
 audio track. Reference videos remain in the gated evaluation lane and cannot
 be used by any of these steps as project media.
 
+After an operator reviews one or more delivered revisions, a private typed
+admission can bind the accepted, rejected, and deferred lessons to resolvable
+external evidence without publishing that evidence:
+
+```bash
+./scripts/aoa-editing workflow admit-experience \
+  --admission var/state/workflow-experience-intake/project-demo.json
+```
+
+The full immutable receipt stays under `var/state`. Candidate knowledge cites
+only the hash of its reviewed source-neutral projection, so future project demos
+can add independent evidence or counterexamples without turning one session
+into a universal editing rule.
+
 ## Status
 
 The production-shaped prototype and its fail-closed completion chain are
