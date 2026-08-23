@@ -99,7 +99,8 @@ The baseline also checks explicit schemas for Brief revisions, evidence
 authority/time ranges/supersession, treatment comparison facts, decision graphs,
 patch previews, render frame ranges, derived media, style confirmations,
 clean-rerun reports, transfer reports, and candidate technique packets. A
-`completion-audit.schema.json` v2 joins every current proof lane into a
+`completion-audit.schema.json` v2 joins every current proof lane, including the
+revision-bound independent Video Anatomy corpus, into a
 fail-closed DoD map. It records the exact clean Git revision and goal boundary,
 hashes every evidence file, binds Spec/Protocol/Reconstruction/Clean Rerun
 bytes, requires an exact local tag, preserves a separate human editorial

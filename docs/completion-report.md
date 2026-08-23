@@ -55,7 +55,8 @@ The executable proof order is:
 14. transfer the technique across seven heterogeneous source classes;
 15. pass provider-alias and live existing-model admission gates;
 16. create the final local-only tag;
-17. join every receipt with Completion Audit v2.
+17. join every receipt, including the exact Video Anatomy eval, with Completion
+    Audit v2.
 
 The reference remains evaluation evidence and is forbidden from render lineage.
 The checked-in reveal technique remains a reviewable candidate rather than

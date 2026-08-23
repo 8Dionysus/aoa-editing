@@ -980,8 +980,30 @@ def _aggregate_metrics(cases: list[VideoAnatomyEvalCase]) -> dict[str, float]:
     return metrics
 
 
-def _required_tags() -> set[str]:
-    return {
+REQUIRED_VIDEO_ANATOMY_CHECKS = frozenset(
+    {
+        "requirement-coverage",
+        "boundary-recall",
+        "boundary-precision",
+        "transition-classification",
+        "temporal-error",
+        "shot-coverage",
+        "short-event-recall",
+        "semantic-coverage",
+        "motion-model-error",
+        "audio-event-coverage",
+        "audio-accent-alignment",
+        "vfr-exact-timestamps",
+        "fractional-rate-identity",
+        "unresolved-ratio",
+        "no-reference-media",
+        "clean-revision",
+    }
+)
+
+
+REQUIRED_VIDEO_ANATOMY_TAGS = frozenset(
+    {
         "hard-cuts",
         "fade-in-out",
         "cross-dissolve",
@@ -1005,6 +1027,11 @@ def _required_tags() -> set[str]:
         "music-beats",
         "long-video-events-start-middle-end",
     }
+)
+
+
+def _required_tags() -> set[str]:
+    return set(REQUIRED_VIDEO_ANATOMY_TAGS)
 
 
 def _fixture_provider_service(settings: Settings) -> ProviderService:

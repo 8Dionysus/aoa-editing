@@ -1695,6 +1695,13 @@ def eval_local_ai_live(
 @eval_app.command("completion-audit")
 def eval_completion_audit(
     readiness: Annotated[Path, typer.Option("--readiness", help="Passing readiness receipt")],
+    video_anatomy: Annotated[
+        Path,
+        typer.Option(
+            "--video-anatomy",
+            help="Current passing independent Video Anatomy eval",
+        ),
+    ],
     storage: Annotated[
         Path,
         typer.Option("--storage", help="Passing product-home relocation receipt"),
@@ -1777,6 +1784,7 @@ def eval_completion_audit(
         lock_path=repo / "evals" / "reference.lock.json",
         storage_path=storage,
         readiness_path=readiness,
+        video_anatomy_path=video_anatomy,
         motion_gate_path=motion_gate,
         motion_evidence_path=motion_evidence,
         spec_path=spec,

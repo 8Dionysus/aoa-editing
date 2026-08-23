@@ -19,6 +19,9 @@
   independent network-free evaluation corpus.
 - Sealed reference analysis remains readiness-gated and no reference pixels,
   audio, masks or source-specific matrices can enter reconstruction lineage.
+- Completion Audit v2 now consumes the current independent Video Anatomy eval
+  and maps the `video-anatomy` Definition of Done row instead of silently
+  omitting it.
 - Product provenance now reports package version `0.2.0` instead of hard-coded
   prototype version strings.
 

@@ -418,6 +418,7 @@ claim:
 ./scripts/aoa-editing eval completion-audit \
   --storage /path/to/relocation-receipt.json \
   --readiness /path/to/readiness.json \
+  --video-anatomy /path/to/video-anatomy-eval.json \
   --motion-gate /path/to/current/motion-recovery-gate.json \
   --motion-evidence /path/to/reference-motion-evidence-v2.json \
   --spec /path/to/reference-spec-v2.json \
@@ -442,10 +443,11 @@ tag there, and confirm that the working branch has no upstream. Do not use the
 flag merely to ignore a remote error.
 
 The audit re-hashes both immutable user inputs and every receipt, requires the
-readiness, motion gate, provider gate, and live-AI gate to match the clean
-current Git revision, verifies the exact Spec/Protocol/Reconstruction/Clean
-Rerun chain, rejects a missing human review or any nested skip/failure, proves
-that the reference hash is absent from render lineage and tracked files, and
-maps all 28 rows in `docs/definition-of-done.md` to passing checks. Until the
+readiness, independent Video Anatomy corpus, motion gate, provider gate, and
+live-AI gate to match the clean current Git revision, verifies the exact
+Spec/Protocol/Reconstruction/Clean Rerun chain, rejects a missing human review
+or any nested skip/failure, proves that the reference hash is absent from render
+lineage and tracked files, and maps every row in `docs/definition-of-done.md`
+to passing checks. Until the
 human verdict and local tag exist, the report is expected to fail and names
 those unresolved checks; it never upgrades an objective-only comparison.

@@ -18,8 +18,14 @@ from aoa_editing.domain.models import (
     MotionRecoveryReport,
     Provenance,
     TechniquePacket,
+    VideoAnatomyEvalCorpus,
+    VideoAnatomyEvalReport,
 )
 from aoa_editing.evals.motion_recovery import REQUIRED_CORPUS_TAGS
+from aoa_editing.evals.video_anatomy import (
+    REQUIRED_VIDEO_ANATOMY_CHECKS,
+    REQUIRED_VIDEO_ANATOMY_TAGS,
+)
 from aoa_editing.infrastructure.media import sha256_file
 
 DONE_REQUIREMENTS = (
@@ -36,6 +42,7 @@ DONE_REQUIREMENTS = (
     "three-scenarios",
     "restart-resume",
     "partial-evidence-corrections",
+    "video-anatomy",
     "brief-style-memory",
     "editing-language",
     "motion-ground-truth-recovery",
@@ -75,6 +82,8 @@ REQUIRED_REPOSITORY_PATHS = (
     "docs/evaluation.md",
     "docs/operations.md",
     "docs/roadmap.md",
+    "docs/video-anatomy.md",
+    "docs/decisions/ADR-0025-video-anatomy-evidence-and-proposal-boundary.md",
     "manifests/ai-capabilities.json",
     "manifests/storage-layout.json",
     "scripts/bootstrap",
@@ -87,6 +96,14 @@ REQUIRED_REPOSITORY_PATHS = (
     "src/aoa_editing/api/app.py",
     "src/aoa_editing/cli.py",
     "src/aoa_editing/domain/models.py",
+    "src/aoa_editing/analysis/video_anatomy.py",
+    "src/aoa_editing/analysis/video_audio.py",
+    "src/aoa_editing/analysis/video_motion.py",
+    "src/aoa_editing/analysis/video_pipeline.py",
+    "src/aoa_editing/analysis/video_semantics.py",
+    "src/aoa_editing/application/video_jobs.py",
+    "src/aoa_editing/application/video_proposals.py",
+    "src/aoa_editing/evals/video_anatomy.py",
     "src/aoa_editing/web/index.html",
     "editing-knowledge/scenarios/speech.clean.json",
     "editing-knowledge/scenarios/memory.montage.json",
@@ -155,6 +172,7 @@ def run_completion_audit(
     lock_path: Path,
     storage_path: Path,
     readiness_path: Path,
+    video_anatomy_path: Path,
     motion_gate_path: Path,
     motion_evidence_path: Path,
     spec_path: Path,
@@ -183,6 +201,7 @@ def run_completion_audit(
         "lock": lock_path,
         "storage": storage_path,
         "readiness": readiness_path,
+        "video_anatomy": video_anatomy_path,
         "motion_gate": motion_gate_path,
         "motion_evidence": motion_evidence_path,
         "spec": spec_path,
@@ -202,6 +221,7 @@ def run_completion_audit(
     lock = payloads["lock"]
     storage = payloads["storage"]
     readiness = payloads["readiness"]
+    video_anatomy = payloads["video_anatomy"]
     motion_gate = payloads["motion_gate"]
     motion_evidence = payloads["motion_evidence"]
     spec = payloads["spec"]
@@ -289,6 +309,68 @@ def run_completion_audit(
             receipt=str(selected_paths["readiness"]),
             statuses=readiness_statuses,
             required=sorted(REQUIRED_READINESS_CHECKS),
+        )
+    )
+
+    video_anatomy_corpus_path = _resolve_required(
+        str(video_anatomy.get("corpus_path", "")),
+        (selected_repo, selected_paths["video_anatomy"].parent),
+    )
+    video_anatomy_validation_errors: dict[str, str] = {}
+    try:
+        video_anatomy_contract = VideoAnatomyEvalReport.model_validate(video_anatomy)
+    except ValueError as error:
+        video_anatomy_contract = None
+        video_anatomy_validation_errors["report"] = str(error)
+    try:
+        video_anatomy_corpus = VideoAnatomyEvalCorpus.model_validate(
+            _object(video_anatomy_corpus_path)
+        )
+    except ValueError as error:
+        video_anatomy_corpus = None
+        video_anatomy_validation_errors["corpus"] = str(error)
+    video_anatomy_statuses = _check_statuses(video_anatomy)
+    video_anatomy_ok = (
+        video_anatomy_contract is not None
+        and video_anatomy_corpus is not None
+        and not video_anatomy_validation_errors
+        and video_anatomy_contract.overall == "pass"
+        and video_anatomy_contract.git_clean is True
+        and video_anatomy_contract.git_revision == revision
+        and video_anatomy_contract.mandatory_skips == 0
+        and video_anatomy_contract.reference_media_used is False
+        and video_anatomy_corpus.reference_media_used is False
+        and sha256_file(video_anatomy_corpus_path)
+        == video_anatomy_contract.corpus_sha256
+        and REQUIRED_VIDEO_ANATOMY_TAGS.issubset(
+            video_anatomy_corpus.requirement_coverage
+        )
+        and REQUIRED_VIDEO_ANATOMY_TAGS.issubset(
+            video_anatomy_contract.requirement_coverage
+        )
+        and REQUIRED_VIDEO_ANATOMY_CHECKS.issubset(video_anatomy_statuses)
+        and all(
+            video_anatomy_statuses[item] == "pass"
+            for item in REQUIRED_VIDEO_ANATOMY_CHECKS
+        )
+        and all(
+            item.overall == "pass"
+            and all(check.status == "pass" for check in item.checks)
+            for item in video_anatomy_contract.cases
+        )
+    )
+    checks.append(
+        _check(
+            "video-anatomy-generic",
+            video_anatomy_ok,
+            "the current clean revision passes the independent Video Anatomy corpus",
+            receipt=str(selected_paths["video_anatomy"]),
+            corpus=str(video_anatomy_corpus_path),
+            git_revision=video_anatomy.get("git_revision"),
+            case_count=len(video_anatomy.get("cases", [])),
+            required_tags=sorted(REQUIRED_VIDEO_ANATOMY_TAGS),
+            required_checks=sorted(REQUIRED_VIDEO_ANATOMY_CHECKS),
+            validation_errors=video_anatomy_validation_errors,
         )
     )
 
@@ -1224,6 +1306,7 @@ def run_completion_audit(
         "motion_error_plot": str(comparison_artifacts["motion_error_plot"]),
         "derivative_error_plot": str(comparison_artifacts["derivative_error_plot"]),
         "reference_motion_evidence": str(selected_paths["motion_evidence"]),
+        "video_anatomy_eval": str(selected_paths["video_anatomy"]),
         "reference_spec": str(selected_paths["spec"]),
         "comparison": str(selected_paths["comparison"]),
         "clean_rerun": str(selected_paths["clean_rerun"]),
@@ -1294,6 +1377,15 @@ def _coverage() -> dict[str, list[str]]:
         "partial-evidence-corrections": [
             "generic-readiness",
             "ai-provider-boundary",
+        ],
+        "video-anatomy": [
+            "video-anatomy-generic",
+            "generic-readiness",
+            "motion-v2-execution",
+            "comparison-proof-binding",
+            "objective-comparison-v2",
+            "human-editorial-verdict",
+            "source-only-lineage",
         ],
         "brief-style-memory": ["generic-readiness", "application-and-contract-surfaces"],
         "editing-language": ["generic-readiness", "motion-v2-execution"],
