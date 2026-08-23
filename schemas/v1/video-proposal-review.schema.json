@@ -1,0 +1,79 @@
+{
+  "additionalProperties": false,
+  "description": "Explicit human decision over one immutable Video Anatomy proposal revision.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "proposal_kind": {
+      "enum": [
+        "editorial-structure",
+        "reference-reconstruction"
+      ],
+      "title": "Proposal Kind",
+      "type": "string"
+    },
+    "proposal_id": {
+      "title": "Proposal Id",
+      "type": "string"
+    },
+    "proposal_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Proposal Sha256",
+      "type": "string"
+    },
+    "decision": {
+      "enum": [
+        "approved",
+        "rejected"
+      ],
+      "title": "Decision",
+      "type": "string"
+    },
+    "reviewer": {
+      "minLength": 1,
+      "title": "Reviewer",
+      "type": "string"
+    },
+    "rationale": {
+      "minLength": 1,
+      "title": "Rationale",
+      "type": "string"
+    },
+    "reviewed_at": {
+      "format": "date-time",
+      "title": "Reviewed At",
+      "type": "string"
+    },
+    "timeline_mutated": {
+      "const": false,
+      "default": false,
+      "title": "Timeline Mutated",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "project_id",
+    "proposal_kind",
+    "proposal_id",
+    "proposal_sha256",
+    "decision",
+    "reviewer",
+    "rationale"
+  ],
+  "title": "VideoProposalReview",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/video-proposal-review.schema.json"
+}

@@ -12,6 +12,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageDraw
 
+from aoa_editing import __version__
 from aoa_editing.config import Settings
 from aoa_editing.domain.models import (
     MediaKind,
@@ -120,7 +121,7 @@ def run_reference_workflow_study(
             candidate_rules=plan.candidate_rules,
             provenance=Provenance(
                 tool="aoa-editing-reference-workflow-study",
-                tool_version="0.1.0",
+                tool_version=__version__,
                 parameters={
                     "activity_sampler": "opencv-gray-absdiff-v1",
                     "sample_rate_hz": 4.0,

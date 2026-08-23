@@ -1,0 +1,321 @@
+{
+  "$defs": {
+    "FrameRange": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "duration": {
+          "exclusiveMinimum": 0,
+          "title": "Duration",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "duration"
+      ],
+      "title": "FrameRange",
+      "type": "object"
+    },
+    "FrameRate": {
+      "additionalProperties": false,
+      "properties": {
+        "numerator": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        }
+      },
+      "title": "FrameRate",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "VideoAnatomyFixtureTruth": {
+      "additionalProperties": false,
+      "description": "Hash-bound synthetic truth; it is never derived from detector output.",
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "content_origin": {
+          "const": "synthetic_ground_truth",
+          "default": "synthetic_ground_truth",
+          "title": "Content Origin",
+          "type": "string"
+        },
+        "video_path": {
+          "title": "Video Path",
+          "type": "string"
+        },
+        "video_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Video Sha256",
+          "type": "string"
+        },
+        "frame_count": {
+          "exclusiveMinimum": 1,
+          "title": "Frame Count",
+          "type": "integer"
+        },
+        "frame_rate": {
+          "$ref": "#/$defs/FrameRate"
+        },
+        "variable_frame_rate": {
+          "default": false,
+          "title": "Variable Frame Rate",
+          "type": "boolean"
+        },
+        "has_audio": {
+          "title": "Has Audio",
+          "type": "boolean"
+        },
+        "boundaries": {
+          "items": {
+            "$ref": "#/$defs/VideoAnatomyTruthBoundary"
+          },
+          "title": "Boundaries",
+          "type": "array"
+        },
+        "short_event_ranges": {
+          "items": {
+            "$ref": "#/$defs/FrameRange"
+          },
+          "title": "Short Event Ranges",
+          "type": "array"
+        },
+        "expected_motion_labels": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Expected Motion Labels",
+          "type": "array"
+        },
+        "expected_audio_labels": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Expected Audio Labels",
+          "type": "array"
+        },
+        "requirement_tags": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Requirement Tags",
+          "type": "array"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        }
+      },
+      "required": [
+        "id",
+        "video_path",
+        "video_sha256",
+        "frame_count",
+        "frame_rate",
+        "has_audio",
+        "requirement_tags",
+        "provenance"
+      ],
+      "title": "VideoAnatomyFixtureTruth",
+      "type": "object"
+    },
+    "VideoAnatomyTruthBoundary": {
+      "additionalProperties": false,
+      "description": "Independently authored temporal truth for one synthetic boundary.",
+      "properties": {
+        "frame": {
+          "minimum": 0,
+          "title": "Frame",
+          "type": "integer"
+        },
+        "transition_type": {
+          "$ref": "#/$defs/VideoTransitionType"
+        },
+        "tolerance_frames": {
+          "minimum": 0,
+          "title": "Tolerance Frames",
+          "type": "integer"
+        },
+        "splits_shot": {
+          "title": "Splits Shot",
+          "type": "boolean"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "frame",
+        "transition_type",
+        "tolerance_frames",
+        "splits_shot",
+        "label"
+      ],
+      "title": "VideoAnatomyTruthBoundary",
+      "type": "object"
+    },
+    "VideoTransitionType": {
+      "enum": [
+        "hard-cut",
+        "fade-in",
+        "fade-out",
+        "cross-dissolve",
+        "flash",
+        "wipe-or-directional",
+        "continuous-motion",
+        "unknown"
+      ],
+      "title": "VideoTransitionType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Manifest proving requirement coverage of the network-free corpus.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "content_origin": {
+      "const": "synthetic_ground_truth",
+      "default": "synthetic_ground_truth",
+      "title": "Content Origin",
+      "type": "string"
+    },
+    "fixtures": {
+      "items": {
+        "$ref": "#/$defs/VideoAnatomyFixtureTruth"
+      },
+      "minItems": 1,
+      "title": "Fixtures",
+      "type": "array"
+    },
+    "requirement_coverage": {
+      "additionalProperties": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "title": "Requirement Coverage",
+      "type": "object"
+    },
+    "reference_media_used": {
+      "const": false,
+      "default": false,
+      "title": "Reference Media Used",
+      "type": "boolean"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "fixtures",
+    "requirement_coverage",
+    "provenance"
+  ],
+  "title": "VideoAnatomyEvalCorpus",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/video-anatomy-eval-corpus.schema.json"
+}

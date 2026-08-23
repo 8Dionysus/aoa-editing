@@ -55,9 +55,16 @@ def _ffmpeg_version() -> str:
 
 
 class AnalysisService:
-    def __init__(self, store: ProjectStore, ports: Iterable[AnalyzerPort] = ()):
+    def __init__(
+        self,
+        store: ProjectStore,
+        ports: Iterable[AnalyzerPort] = (),
+        *,
+        providers: ProviderService | None = None,
+    ):
         self.store = store
         self.ports = {port.kind: port for port in ports}
+        self.providers = providers
 
     def analyze(
         self, project_id: str, asset_id: str, *, transcribe: bool = False
@@ -113,9 +120,7 @@ class AnalysisService:
                     transcript_record = existing.get("speech.transcript")
                     if transcript_record is None:
                         produced.extend(
-                            self._execute(
-                                "speech.transcript", project_id, asset, self._transcribe
-                            )
+                            self._execute("speech.transcript", project_id, asset, self._transcribe)
                         )
                     else:
                         produced.append(transcript_record)
@@ -236,8 +241,7 @@ class AnalysisService:
             raise AnalysisError(result.stderr[-2000:])
         starts = [float(value) for value in SILENCE_START.findall(result.stderr)]
         ends = [
-            (float(end), float(duration))
-            for end, duration in SILENCE_END.findall(result.stderr)
+            (float(end), float(duration)) for end, duration in SILENCE_END.findall(result.stderr)
         ]
         intervals: list[dict[str, float]] = []
         for index, start in enumerate(starts):
@@ -306,17 +310,14 @@ class AnalysisService:
         sample = image.copy()
         sample.thumbnail((512, 512), Image.Resampling.LANCZOS)
         pixels = np.asarray(sample, dtype=np.float32) / 255.0
-        luminance = (
-            pixels[..., 0] * 0.2126 + pixels[..., 1] * 0.7152 + pixels[..., 2] * 0.0722
-        )
+        luminance = pixels[..., 0] * 0.2126 + pixels[..., 1] * 0.7152 + pixels[..., 2] * 0.0722
         saturation = pixels.max(axis=2) - pixels.min(axis=2)
         grad_y, grad_x = np.gradient(luminance)
         edges = np.hypot(grad_x, grad_y)
         height, width = luminance.shape
         yy, xx = np.mgrid[0:height, 0:width]
         radius = np.sqrt(
-            ((xx / max(width - 1, 1)) - 0.5) ** 2
-            + ((yy / max(height - 1, 1)) - 0.5) ** 2
+            ((xx / max(width - 1, 1)) - 0.5) ** 2 + ((yy / max(height - 1, 1)) - 0.5) ** 2
         )
         center = np.clip(1 - radius / 0.7072, 0, 1)
         saliency = _normalize(edges) * 0.45 + saturation * 0.25 + center * 0.30
@@ -383,7 +384,8 @@ class AnalysisService:
 
     def _transcribe(self, project_id: str, asset: Asset) -> EvidenceRecord:
         source = self.store.asset_source_path(project_id, asset.id)
-        result = ProviderService.for_settings(self.store.settings).invoke(
+        providers = self.providers or ProviderService.for_settings(self.store.settings)
+        result = providers.invoke(
             "local-ai://speech/transcript/default",
             {
                 "media_path": str(source),

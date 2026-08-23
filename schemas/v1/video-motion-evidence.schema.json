@@ -1,0 +1,293 @@
+{
+  "$defs": {
+    "FrameRange": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "duration": {
+          "exclusiveMinimum": 0,
+          "title": "Duration",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "duration"
+      ],
+      "title": "FrameRange",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "VideoMotionClassification": {
+      "enum": [
+        "static",
+        "global-motion",
+        "independent-motion",
+        "mixed-motion",
+        "unknown"
+      ],
+      "title": "VideoMotionClassification",
+      "type": "string"
+    },
+    "VideoMotionPhase": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "enum": [
+            "onset",
+            "development",
+            "peak",
+            "settle"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "frame_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "role",
+        "frame_range",
+        "confidence"
+      ],
+      "title": "VideoMotionPhase",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "shot_id": {
+      "title": "Shot Id",
+      "type": "string"
+    },
+    "frame_range": {
+      "$ref": "#/$defs/FrameRange"
+    },
+    "classification": {
+      "$ref": "#/$defs/VideoMotionClassification"
+    },
+    "global_transform_model": {
+      "enum": [
+        "none",
+        "translation",
+        "similarity",
+        "affine",
+        "homography",
+        "unknown"
+      ],
+      "title": "Global Transform Model",
+      "type": "string"
+    },
+    "camera_hypotheses": {
+      "items": {
+        "enum": [
+          "pan",
+          "tilt",
+          "zoom",
+          "rotation"
+        ],
+        "type": "string"
+      },
+      "title": "Camera Hypotheses",
+      "type": "array"
+    },
+    "independent_motion_detected": {
+      "title": "Independent Motion Detected",
+      "type": "boolean"
+    },
+    "motion_magnitude_mean": {
+      "minimum": 0,
+      "title": "Motion Magnitude Mean",
+      "type": "number"
+    },
+    "motion_magnitude_peak": {
+      "minimum": 0,
+      "title": "Motion Magnitude Peak",
+      "type": "number"
+    },
+    "direction_degrees": {
+      "anyOf": [
+        {
+          "maximum": 180,
+          "minimum": -180,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Direction Degrees"
+    },
+    "phases": {
+      "items": {
+        "$ref": "#/$defs/VideoMotionPhase"
+      },
+      "title": "Phases",
+      "type": "array"
+    },
+    "uncertainty": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Uncertainty",
+      "type": "array"
+    },
+    "competing_models": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Competing Models",
+      "type": "array"
+    },
+    "analyzed_frame_count": {
+      "exclusiveMinimum": 0,
+      "title": "Analyzed Frame Count",
+      "type": "integer"
+    },
+    "source_frame_count": {
+      "exclusiveMinimum": 0,
+      "title": "Source Frame Count",
+      "type": "integer"
+    },
+    "all_frame_evidence_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "All Frame Evidence Ref"
+    },
+    "confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "project_id",
+    "asset_id",
+    "source_sha256",
+    "shot_id",
+    "frame_range",
+    "classification",
+    "global_transform_model",
+    "independent_motion_detected",
+    "motion_magnitude_mean",
+    "motion_magnitude_peak",
+    "analyzed_frame_count",
+    "source_frame_count",
+    "confidence",
+    "provenance"
+  ],
+  "title": "VideoMotionEvidence",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/video-motion-evidence.schema.json"
+}

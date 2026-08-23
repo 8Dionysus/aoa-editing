@@ -76,11 +76,24 @@ def ffprobe(path: Path) -> tuple[MediaKind, MediaMetadata, dict[str, Any], list[
         duration = float(raw_duration) if raw_duration not in {None, "N/A"} else None
     except (TypeError, ValueError):
         duration = None
+    average_frame_rate = _fraction(video.get("avg_frame_rate")) if video else None
+    nominal_frame_rate = _fraction(video.get("r_frame_rate")) if video else None
+    frame_count: int | None = None
+    if video is not None and str(video.get("nb_frames", "")).isdigit():
+        frame_count = int(video["nb_frames"])
     metadata = MediaMetadata(
         duration_seconds=duration,
         width=video.get("width") if video else None,
         height=video.get("height") if video else None,
-        frame_rate=_fraction(video.get("avg_frame_rate")) if video else None,
+        frame_rate=average_frame_rate,
+        nominal_frame_rate=nominal_frame_rate,
+        video_time_base=_fraction(video.get("time_base")) if video else None,
+        video_frame_count=frame_count,
+        variable_frame_rate=(
+            average_frame_rate is not None
+            and nominal_frame_rate is not None
+            and average_frame_rate != nominal_frame_rate
+        ),
         sample_rate=int(audio["sample_rate"]) if audio and audio.get("sample_rate") else None,
         channels=audio.get("channels") if audio else None,
         format_name=payload.get("format", {}).get("format_name"),
@@ -92,4 +105,3 @@ def ffprobe(path: Path) -> tuple[MediaKind, MediaMetadata, dict[str, Any], list[
         has_audio=audio is not None,
     )
     return kind, metadata, payload, command
-

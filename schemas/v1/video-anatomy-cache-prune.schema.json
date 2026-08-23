@@ -1,0 +1,151 @@
+{
+  "$defs": {
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Receipt for deleting only the explicitly rebuildable Video Anatomy cache.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "scope": {
+      "const": "video-anatomy",
+      "default": "video-anatomy",
+      "title": "Scope",
+      "type": "string"
+    },
+    "dry_run": {
+      "title": "Dry Run",
+      "type": "boolean"
+    },
+    "cache_root": {
+      "minLength": 1,
+      "title": "Cache Root",
+      "type": "string"
+    },
+    "files_selected": {
+      "minimum": 0,
+      "title": "Files Selected",
+      "type": "integer"
+    },
+    "bytes_selected": {
+      "minimum": 0,
+      "title": "Bytes Selected",
+      "type": "integer"
+    },
+    "files_removed": {
+      "minimum": 0,
+      "title": "Files Removed",
+      "type": "integer"
+    },
+    "bytes_removed": {
+      "minimum": 0,
+      "title": "Bytes Removed",
+      "type": "integer"
+    },
+    "canonical_evidence_preserved": {
+      "const": true,
+      "default": true,
+      "title": "Canonical Evidence Preserved",
+      "type": "boolean"
+    },
+    "project_artifacts_removed": {
+      "const": false,
+      "default": false,
+      "title": "Project Artifacts Removed",
+      "type": "boolean"
+    },
+    "completed_at": {
+      "format": "date-time",
+      "title": "Completed At",
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "dry_run",
+    "cache_root",
+    "files_selected",
+    "bytes_selected",
+    "files_removed",
+    "bytes_removed",
+    "provenance"
+  ],
+  "title": "VideoAnatomyCachePruneReceipt",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/video-anatomy-cache-prune.schema.json"
+}

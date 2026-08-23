@@ -72,6 +72,46 @@
           ],
           "default": null
         },
+        "nominal_frame_rate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameRate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "video_time_base": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameRate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "video_frame_count": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Video Frame Count"
+        },
+        "variable_frame_rate": {
+          "default": false,
+          "title": "Variable Frame Rate",
+          "type": "boolean"
+        },
         "sample_rate": {
           "anyOf": [
             {

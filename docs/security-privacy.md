@@ -16,9 +16,19 @@
 - Style Memory rejects implicit opt-in and stores only explicit confirmations.
 - Analyzer failures are localized records; unexpected exception text is bounded
   before persistence.
+- Video Anatomy sends only explicitly selected project media/timestamps through
+  a declared provider alias; structural analysis remains local and usable with
+  every AI provider absent.
+- The cache-prune surface is dry-run first and is physically restricted to
+  `var/cache/video-anatomy`; canonical project and evaluation roots are outside
+  its scope.
 - The reference video hash is forbidden in ingest/render ancestry.
 - Readiness verifies sealed inputs using only existence, readability, size, and
   SHA-256. Content decoding is fail-closed behind a passing receipt.
+- Post-gate reference registration stores only a sealed external binding and
+  `asset.json`; no reference media is copied. Source-neutral reconstruction may
+  use normalized motion semantics, never reference pixels, audio, masks, or
+  source-specific matrices.
 - Network providers are absent by default. Any future external provider must
   retain the same explicit opt-in, disclosure, health, and provenance contract.
 

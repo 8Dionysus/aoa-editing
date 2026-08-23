@@ -14,6 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from aoa_editing import __version__
 from aoa_editing.analysis.service import AnalysisService
+from aoa_editing.analysis.video_pipeline import VideoAnatomyPipelineService
 from aoa_editing.application.language import NaturalLanguagePatchService
 from aoa_editing.application.reference_workspace import (
     MotionCorrectionService,
@@ -21,6 +22,8 @@ from aoa_editing.application.reference_workspace import (
     ReferenceWorkspaceService,
 )
 from aoa_editing.application.service import EditingService
+from aoa_editing.application.video_jobs import VideoAnatomyJobService
+from aoa_editing.application.video_proposals import VideoProposalService
 from aoa_editing.config import Settings
 from aoa_editing.domain.models import (
     EditPatch,
@@ -30,12 +33,14 @@ from aoa_editing.domain.models import (
     MotionCorrectionOperationV2,
     MotionCorrectionReviewDecisionV2,
     PatchOperation,
+    ReferenceReconstructionSpecV2,
     Scenario,
     ScreenWorkflowBeatInput,
     ScreenWorkflowEditSpec,
     ScreenWorkflowPlan,
     ScreenWorkflowVoiceoverCue,
     ScreenWorkflowVoiceoverTiming,
+    VideoAnatomyProfile,
 )
 from aoa_editing.infrastructure.probes import doctor_report
 from aoa_editing.infrastructure.store import ProjectStore, StoreError
@@ -62,9 +67,9 @@ class ProjectCreate(RequestModel):
     forbidden_elements: list[str] = Field(default_factory=list)
     sound_requirements: list[str] = Field(default_factory=list)
     privacy_mode: Literal["local-only", "explicit-provider-opt-in"] = "local-only"
-    automation_level: Literal[
-        "suggest", "review-before-apply", "approved-auto"
-    ] = "review-before-apply"
+    automation_level: Literal["suggest", "review-before-apply", "approved-auto"] = (
+        "review-before-apply"
+    )
 
     def to_intent(self) -> Intent:
         return Intent(
@@ -101,6 +106,38 @@ class StyleProfileRequest(RequestModel):
 
 class AnalyzeRequest(RequestModel):
     transcribe: bool = False
+
+
+class VideoAnatomyRequest(RequestModel):
+    profile: VideoAnatomyProfile = VideoAnatomyProfile.STRUCTURAL
+    start_frame: int | None = Field(default=None, ge=0)
+    duration_frames: int | None = Field(default=None, gt=0)
+    pinned_frames: list[int] = Field(default_factory=list)
+    explicit_provider_opt_in: bool = False
+
+    def frame_range(self) -> FrameRange | None:
+        if self.start_frame is None and self.duration_frames is None:
+            return None
+        if self.start_frame is None or self.duration_frames is None:
+            raise ValueError("start_frame and duration_frames must appear together")
+        return FrameRange(start=self.start_frame, duration=self.duration_frames)
+
+
+class VideoAnatomyCachePruneRequest(RequestModel):
+    apply: bool = False
+
+
+class VideoReconstructionProposalRequest(RequestModel):
+    target_asset_id: str | None = None
+    base_version_id: str | None = None
+    precise_motion_spec: ReferenceReconstructionSpecV2 | None = None
+    precise_motion_spec_ref: str | None = None
+
+
+class VideoProposalReviewRequest(RequestModel):
+    decision: Literal["approved", "rejected"]
+    reviewer: str = Field(min_length=1)
+    rationale: str = Field(min_length=1)
 
 
 class ProposeRequest(RequestModel):
@@ -186,6 +223,8 @@ def create_app(
     selected = settings or Settings.from_env()
     store = ProjectStore(selected)
     editing = EditingService(store)
+    video_jobs = VideoAnatomyJobService(store)
+    video_proposals = VideoProposalService(store)
     reference_workspaces = (
         ReferenceWorkspaceService(store, readiness_guard=readiness_guard)
         if readiness_guard is not None
@@ -204,6 +243,8 @@ def create_app(
     app.state.settings = selected
     app.state.store = store
     app.state.editing = editing
+    app.state.video_jobs = video_jobs
+    app.state.video_proposals = video_proposals
     app.state.reference_workspaces = reference_workspaces
     app.state.motion_corrections = motion_corrections
     static_root = Path(__file__).resolve().parents[1] / "web"
@@ -241,9 +282,9 @@ def create_app(
 
     @app.post("/api/projects/{project_id}/briefs", status_code=201)
     def revise_brief(project_id: str, request: BriefRevisionRequest) -> dict[str, Any]:
-        return editing.revise_brief(
-            project_id, request.to_intent(), request.rationale
-        ).model_dump(mode="json")
+        return editing.revise_brief(project_id, request.to_intent(), request.rationale).model_dump(
+            mode="json"
+        )
 
     @app.get("/api/style-profiles")
     def style_profiles() -> list[dict[str, Any]]:
@@ -253,9 +294,7 @@ def create_app(
     def confirm_style(request: StyleProfileRequest) -> dict[str, Any]:
         return editing.confirm_style(
             scope=request.scope,
-            confirmations=[
-                (item.preference, item.value) for item in request.confirmations
-            ],
+            confirmations=[(item.preference, item.value) for item in request.confirmations],
         ).model_dump(mode="json")
 
     @app.get("/api/projects/{project_id}")
@@ -279,9 +318,7 @@ def create_app(
             return {
                 "asset": asset.model_dump(mode="json"),
                 "evidence": evidence.model_dump(mode="json"),
-                "derivatives": store.load_derivatives(project_id, asset.id).model_dump(
-                    mode="json"
-                ),
+                "derivatives": store.load_derivatives(project_id, asset.id).model_dump(mode="json"),
             }
         finally:
             Path(temp_name).unlink(missing_ok=True)
@@ -295,10 +332,205 @@ def create_app(
         )
         return [record.model_dump(mode="json") for record in records]
 
-    @app.post("/api/projects/{project_id}/evidence/corrections", status_code=201)
-    def correct_evidence(
-        project_id: str, request: EvidenceCorrectionRequest
+    @app.post("/api/projects/{project_id}/assets/{asset_id}/video-anatomy")
+    def analyze_video_anatomy(
+        project_id: str,
+        asset_id: str,
+        request: VideoAnatomyRequest,
     ) -> dict[str, Any]:
+        result = video_jobs.run(
+            project_id,
+            asset_id,
+            profile=request.profile,
+            analysis_range=request.frame_range(),
+            pinned_frames=tuple(sorted(set(request.pinned_frames))),
+            explicit_provider_opt_in=request.explicit_provider_opt_in,
+        )
+        return {
+            "job": result.receipt.model_dump(mode="json"),
+            "anatomy": result.anatomy.model_dump(mode="json"),
+            "editorial_proposal": (
+                result.editorial_proposal.model_dump(mode="json")
+                if result.editorial_proposal is not None
+                else None
+            ),
+            "reconstruction_proposal": (
+                result.reconstruction_proposal.model_dump(mode="json")
+                if result.reconstruction_proposal is not None
+                else None
+            ),
+        }
+
+    @app.post("/api/projects/{project_id}/assets/{asset_id}/video-anatomy/estimate")
+    def estimate_video_anatomy(
+        project_id: str,
+        asset_id: str,
+        request: VideoAnatomyRequest,
+    ) -> dict[str, Any]:
+        return video_jobs.estimate(
+            project_id,
+            asset_id,
+            profile=request.profile,
+            analysis_range=request.frame_range(),
+            pinned_frames=tuple(sorted(set(request.pinned_frames))),
+        ).model_dump(mode="json")
+
+    @app.post("/api/video-anatomy/cache/prune")
+    def prune_video_anatomy_cache(
+        request: VideoAnatomyCachePruneRequest,
+    ) -> dict[str, Any]:
+        return video_jobs.prune_rebuildable_cache(
+            dry_run=not request.apply
+        ).model_dump(mode="json")
+
+    @app.get("/api/projects/{project_id}/video-anatomy/{plan_id}")
+    def get_video_anatomy(project_id: str, plan_id: str) -> dict[str, Any]:
+        return store.load_video_anatomy(project_id, plan_id).model_dump(mode="json")
+
+    @app.get("/api/projects/{project_id}/video-anatomy/{plan_id}/contact-sheet")
+    def get_video_anatomy_contact_sheet(project_id: str, plan_id: str) -> FileResponse:
+        path = store.video_anatomy_path(project_id, plan_id) / "contact-sheet.jpg"
+        if not path.is_file():
+            raise HTTPException(status_code=404, detail="contact sheet not found")
+        return FileResponse(path, media_type="image/jpeg")
+
+    @app.post("/api/projects/{project_id}/video-anatomy/{plan_id}/focused-plans")
+    def create_video_anatomy_focused_plans(
+        project_id: str,
+        plan_id: str,
+    ) -> list[dict[str, Any]]:
+        anatomy = store.load_video_anatomy(project_id, plan_id)
+        return [
+            item.model_dump(mode="json")
+            for item in VideoAnatomyPipelineService(store).create_focused_plans(anatomy)
+        ]
+
+    @app.post("/api/projects/{project_id}/video-anatomy/{plan_id}/shots/{shot_id}/deepen")
+    def deepen_video_anatomy_shot(
+        project_id: str,
+        plan_id: str,
+        shot_id: str,
+    ) -> dict[str, Any]:
+        anatomy = store.load_video_anatomy(project_id, plan_id)
+        shot = next((item for item in anatomy.structure.shots if item.id == shot_id), None)
+        if shot is None:
+            raise HTTPException(status_code=404, detail="shot not found")
+        result = video_jobs.run(
+            project_id,
+            anatomy.asset_id,
+            profile=VideoAnatomyProfile.MOTION,
+            analysis_range=shot.frame_range,
+            pinned_frames=(shot.frame_range.start, shot.frame_range.end - 1),
+        )
+        return {
+            "job": result.receipt.model_dump(mode="json"),
+            "anatomy": result.anatomy.model_dump(mode="json"),
+        }
+
+    @app.get("/api/projects/{project_id}/jobs/{job_id}")
+    def get_job(project_id: str, job_id: str) -> dict[str, Any]:
+        return store.load_job(project_id, job_id).model_dump(mode="json")
+
+    @app.post("/api/projects/{project_id}/jobs/{job_id}/cancel")
+    def cancel_job(project_id: str, job_id: str) -> dict[str, Any]:
+        return video_jobs.cancel(project_id, job_id).model_dump(mode="json")
+
+    @app.post("/api/projects/{project_id}/jobs/{job_id}/retry")
+    def retry_job(project_id: str, job_id: str) -> dict[str, Any]:
+        result = video_jobs.retry(project_id, job_id)
+        return {
+            "job": result.receipt.model_dump(mode="json"),
+            "anatomy": result.anatomy.model_dump(mode="json"),
+        }
+
+    @app.post(
+        "/api/projects/{project_id}/video-anatomy/{plan_id}/editorial-proposals",
+        status_code=201,
+    )
+    def create_video_editorial_proposal(
+        project_id: str,
+        plan_id: str,
+    ) -> dict[str, Any]:
+        anatomy = store.load_video_anatomy(project_id, plan_id)
+        return video_proposals.create_editorial_structure(anatomy).model_dump(mode="json")
+
+    @app.post(
+        "/api/projects/{project_id}/video-anatomy/{plan_id}/reconstruction-proposals",
+        status_code=201,
+    )
+    def create_video_reconstruction_proposal(
+        project_id: str,
+        plan_id: str,
+        request: VideoReconstructionProposalRequest,
+    ) -> dict[str, Any]:
+        anatomy = store.load_video_anatomy(project_id, plan_id)
+        if (request.precise_motion_spec is None) != (
+            request.precise_motion_spec_ref is None
+        ):
+            raise HTTPException(
+                status_code=422,
+                detail="precise motion spec and immutable ref must appear together",
+            )
+        return video_proposals.create_reference_reconstruction(
+            anatomy,
+            target_asset_id=request.target_asset_id,
+            base_version_id=request.base_version_id,
+            precise_motion_spec=request.precise_motion_spec,
+            precise_motion_spec_ref=request.precise_motion_spec_ref,
+        ).model_dump(mode="json")
+
+    @app.post(
+        "/api/projects/{project_id}/video-editorial-proposals/{proposal_id}/review",
+        status_code=201,
+    )
+    def review_video_editorial_proposal(
+        project_id: str,
+        proposal_id: str,
+        request: VideoProposalReviewRequest,
+    ) -> dict[str, Any]:
+        return video_proposals.review_editorial(
+            project_id,
+            proposal_id,
+            decision=request.decision,
+            reviewer=request.reviewer,
+            rationale=request.rationale,
+        ).model_dump(mode="json")
+
+    @app.post(
+        "/api/projects/{project_id}/video-reconstruction-proposals/{proposal_id}/review",
+        status_code=201,
+    )
+    def review_video_reconstruction_proposal(
+        project_id: str,
+        proposal_id: str,
+        request: VideoProposalReviewRequest,
+    ) -> dict[str, Any]:
+        return video_proposals.review_reconstruction(
+            project_id,
+            proposal_id,
+            decision=request.decision,
+            reviewer=request.reviewer,
+            rationale=request.rationale,
+        ).model_dump(mode="json")
+
+    @app.post(
+        "/api/projects/{project_id}/video-reconstruction-proposals/"
+        "{proposal_id}/accept/{review_id}",
+        status_code=201,
+    )
+    def accept_video_reconstruction_proposal(
+        project_id: str,
+        proposal_id: str,
+        review_id: str,
+    ) -> dict[str, Any]:
+        return video_proposals.accept_reconstruction(
+            project_id,
+            proposal_id,
+            review_id,
+        ).model_dump(mode="json")
+
+    @app.post("/api/projects/{project_id}/evidence/corrections", status_code=201)
+    def correct_evidence(project_id: str, request: EvidenceCorrectionRequest) -> dict[str, Any]:
         return editing.correct_evidence(
             project_id,
             asset_id=request.asset_id,
@@ -324,20 +556,14 @@ def create_app(
             ),
         ).model_dump(mode="json")
 
-    @app.get(
-        "/api/projects/{project_id}/reference-workspaces/{workspace_id}"
-    )
+    @app.get("/api/projects/{project_id}/reference-workspaces/{workspace_id}")
     def reference_workspace_bundle(
         project_id: str,
         workspace_id: str,
     ) -> dict[str, Any]:
-        return reference_workspaces.bundle(project_id, workspace_id).model_dump(
-            mode="json"
-        )
+        return reference_workspaces.bundle(project_id, workspace_id).model_dump(mode="json")
 
-    @app.get(
-        "/api/projects/{project_id}/reference-workspaces/{workspace_id}/artifacts/{role}"
-    )
+    @app.get("/api/projects/{project_id}/reference-workspaces/{workspace_id}/artifacts/{role}")
     def reference_workspace_artifact(
         project_id: str,
         workspace_id: str,
@@ -491,12 +717,12 @@ def create_app(
         return editing.apply_patch(project_id, patch, request.message).model_dump(mode="json")
 
     @app.post("/api/projects/{project_id}/patches/preview-language")
-    def preview_language_patch(
-        project_id: str, request: LanguagePatchRequest
-    ) -> dict[str, Any]:
-        return NaturalLanguagePatchService(store).preview(
-            project_id, request.command, version_id=request.version_id
-        ).model_dump(mode="json")
+    def preview_language_patch(project_id: str, request: LanguagePatchRequest) -> dict[str, Any]:
+        return (
+            NaturalLanguagePatchService(store)
+            .preview(project_id, request.command, version_id=request.version_id)
+            .model_dump(mode="json")
+        )
 
     @app.post("/api/projects/{project_id}/versions/{version_id}/revert", status_code=201)
     def revert(project_id: str, version_id: str) -> dict[str, Any]:
@@ -515,16 +741,20 @@ def create_app(
                 status_code=422,
                 detail="start_frame and duration_frames must be supplied together",
             )
-        return RenderService(store).render(
-            project_id,
-            version_id,
-            profile=profile,
-            frame_range=(
-                FrameRange(start=start_frame, duration=duration_frames)
-                if start_frame is not None and duration_frames is not None
-                else None
-            ),
-        ).model_dump(mode="json")
+        return (
+            RenderService(store)
+            .render(
+                project_id,
+                version_id,
+                profile=profile,
+                frame_range=(
+                    FrameRange(start=start_frame, duration=duration_frames)
+                    if start_frame is not None and duration_frames is not None
+                    else None
+                ),
+            )
+            .model_dump(mode="json")
+        )
 
     @app.post("/api/projects/{project_id}/versions/{version_id}/qc", status_code=201)
     def qc(
@@ -532,9 +762,11 @@ def create_app(
         version_id: str,
         profile: Literal["preview", "final"] = Query(default="preview"),
     ) -> dict[str, Any]:
-        return QualityService(store).inspect(
-            project_id, version_id, profile=profile
-        ).model_dump(mode="json")
+        return (
+            QualityService(store)
+            .inspect(project_id, version_id, profile=profile)
+            .model_dump(mode="json")
+        )
 
     @app.post("/api/projects/{project_id}/versions/{version_id}/export/{format_name}")
     def export(
@@ -567,25 +799,39 @@ def _project_bundle(store: ProjectStore, project_id: str) -> dict[str, Any]:
         ],
         "evidence": [item.model_dump(mode="json") for item in store.list_evidence(project_id)],
         "effective_evidence": [
-            item.model_dump(mode="json")
-            for item in store.list_effective_evidence(project_id)
+            item.model_dump(mode="json") for item in store.list_effective_evidence(project_id)
         ],
-        "treatments": [
-            item.model_dump(mode="json") for item in store.list_treatments(project_id)
-        ],
+        "treatments": [item.model_dump(mode="json") for item in store.list_treatments(project_id)],
         "versions": [item.model_dump(mode="json") for item in store.list_versions(project_id)],
         "decision_graphs": [
             item.model_dump(mode="json") for item in store.list_decision_graphs(project_id)
         ],
         "decision_log": store.load_decision_log(project_id).model_dump(mode="json"),
         "jobs": [item.model_dump(mode="json") for item in store.list_jobs(project_id)],
+        "video_anatomies": [
+            item.model_dump(mode="json") for item in store.list_video_anatomies(project_id)
+        ],
+        "video_editorial_proposals": [
+            item.model_dump(mode="json")
+            for item in store.list_editorial_structure_proposals(project_id)
+        ],
+        "video_reconstruction_proposals": [
+            item.model_dump(mode="json")
+            for item in store.list_reference_reconstruction_proposals(project_id)
+        ],
+        "video_proposal_reviews": [
+            item.model_dump(mode="json") for item in store.list_video_proposal_reviews(project_id)
+        ],
+        "video_proposal_acceptances": [
+            item.model_dump(mode="json")
+            for item in store.list_video_proposal_acceptances(project_id)
+        ],
         "qc": [item.model_dump(mode="json") for item in store.list_qc(project_id)],
         "interchange": [
             item.model_dump(mode="json") for item in store.list_interchange(project_id)
         ],
         "reference_workspaces": [
-            item.model_dump(mode="json")
-            for item in store.list_reference_workspaces(project_id)
+            item.model_dump(mode="json") for item in store.list_reference_workspaces(project_id)
         ],
         "motion_correction_proposals": [
             item.model_dump(mode="json")

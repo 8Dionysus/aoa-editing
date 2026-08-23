@@ -24,6 +24,7 @@ from aoa_editing.domain.models import (
     DerivedMediaManifest,
     EditorialBriefRevision,
     EditorialDecisionGraph,
+    EditorialStructureProposal,
     EditPatch,
     EvidenceRecord,
     FrameRange,
@@ -38,10 +39,20 @@ from aoa_editing.domain.models import (
     Provenance,
     QCReport,
     ReferenceMediaBindingV2,
+    ReferenceReconstructionProposal,
     ReferenceWorkspaceRegistrationV2,
     StyleProfile,
     Timeline,
     Treatment,
+    VideoAnatomy,
+    VideoAudioTimelineEvidence,
+    VideoFrameSampleManifest,
+    VideoMotionEvidence,
+    VideoProposalAcceptanceReceipt,
+    VideoProposalReview,
+    VideoSamplingPlan,
+    VideoStructureEvidence,
+    VideoVisualObservation,
     new_id,
 )
 from aoa_editing.infrastructure.media import ffprobe, sha256_file
@@ -380,6 +391,104 @@ class ProjectStore:
             )
         return stored, evidence
 
+    def register_evaluation_reference_asset(
+        self,
+        project_id: str,
+        reference_sha256: str,
+        *,
+        readiness_revision: str,
+    ) -> tuple[Asset, EvidenceRecord]:
+        """Register a sealed external binding for post-gate analysis without copying media."""
+
+        if not re.fullmatch(r"[0-9a-f]{40}", readiness_revision):
+            raise StoreError("evaluation reference registration requires a full readiness revision")
+        # Local import keeps ordinary storage independent from the eval module,
+        # while this exceptional external-media route remains impossible before
+        # a live, revision-matched, clean-worktree readiness decision.
+        from aoa_editing.evals.gate import require_readiness
+
+        readiness = require_readiness(self.settings)
+        if readiness.get("git_revision") != readiness_revision:
+            raise ForbiddenSourceError("evaluation reference readiness revision differs")
+        manifest = self.load_project(project_id)
+        if reference_sha256 not in manifest.sealed_reference_hashes:
+            raise ForbiddenSourceError(
+                "evaluation reference hash must be sealed before registration"
+            )
+        for asset_id in manifest.assets:
+            existing = self.load_asset(project_id, asset_id)
+            if existing.sha256 == reference_sha256:
+                evidence = next(
+                    item
+                    for item in self.list_evidence(project_id)
+                    if item.asset_id == asset_id and item.kind == "media.probe"
+                )
+                return existing, evidence
+        source = self.resolve_reference_media(reference_sha256)
+        media_kind, metadata, payload, command = ffprobe(source)
+        asset = Asset(
+            sha256=reference_sha256,
+            original_name="sealed-reference-video",
+            media_kind=media_kind,
+            stored_path=f"@evaluation-reference/{reference_sha256}",
+            size_bytes=source.stat().st_size,
+            metadata=metadata,
+        )
+        asset_dir = self._project_root(project_id) / "assets" / asset.id
+        asset_dir.mkdir(parents=False, exist_ok=False)
+        _atomic_json(asset_dir / "asset.json", asset)
+        probe_payload = dict(payload)
+        probe_payload["evaluation_reference"] = {
+            "role": "analysis-and-comparison-only",
+            "media_copied_into_project": False,
+            "allowed_as_render_input": False,
+            "readiness_revision": readiness_revision,
+        }
+        evidence = EvidenceRecord(
+            project_id=project_id,
+            asset_id=asset.id,
+            source_sha256=reference_sha256,
+            kind="media.probe",
+            payload=probe_payload,
+            **_asset_temporal_scope(asset),
+            provenance=Provenance(
+                tool="ffprobe",
+                tool_version=_tool_version("ffprobe"),
+                command=[
+                    item if item != str(source) else "<sealed-reference-binding>"
+                    for item in command
+                ],
+                parameters={
+                    "evaluation_only": True,
+                    "readiness_revision": readiness_revision,
+                    "media_copied_into_project": False,
+                },
+                deterministic=True,
+            ),
+        )
+        self.save_evidence(evidence)
+        self.save_project(
+            manifest.model_copy(
+                update={
+                    "assets": [*manifest.assets, asset.id],
+                    "updated_at": datetime.now(UTC),
+                }
+            )
+        )
+        with sqlite3.connect(self.settings.state_root / "index.sqlite3") as database:
+            database.execute(
+                """INSERT INTO assets(id, project_id, sha256, media_kind, stored_path)
+                VALUES (?, ?, ?, ?, ?)""",
+                (
+                    asset.id,
+                    project_id,
+                    reference_sha256,
+                    asset.media_kind.value,
+                    asset.stored_path,
+                ),
+            )
+        return asset, evidence
+
     def load_asset(self, project_id: str, asset_id: str) -> Asset:
         return _read_model(
             self._project_root(project_id) / "assets" / asset_id / "asset.json", Asset
@@ -391,6 +500,11 @@ class ProjectStore:
 
     def asset_source_path(self, project_id: str, asset_id: str) -> Path:
         asset = self.load_asset(project_id, asset_id)
+        if asset.stored_path == f"@evaluation-reference/{asset.sha256}":
+            project = self.load_project(project_id)
+            if asset.sha256 not in project.sealed_reference_hashes:
+                raise ForbiddenSourceError("evaluation reference binding is no longer sealed")
+            return self.resolve_reference_media(asset.sha256)
         path = (self._project_root(project_id) / asset.stored_path).resolve()
         root = self._project_root(project_id).resolve()
         if not path.is_relative_to(root):
@@ -428,10 +542,7 @@ class ProjectStore:
                 superseded = known.get(superseded_id)
                 if superseded is None:
                     raise StoreError(f"superseded evidence does not exist: {superseded_id}")
-                if (
-                    superseded.asset_id != evidence.asset_id
-                    or superseded.kind != evidence.kind
-                ):
+                if superseded.asset_id != evidence.asset_id or superseded.kind != evidence.kind:
                     raise StoreError("a correction may only supersede the same asset and kind")
         _atomic_json(
             self._project_root(evidence.project_id) / "evidence" / f"{evidence.id}.json",
@@ -441,6 +552,318 @@ class ProjectStore:
     def list_evidence(self, project_id: str) -> list[EvidenceRecord]:
         root = self._project_root(project_id) / "evidence"
         return [_read_model(path, EvidenceRecord) for path in sorted(root.glob("*.json"))]
+
+    def video_anatomy_path(self, project_id: str, plan_id: str) -> Path:
+        """Return the project-owned artifact root for one immutable sampling plan."""
+
+        self.load_project(project_id)
+        _require_id(plan_id, "samplingplan")
+        root = self._project_root(project_id) / "analysis" / "video-anatomy" / plan_id
+        root.mkdir(parents=True, exist_ok=True)
+        return root
+
+    def save_video_frame_timestamps(
+        self,
+        project_id: str,
+        asset_id: str,
+        source_sha256: str,
+        payload: dict[str, object],
+    ) -> Path:
+        """Persist the exact decoded-order PTS map for a VFR source."""
+
+        asset = self.load_asset(project_id, asset_id)
+        if asset.sha256 != source_sha256:
+            raise StoreError("frame timestamp map source identity differs from the asset")
+        path = (
+            self._project_root(project_id)
+            / "analysis"
+            / "video-timing"
+            / f"{asset_id}-{source_sha256[:16]}.json"
+        )
+        if path.exists():
+            existing = json.loads(path.read_text(encoding="utf-8"))
+            if existing != payload:
+                raise StoreError("immutable frame timestamp map already differs")
+            return path
+        _atomic_json(path, payload)
+        return path
+
+    def _save_video_anatomy_model(
+        self,
+        project_id: str,
+        plan_id: str,
+        filename: str,
+        model: BaseModel,
+    ) -> Path:
+        path = self.video_anatomy_path(project_id, plan_id) / filename
+        if path.exists():
+            existing = json.loads(path.read_text(encoding="utf-8"))
+            incoming = model.model_dump(mode="json")
+            if existing != incoming:
+                raise StoreError(f"immutable Video Anatomy artifact already differs: {path}")
+            return path
+        _atomic_json(path, model)
+        return path
+
+    def save_video_sampling_plan(self, plan: VideoSamplingPlan) -> Path:
+        if plan.project_id != self.load_project(plan.project_id).id:
+            raise StoreError("sampling plan belongs to an unknown project")
+        asset = self.load_asset(plan.project_id, plan.asset_id)
+        if asset.sha256 != plan.source_sha256:
+            raise StoreError("sampling plan source identity differs from the asset")
+        return self._save_video_anatomy_model(plan.project_id, plan.id, "sampling-plan.json", plan)
+
+    def load_video_sampling_plan(self, project_id: str, plan_id: str) -> VideoSamplingPlan:
+        return _read_model(
+            self.video_anatomy_path(project_id, plan_id) / "sampling-plan.json",
+            VideoSamplingPlan,
+        )
+
+    def save_video_frame_manifest(self, manifest: VideoFrameSampleManifest) -> Path:
+        plan = self.load_video_sampling_plan(manifest.project_id, manifest.plan_id)
+        if (
+            manifest.asset_id != plan.asset_id
+            or manifest.source_sha256 != plan.source_sha256
+            or manifest.plan_sha256 != plan.plan_sha256
+        ):
+            raise StoreError("frame manifest differs from its persisted sampling plan")
+        return self._save_video_anatomy_model(
+            manifest.project_id, manifest.plan_id, "frame-manifest.json", manifest
+        )
+
+    def load_video_frame_manifest(self, project_id: str, plan_id: str) -> VideoFrameSampleManifest:
+        return _read_model(
+            self.video_anatomy_path(project_id, plan_id) / "frame-manifest.json",
+            VideoFrameSampleManifest,
+        )
+
+    def save_video_structure(self, structure: VideoStructureEvidence) -> Path:
+        plan = self.load_video_sampling_plan(structure.project_id, structure.plan_id)
+        if (
+            structure.asset_id != plan.asset_id
+            or structure.source_sha256 != plan.source_sha256
+            or structure.plan_sha256 != plan.plan_sha256
+        ):
+            raise StoreError("structure evidence differs from its persisted sampling plan")
+        return self._save_video_anatomy_model(
+            structure.project_id, structure.plan_id, "structure.json", structure
+        )
+
+    def load_video_structure(self, project_id: str, plan_id: str) -> VideoStructureEvidence:
+        return _read_model(
+            self.video_anatomy_path(project_id, plan_id) / "structure.json",
+            VideoStructureEvidence,
+        )
+
+    def save_video_audio_timeline(self, plan_id: str, timeline: VideoAudioTimelineEvidence) -> Path:
+        plan = self.load_video_sampling_plan(timeline.project_id, plan_id)
+        if timeline.asset_id != plan.asset_id or timeline.source_sha256 != plan.source_sha256:
+            raise StoreError("audio timeline differs from its sampling plan source")
+        return self._save_video_anatomy_model(
+            timeline.project_id, plan_id, "audio-timeline.json", timeline
+        )
+
+    def load_video_audio_timeline(
+        self, project_id: str, plan_id: str
+    ) -> VideoAudioTimelineEvidence:
+        return _read_model(
+            self.video_anatomy_path(project_id, plan_id) / "audio-timeline.json",
+            VideoAudioTimelineEvidence,
+        )
+
+    def save_video_visual_observation(
+        self, plan_id: str, observation: VideoVisualObservation
+    ) -> Path:
+        plan = self.load_video_sampling_plan(observation.project_id, plan_id)
+        if observation.asset_id != plan.asset_id or observation.source_sha256 != plan.source_sha256:
+            raise StoreError("visual observation differs from its sampling plan source")
+        return self._save_video_anatomy_model(
+            observation.project_id,
+            plan_id,
+            f"visual/{observation.id}.json",
+            observation,
+        )
+
+    def list_video_visual_observations(
+        self, project_id: str, plan_id: str
+    ) -> list[VideoVisualObservation]:
+        root = self.video_anatomy_path(project_id, plan_id) / "visual"
+        return [_read_model(path, VideoVisualObservation) for path in sorted(root.glob("*.json"))]
+
+    def save_video_motion_evidence(self, plan_id: str, motion: VideoMotionEvidence) -> Path:
+        plan = self.load_video_sampling_plan(motion.project_id, plan_id)
+        if motion.asset_id != plan.asset_id or motion.source_sha256 != plan.source_sha256:
+            raise StoreError("motion evidence differs from its sampling plan source")
+        return self._save_video_anatomy_model(
+            motion.project_id,
+            plan_id,
+            f"motion/{motion.id}.json",
+            motion,
+        )
+
+    def list_video_motion_evidence(
+        self, project_id: str, plan_id: str
+    ) -> list[VideoMotionEvidence]:
+        root = self.video_anatomy_path(project_id, plan_id) / "motion"
+        return [_read_model(path, VideoMotionEvidence) for path in sorted(root.glob("*.json"))]
+
+    def save_video_anatomy(self, anatomy: VideoAnatomy) -> Path:
+        plan = self.load_video_sampling_plan(anatomy.project_id, anatomy.plan.id)
+        if plan != anatomy.plan:
+            raise StoreError("Video Anatomy embeds a different sampling plan")
+        path = self._save_video_anatomy_model(
+            anatomy.project_id,
+            anatomy.plan.id,
+            f"anatomies/{anatomy.id}.json",
+            anatomy,
+        )
+        _atomic_json(
+            self.video_anatomy_path(anatomy.project_id, anatomy.plan.id) / "latest-anatomy.json",
+            {
+                "anatomy_id": anatomy.id,
+                "anatomy_sha256": anatomy.anatomy_sha256,
+                "artifact_path": str(path.relative_to(self._project_root(anatomy.project_id))),
+            },
+        )
+        return path
+
+    def load_video_anatomy(self, project_id: str, plan_id: str) -> VideoAnatomy:
+        root = self.video_anatomy_path(project_id, plan_id)
+        latest_path = root / "latest-anatomy.json"
+        try:
+            latest = json.loads(latest_path.read_text(encoding="utf-8"))
+            anatomy_id = str(latest["anatomy_id"])
+        except (OSError, ValueError, KeyError) as error:
+            raise StoreError(f"cannot resolve latest Video Anatomy: {latest_path}") from error
+        return _read_model(root / "anatomies" / f"{anatomy_id}.json", VideoAnatomy)
+
+    def list_video_anatomies(self, project_id: str) -> list[VideoAnatomy]:
+        root = self._project_root(project_id) / "analysis" / "video-anatomy"
+        results: list[VideoAnatomy] = []
+        for latest_path in sorted(root.glob("samplingplan_*/latest-anatomy.json")):
+            try:
+                latest = json.loads(latest_path.read_text(encoding="utf-8"))
+                anatomy_id = str(latest["anatomy_id"])
+                results.append(
+                    _read_model(
+                        latest_path.parent / "anatomies" / f"{anatomy_id}.json",
+                        VideoAnatomy,
+                    )
+                )
+            except (OSError, ValueError, KeyError) as error:
+                raise StoreError(f"cannot enumerate Video Anatomy: {latest_path}") from error
+        return results
+
+    def _save_project_immutable_model(
+        self,
+        project_id: str,
+        relative_path: Path,
+        model: BaseModel,
+    ) -> Path:
+        self.load_project(project_id)
+        path = self._project_root(project_id) / relative_path
+        if path.exists():
+            existing = json.loads(path.read_text(encoding="utf-8"))
+            if existing != model.model_dump(mode="json"):
+                raise StoreError(f"immutable project artifact already differs: {path}")
+            return path
+        _atomic_json(path, model)
+        return path
+
+    def save_editorial_structure_proposal(self, proposal: EditorialStructureProposal) -> Path:
+        _require_id(proposal.id, "editorialproposal")
+        return self._save_project_immutable_model(
+            proposal.project_id,
+            Path("proposals/video-anatomy/editorial") / f"{proposal.id}.json",
+            proposal,
+        )
+
+    def load_editorial_structure_proposal(
+        self, project_id: str, proposal_id: str
+    ) -> EditorialStructureProposal:
+        _require_id(proposal_id, "editorialproposal")
+        return _read_model(
+            self._project_root(project_id)
+            / "proposals/video-anatomy/editorial"
+            / f"{proposal_id}.json",
+            EditorialStructureProposal,
+        )
+
+    def list_editorial_structure_proposals(
+        self, project_id: str
+    ) -> list[EditorialStructureProposal]:
+        root = self._project_root(project_id) / "proposals/video-anatomy/editorial"
+        return [
+            _read_model(path, EditorialStructureProposal) for path in sorted(root.glob("*.json"))
+        ]
+
+    def save_reference_reconstruction_proposal(
+        self, proposal: ReferenceReconstructionProposal
+    ) -> Path:
+        _require_id(proposal.id, "reconstructionproposal")
+        return self._save_project_immutable_model(
+            proposal.project_id,
+            Path("proposals/video-anatomy/reconstruction") / f"{proposal.id}.json",
+            proposal,
+        )
+
+    def load_reference_reconstruction_proposal(
+        self, project_id: str, proposal_id: str
+    ) -> ReferenceReconstructionProposal:
+        _require_id(proposal_id, "reconstructionproposal")
+        return _read_model(
+            self._project_root(project_id)
+            / "proposals/video-anatomy/reconstruction"
+            / f"{proposal_id}.json",
+            ReferenceReconstructionProposal,
+        )
+
+    def list_reference_reconstruction_proposals(
+        self, project_id: str
+    ) -> list[ReferenceReconstructionProposal]:
+        root = self._project_root(project_id) / "proposals/video-anatomy/reconstruction"
+        return [
+            _read_model(path, ReferenceReconstructionProposal)
+            for path in sorted(root.glob("*.json"))
+        ]
+
+    def save_video_proposal_review(self, review: VideoProposalReview) -> Path:
+        _require_id(review.id, "proposalreview")
+        return self._save_project_immutable_model(
+            review.project_id,
+            Path("proposals/video-anatomy/reviews") / f"{review.id}.json",
+            review,
+        )
+
+    def load_video_proposal_review(self, project_id: str, review_id: str) -> VideoProposalReview:
+        _require_id(review_id, "proposalreview")
+        return _read_model(
+            self._project_root(project_id)
+            / "proposals/video-anatomy/reviews"
+            / f"{review_id}.json",
+            VideoProposalReview,
+        )
+
+    def list_video_proposal_reviews(self, project_id: str) -> list[VideoProposalReview]:
+        root = self._project_root(project_id) / "proposals/video-anatomy/reviews"
+        return [_read_model(path, VideoProposalReview) for path in sorted(root.glob("*.json"))]
+
+    def save_video_proposal_acceptance(self, receipt: VideoProposalAcceptanceReceipt) -> Path:
+        _require_id(receipt.id, "proposalacceptance")
+        return self._save_project_immutable_model(
+            receipt.project_id,
+            Path("proposals/video-anatomy/acceptances") / f"{receipt.id}.json",
+            receipt,
+        )
+
+    def list_video_proposal_acceptances(
+        self, project_id: str
+    ) -> list[VideoProposalAcceptanceReceipt]:
+        root = self._project_root(project_id) / "proposals/video-anatomy/acceptances"
+        return [
+            _read_model(path, VideoProposalAcceptanceReceipt)
+            for path in sorted(root.glob("*.json"))
+        ]
 
     def list_effective_evidence(self, project_id: str) -> list[EvidenceRecord]:
         """Resolve supersession and prefer explicit human corrections per capability."""
@@ -495,9 +918,7 @@ class ProjectStore:
                 for event in graph_events(graph, rationale=treatment.patch.rationale):
                     self.append_decision_event(event)
         _atomic_json(
-            self._project_root(treatment.project_id)
-            / "treatments"
-            / f"{treatment.id}.json",
+            self._project_root(treatment.project_id) / "treatments" / f"{treatment.id}.json",
             treatment,
         )
         self.save_patch(treatment.patch)
@@ -516,17 +937,10 @@ class ProjectStore:
         return [_read_model(path, Treatment) for path in sorted(root.glob("*.json"))]
 
     def save_patch(self, patch: EditPatch) -> None:
-        _atomic_json(
-            self._project_root(patch.project_id) / "patches" / f"{patch.id}.json", patch
-        )
+        _atomic_json(self._project_root(patch.project_id) / "patches" / f"{patch.id}.json", patch)
 
     def save_decision_graph(self, graph: EditorialDecisionGraph) -> Path:
-        path = (
-            self._project_root(graph.project_id)
-            / "decisions"
-            / "graphs"
-            / f"{graph.id}.json"
-        )
+        path = self._project_root(graph.project_id) / "decisions" / "graphs" / f"{graph.id}.json"
         if path.exists():
             existing = _read_model(path, EditorialDecisionGraph)
             if existing != graph:
@@ -535,9 +949,7 @@ class ProjectStore:
         _atomic_json(path, graph)
         return path
 
-    def load_decision_graph(
-        self, project_id: str, graph_id: str
-    ) -> EditorialDecisionGraph:
+    def load_decision_graph(self, project_id: str, graph_id: str) -> EditorialDecisionGraph:
         return _read_model(
             self._project_root(project_id) / "decisions" / "graphs" / f"{graph_id}.json",
             EditorialDecisionGraph,
@@ -545,17 +957,10 @@ class ProjectStore:
 
     def list_decision_graphs(self, project_id: str) -> list[EditorialDecisionGraph]:
         root = self._project_root(project_id) / "decisions" / "graphs"
-        return [
-            _read_model(path, EditorialDecisionGraph) for path in sorted(root.glob("*.json"))
-        ]
+        return [_read_model(path, EditorialDecisionGraph) for path in sorted(root.glob("*.json"))]
 
     def append_decision_event(self, event: DecisionLogEntry) -> None:
-        path = (
-            self._project_root(event.project_id)
-            / "decisions"
-            / "log"
-            / f"{event.id}.json"
-        )
+        path = self._project_root(event.project_id) / "decisions" / "log" / f"{event.id}.json"
         if path.exists():
             existing = _read_model(path, DecisionLogEntry)
             if existing != event:
@@ -659,10 +1064,31 @@ class ProjectStore:
         root = self._project_root(project_id) / "jobs"
         return [_read_model(path, JobReceipt) for path in sorted(root.glob("*.json"))]
 
-    def save_qc(self, report: QCReport) -> None:
-        _atomic_json(
-            self._project_root(report.project_id) / "qc" / f"{report.id}.json", report
+    def load_job(self, project_id: str, job_id: str) -> JobReceipt:
+        _require_id(job_id, "job")
+        return _read_model(
+            self._project_root(project_id) / "jobs" / f"{job_id}.json",
+            JobReceipt,
         )
+
+    def save_job_checkpoint(
+        self,
+        project_id: str,
+        job_id: str,
+        phase: str,
+        payload: dict[str, object],
+    ) -> Path:
+        """Atomically promote a restart checkpoint under the owning project."""
+
+        _require_id(job_id, "job")
+        if re.fullmatch(r"[a-z0-9][a-z0-9-]*", phase) is None:
+            raise StoreError("job checkpoint phase is not path-safe")
+        path = self._project_root(project_id) / "jobs" / "checkpoints" / job_id / f"{phase}.json"
+        _atomic_json(path, payload)
+        return path
+
+    def save_qc(self, report: QCReport) -> None:
+        _atomic_json(self._project_root(report.project_id) / "qc" / f"{report.id}.json", report)
 
     def list_qc(self, project_id: str) -> list[QCReport]:
         root = self._project_root(project_id) / "qc"
@@ -670,18 +1096,13 @@ class ProjectStore:
 
     def save_interchange(self, report: InterchangeReport) -> None:
         _atomic_json(
-            self._project_root(report.project_id)
-            / "exports"
-            / f"{report.id}.report.json",
+            self._project_root(report.project_id) / "exports" / f"{report.id}.report.json",
             report,
         )
 
     def list_interchange(self, project_id: str) -> list[InterchangeReport]:
         root = self._project_root(project_id) / "exports"
-        return [
-            _read_model(path, InterchangeReport)
-            for path in sorted(root.glob("*.report.json"))
-        ]
+        return [_read_model(path, InterchangeReport) for path in sorted(root.glob("*.report.json"))]
 
     def save_reference_workspace(
         self,
@@ -701,9 +1122,7 @@ class ProjectStore:
         if path.exists():
             existing = _read_model(path, ReferenceWorkspaceRegistrationV2)
             if existing != workspace:
-                raise StoreError(
-                    f"immutable reference workspace already differs: {workspace.id}"
-                )
+                raise StoreError(f"immutable reference workspace already differs: {workspace.id}")
             return existing
         _atomic_json(path, workspace)
         return workspace
@@ -715,10 +1134,7 @@ class ProjectStore:
     ) -> ReferenceWorkspaceRegistrationV2:
         _require_id(workspace_id, "referenceworkspace")
         return _read_model(
-            self._project_root(project_id)
-            / "comparison"
-            / "workspaces"
-            / f"{workspace_id}.json",
+            self._project_root(project_id) / "comparison" / "workspaces" / f"{workspace_id}.json",
             ReferenceWorkspaceRegistrationV2,
         )
 
@@ -779,12 +1195,7 @@ class ProjectStore:
         *,
         workspace_id: str | None = None,
     ) -> list[MotionCorrectionProposalSetV2]:
-        root = (
-            self._project_root(project_id)
-            / "comparison"
-            / "corrections"
-            / "proposals"
-        )
+        root = self._project_root(project_id) / "comparison" / "corrections" / "proposals"
         proposals = [
             _read_model(path, MotionCorrectionProposalSetV2)
             for path in sorted(root.glob("motionproposal_*.json"))
@@ -827,12 +1238,7 @@ class ProjectStore:
         *,
         workspace_id: str | None = None,
     ) -> list[MotionCorrectionReviewV2]:
-        root = (
-            self._project_root(project_id)
-            / "comparison"
-            / "corrections"
-            / "reviews"
-        )
+        root = self._project_root(project_id) / "comparison" / "corrections" / "reviews"
         reviews = [
             _read_model(path, MotionCorrectionReviewV2)
             for path in sorted(root.glob("motionreview_*.json"))
@@ -868,18 +1274,14 @@ class ProjectStore:
             ),
         )
         _atomic_json(
-            self.settings.state_root
-            / "reference-media-bindings"
-            / f"{reference_sha256}.json",
+            self.settings.state_root / "reference-media-bindings" / f"{reference_sha256}.json",
             binding,
         )
         return binding
 
     def resolve_reference_media(self, reference_sha256: str) -> Path:
         binding = _read_model(
-            self.settings.state_root
-            / "reference-media-bindings"
-            / f"{reference_sha256}.json",
+            self.settings.state_root / "reference-media-bindings" / f"{reference_sha256}.json",
             ReferenceMediaBindingV2,
         )
         source = Path(binding.physical_path).expanduser().resolve(strict=True)

@@ -10,6 +10,9 @@ const state = {
   referenceChannel: "rotation_degrees",
   referenceDerivative: "value",
   motionProposal: null,
+  anatomyPlanId: null,
+  anatomyFocusedPlans: [],
+  anatomyEstimate: null,
 };
 const $ = (selector) => document.querySelector(selector);
 const esc = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[char]));
@@ -79,6 +82,9 @@ async function selectProject(id) {
     state.languagePreview = null;
     state.referenceFrame = 0;
     state.motionProposal = null;
+    state.anatomyPlanId = null;
+    state.anatomyFocusedPlans = [];
+    state.anatomyEstimate = null;
   }
   state.bundle = await api(`/api/projects/${id}`);
   state.referenceBundle = null;
@@ -128,6 +134,7 @@ function renderWorkspace() {
   $("#workspace-status").textContent = `${b.project.intent.scenario} · ${b.versions.length} версий`;
   renderWorkflow();
   renderEdit();
+  renderAnatomy();
   renderEvidence();
   renderReference();
   renderVersions();
@@ -195,6 +202,125 @@ function renderEdit() {
   $("#upload-form")?.addEventListener("submit", uploadAsset);
   $("#brief-revision-form")?.addEventListener("submit", reviseBrief);
   $("#style-confirm-form")?.addEventListener("submit", confirmStyle);
+}
+
+function anatomyForView() {
+  const anatomies = [...(state.bundle?.video_anatomies || [])].sort((left, right) =>
+    String(left.generated_at).localeCompare(String(right.generated_at))
+  );
+  if (!anatomies.length) return null;
+  const selected = anatomies.find((item) => item.plan.id === state.anatomyPlanId);
+  const anatomy = selected || anatomies.at(-1);
+  state.anatomyPlanId = anatomy.plan.id;
+  return anatomy;
+}
+
+function frameEnd(range) { return range.start + range.duration; }
+
+function anatomyAuthorityLegend() {
+  return `<div class="authority-legend">
+    <span class="authority measured">● измерено</span>
+    <span class="authority normalized">● нормализовано</span>
+    <span class="authority proposed">● предложение</span>
+    <span class="authority human">● решение человека</span>
+    <span class="authority canonical">● canonical version</span>
+  </div>`;
+}
+
+function anatomyTimelineMarkup(anatomy) {
+  const range = anatomy.plan.analysis_range;
+  const position = (frame) => (frame - range.start) / range.duration * 100;
+  const shots = anatomy.structure.shots.map((shot, index) => `
+    <button class="anatomy-shot" data-action="anatomy-select-shot" data-shot="${shot.id}"
+      style="left:${position(shot.frame_range.start)}%;width:${shot.frame_range.duration / range.duration * 100}%"
+      title="${shot.id}: ${shot.frame_range.start}–${frameEnd(shot.frame_range) - 1}">
+      <b>${index + 1}</b><span>${shot.frame_range.duration}f</span>
+    </button>`).join("");
+  const transitions = anatomy.structure.transitions.map((item) => `
+    <button class="anatomy-transition ${item.transition_type === "unknown" ? "unknown" : ""}"
+      data-action="anatomy-pin-frame" data-frame="${item.frame}"
+      style="left:${position(item.frame)}%" title="${esc(item.transition_type)} · frame ${item.frame} · ${Math.round(item.confidence * 100)}%"></button>`).join("");
+  const events = (anatomy.audio_timeline?.events || []).map((item) => {
+    const startFrame = item.start_seconds * anatomy.plan.time_base.numerator / anatomy.plan.time_base.denominator;
+    const durationFrames = Math.max(1, (item.end_seconds - item.start_seconds) * anatomy.plan.time_base.numerator / anatomy.plan.time_base.denominator);
+    return `<span class="audio-event ${esc(item.kind)}" style="left:${position(startFrame)}%;width:${durationFrames / range.duration * 100}%" title="${esc(item.kind)} ${item.start_seconds.toFixed(2)}–${item.end_seconds.toFixed(2)} s"></span>`;
+  }).join("");
+  return `<div class="anatomy-ruler"><div class="anatomy-shot-lane">${shots}${transitions}</div><div class="anatomy-audio-lane">${events || `<span class="lane-empty">audio: событий не обнаружено</span>`}</div></div>`;
+}
+
+function anatomyShotMarkup(anatomy, shot) {
+  const visual = anatomy.visual_observations.find((item) => item.shot_id === shot.id);
+  const motion = anatomy.motion_evidence.find((item) => item.shot_id === shot.id);
+  const transition = anatomy.structure.transitions.find((item) => Math.abs(item.frame - shot.frame_range.start) <= 1);
+  const samples = anatomy.frame_manifest.samples.filter((item) => item.shot_id === shot.id && item.kept);
+  const projectId = anatomy.project_id;
+  return `<article class="anatomy-shot-card" data-shot-card="${shot.id}">
+    <div class="card-head"><div><strong>${esc(shot.id)}</strong><small>frames ${shot.frame_range.start}–${frameEnd(shot.frame_range) - 1}</small></div><span class="badge ${shot.confidence > .75 ? "good" : "warn"}">${Math.round(shot.confidence * 100)}%</span></div>
+    <div class="sample-strip">${samples.slice(0, 6).map((sample) => `<figure><img loading="lazy" src="/api/projects/${projectId}/file?path=${encodeURIComponent(sample.artifact_path)}" alt="frame ${sample.source_frame_index}"><figcaption>${sample.source_frame_index} · ${esc(sample.role)}</figcaption></figure>`).join("")}</div>
+    ${transition ? `<p><span class="authority measured">transition</span> ${esc(transition.transition_type)} · ${Math.round(transition.confidence * 100)}%${transition.competing_types.length ? ` · competing: ${transition.competing_types.map(esc).join(", ")}` : ""}</p>` : ""}
+    ${visual ? `<p><span class="authority normalized">visual</span> ${esc(visual.description)}</p>` : `<p class="muted">Semantic observation не запрашивался или недоступен.</p>`}
+    ${motion ? `<p><span class="authority measured">motion</span> ${esc(motion.classification)} · ${motion.camera_hypotheses.map(esc).join(", ") || "без уверенной camera-гипотезы"} · ${Math.round(motion.confidence * 100)}%</p>` : `<p class="muted">Покадровое motion-evidence ещё не построено.</p>`}
+    ${[...shot.unresolved_questions, ...(motion?.uncertainty || [])].map((item) => `<p class="uncertainty">⚠ ${esc(item)}</p>`).join("")}
+    <div class="button-row"><button class="secondary" data-action="anatomy-deepen-shot" data-shot="${shot.id}">Углубить shot</button><button class="ghost" data-action="anatomy-pin-frame" data-frame="${shot.frame_range.start}">Pin вход</button><button class="ghost" data-action="anatomy-pin-frame" data-frame="${frameEnd(shot.frame_range) - 1}">Pin выход</button></div>
+  </article>`;
+}
+
+function anatomyProposalMarkup(proposal, kind, reviews, acceptances) {
+  const review = [...reviews].reverse().find((item) => item.proposal_id === proposal.id);
+  const acceptance = acceptances.find((item) => item.proposal_id === proposal.id);
+  const confidence = proposal.confidence ?? proposal.sections?.reduce((sum, item) => sum + item.confidence, 0) / Math.max(1, proposal.sections?.length || 1);
+  const summary = kind === "editorial"
+    ? `${proposal.sections.length} sections · ${proposal.likely_techniques.join(", ") || "techniques open"}`
+    : `${proposal.shot_skeleton.length} shots · ${proposal.duration_frames} frames · source-neutral`;
+  return `<article class="proposal-card">
+    <div class="card-head"><div><strong>${kind === "editorial" ? "Editorial structure" : "Reconstruction skeleton"}</strong><small>${short(proposal.id, 18)}</small></div><span class="authority ${acceptance ? "canonical" : review ? "human" : "proposed"}">${acceptance ? "accepted" : review?.decision || "proposal"}</span></div>
+    <p>${esc(summary)}</p><div class="button-row"><span class="badge">confidence ${Math.round((confidence || 0) * 100)}%</span><span class="badge">timeline mutated: ${proposal.timeline_mutated ? "yes" : "no"}</span></div>
+    ${review ? `<p><span class="authority human">${esc(review.reviewer)}</span> ${esc(review.rationale)}</p>` : `<div class="proposal-review"><input data-reviewer="${proposal.id}" placeholder="Кто проверил" value="editor"><input data-rationale="${proposal.id}" placeholder="Причина решения"><button class="primary" data-action="anatomy-review-proposal" data-kind="${kind}" data-proposal="${proposal.id}" data-decision="approved">Approve</button><button class="danger" data-action="anatomy-review-proposal" data-kind="${kind}" data-proposal="${proposal.id}" data-decision="rejected">Reject</button></div>`}
+    ${kind === "reconstruction" && review?.decision === "approved" && proposal.patch_preview && !acceptance ? `<button class="primary" data-action="anatomy-accept-reconstruction" data-proposal="${proposal.id}" data-review="${review.id}">Применить через reversible patch</button>` : ""}
+    ${acceptance ? `<p><span class="authority canonical">version ${short(acceptance.version_id, 18)}</span> · inverse operations ${acceptance.inverse_operation_count}</p>` : ""}
+    <details><summary>Typed payload</summary><pre>${esc(JSON.stringify(proposal, null, 2))}</pre></details>
+  </article>`;
+}
+
+function renderAnatomy() {
+  const panel = $("#tab-anatomy");
+  if (!panel || !state.bundle) return;
+  const b = state.bundle;
+  const videoAssets = b.assets.filter((item) => item.media_kind === "video");
+  const anatomy = anatomyForView();
+  const selector = (b.video_anatomies || []).map((item) => `<option value="${item.plan.id}" ${anatomy?.plan.id === item.plan.id ? "selected" : ""}>${esc(item.profile)} · ${item.structure.shots.length} shots · ${short(item.plan.id, 16)}</option>`).join("");
+  const videoOptions = videoAssets.map((item) => `<option value="${item.id}">${esc(item.original_name)}</option>`).join("");
+  const targetOptions = b.assets.filter((item) => item.media_kind === "image" || item.media_kind === "video").map((item) => `<option value="${item.id}">${esc(item.original_name)}</option>`).join("");
+  const versionOptions = b.versions.map((item) => `<option value="${item.id}">${esc(item.message)} · ${short(item.id)}</option>`).join("");
+  if (!videoAssets.length) {
+    panel.innerHTML = `<article class="card"><div class="card-head"><h3>Video Anatomy</h3><span class="badge warn">нужен video asset</span></div>${anatomyAuthorityLegend()}<p>Добавьте видео во вкладке «Монтаж». Анализ работает внутри проекта и не требует AoA/Abyss runtime.</p></article>`;
+    return;
+  }
+  const structureEvidence = anatomy ? b.evidence.find((item) => anatomy.evidence_refs.includes(item.id) && item.kind === "video.structure") : null;
+  panel.innerHTML = `
+    <article class="card anatomy-console"><div class="card-head"><div><p class="eyebrow">VIDEO → STRUCTURE EVIDENCE</p><h3>Профилированный анализ без изменения timeline</h3></div><span class="badge ${anatomy?.status === "complete" ? "good" : anatomy ? "warn" : ""}">${anatomy?.status || "not run"}</span></div>
+      ${anatomyAuthorityLegend()}
+      <div class="anatomy-controls"><label>Видео<select id="anatomy-asset">${videoOptions}</select></label><label>Профиль<select id="anatomy-profile"><option value="quick">quick</option><option value="structural" selected>structural</option><option value="semantic">semantic</option><option value="motion">motion</option><option value="reconstruct">reconstruct</option></select></label><label>Pin frames<input id="anatomy-pins" placeholder="0, 120, 240"></label><label class="check-label"><input id="anatomy-provider-opt-in" type="checkbox"> явный opt-in для provider</label><div class="button-row"><button class="ghost" data-action="anatomy-estimate">Оценить</button><button class="primary" data-action="anatomy-run">Запустить</button></div></div>
+      ${state.anatomyEstimate ? `<div class="resource-estimate ${state.anatomyEstimate.admitted ? "admitted" : "refused"}"><strong>${state.anatomyEstimate.admitted ? "admitted" : "refused"}</strong><span>≈ ${state.anatomyEstimate.estimated_runtime_seconds.toFixed(1)} s · artifacts ${(state.anatomyEstimate.estimated_artifact_bytes / 1048576).toFixed(1)} MB · required free ${(state.anatomyEstimate.required_free_bytes / 1073741824).toFixed(2)} GB</span>${state.anatomyEstimate.warnings.map((item) => `<small>⚠ ${esc(item)}</small>`).join("")}</div>` : ""}
+      ${anatomy ? `<div class="anatomy-controls secondary-row"><label>Сохранённый проход<select id="anatomy-selector">${selector}</select></label><button class="secondary" data-action="anatomy-focused-plans">Планы углубления</button><a class="artifact-link" href="/api/projects/${b.project.id}/video-anatomy/${anatomy.plan.id}/contact-sheet" target="_blank">Открыть contact sheet</a></div>` : ""}
+    </article>
+    ${anatomy ? `
+      <div class="anatomy-metrics">${Object.entries(anatomy.coverage_matrix).map(([name, value]) => `<div><span>${esc(name)}</span><b>${Math.round(value * 100)}%</b><progress max="1" value="${value}"></progress></div>`).join("")}<div><span>samples</span><b>${anatomy.frame_manifest.selected_count}</b><small>${anatomy.frame_manifest.duplicate_count} deduplicated</small></div></div>
+      <article class="card anatomy-timeline-card"><div class="card-head"><h3>Shots, transitions и audio events</h3><span class="badge">${anatomy.structure.analysis_range.start}–${frameEnd(anatomy.structure.analysis_range) - 1}f</span></div>${anatomyTimelineMarkup(anatomy)}${anatomy.unresolved_ranges.map((item) => `<p class="uncertainty">⚠ unresolved frames ${item.start}–${frameEnd(item) - 1}</p>`).join("")}${anatomy.contradictions.map((item) => `<p class="uncertainty">⇄ ${esc(item)}</p>`).join("")}</article>
+      <div class="anatomy-shot-grid">${anatomy.structure.shots.map((shot) => anatomyShotMarkup(anatomy, shot)).join("")}</div>
+      <div class="grid two" style="margin-top:16px">
+        <article class="card"><div class="card-head"><h3>Contact sheet</h3><span class="authority measured">immutable artifact</span></div><img class="anatomy-contact-sheet" loading="lazy" src="/api/projects/${b.project.id}/video-anatomy/${anatomy.plan.id}/contact-sheet" alt="Video Anatomy contact sheet"><p>${short(anatomy.frame_manifest.manifest_sha256, 20)} · ${(anatomy.frame_manifest.artifact_bytes / 1048576).toFixed(2)} MB</p></article>
+        <article class="card"><div class="card-head"><h3>Audio / transcript</h3><span class="badge ${anatomy.audio_timeline?.partial ? "warn" : "good"}">${anatomy.audio_timeline ? (anatomy.audio_timeline.partial ? "partial" : "complete") : "not requested"}</span></div>${anatomy.audio_timeline?.transcript_segments.length ? `<div class="transcript">${anatomy.audio_timeline.transcript_segments.map((item) => `<p><time>${item.start_seconds.toFixed(2)}–${item.end_seconds.toFixed(2)}</time>${item.speaker ? `<strong>${esc(item.speaker)}</strong> ` : ""}${esc(item.text)}</p>`).join("")}</div>` : `<p class="muted">Транскрипта нет. Это не маскируется как нулевая уверенность.</p>`}${anatomy.audio_timeline?.unknown_intervals.map((item) => `<p class="uncertainty">unknown audio ${item[0].toFixed(2)}–${item[1].toFixed(2)} s</p>`).join("") || ""}</article>
+      </div>
+      ${state.anatomyFocusedPlans.length ? `<article class="card" style="margin-top:16px"><div class="card-head"><h3>Адаптивные планы углубления</h3><span class="badge">${state.anatomyFocusedPlans.length}</span></div>${state.anatomyFocusedPlans.map((item) => `<div class="qc-check"><span><strong>${esc(item.profile)}</strong><small>frames ${item.analysis_range.start}–${frameEnd(item.analysis_range) - 1} · ${item.focused_rescan_reasons.map(esc).join("; ")}</small></span><span class="badge">${item.global_frame_budget} samples</span></div>`).join("")}</article>` : ""}
+      <div class="grid two" style="margin-top:16px">
+        <article class="card"><div class="card-head"><h3>Human correction</h3><span class="authority human">superseding evidence</span></div>${structureEvidence ? `<p>Исходное analyzer-evidence остаётся неизменным. Исправление создаёт отдельную запись.</p><textarea class="code" id="anatomy-correction-payload">${esc(JSON.stringify(structureEvidence.payload, null, 2))}</textarea><input id="anatomy-correction-rationale" placeholder="Что проверено человеком и почему"><button class="secondary" data-action="anatomy-correct-evidence" data-evidence="${structureEvidence.id}" data-asset="${anatomy.asset_id}" data-kind="${structureEvidence.kind}">Записать correction</button>` : `<p class="muted">Связанное structure evidence не найдено.</p>`}</article>
+        <article class="card"><div class="card-head"><h3>Предложения реконструкции</h3><span class="authority proposed">не canonical</span></div><p>Proposal не меняет timeline. Для исполнимого preview укажите target и base version.</p><div class="mini-form"><label>Target asset<select id="anatomy-target-asset"><option value="">source-neutral only</option>${targetOptions}</select></label><label>Base version<select id="anatomy-base-version"><option value="">без patch preview</option>${versionOptions}</select></label><div class="button-row"><button class="secondary" data-action="anatomy-create-editorial">Editorial proposal</button><button class="secondary" data-action="anatomy-create-reconstruction">Reconstruction proposal</button></div></div></article>
+      </div>
+      <div class="proposal-grid" style="margin-top:16px">${b.video_editorial_proposals.filter((item) => item.anatomy_id === anatomy.id).map((item) => anatomyProposalMarkup(item, "editorial", b.video_proposal_reviews, b.video_proposal_acceptances)).join("")}${b.video_reconstruction_proposals.filter((item) => item.reference_anatomy_id === anatomy.id).map((item) => anatomyProposalMarkup(item, "reconstruction", b.video_proposal_reviews, b.video_proposal_acceptances)).join("")}</div>
+      <article class="card" style="margin-top:16px"><details><summary>Coverage, confidence, provenance и полный агрегат</summary><pre>${esc(JSON.stringify({coverage: anatomy.structure.coverage, confidence: anatomy.confidence_summary, provenance_graph: anatomy.provenance_graph, evidence_refs: anatomy.evidence_refs, incompleteness_reasons: anatomy.incompleteness_reasons}, null, 2))}</pre></details></article>
+    ` : `<article class="card" style="margin-top:16px"><p class="muted">Выберите видео и профиль. Первый структурный проход построит shots, transitions, защищённые boundary triplets, coverage и provenance.</p></article>`}`;
+  $("#anatomy-selector")?.addEventListener("change", (event) => { state.anatomyPlanId = event.target.value; state.anatomyFocusedPlans = []; renderAnatomy(); });
 }
 
 function renderEvidence() {
@@ -524,6 +650,81 @@ async function handleAction(button) {
   if (action === "analyze") await guarded("Извлекаю evidence…", async () => {
     await api(`/api/projects/${projectId}/assets/${button.dataset.asset}/analyze`, {method:"POST", headers:{"Content-Type":"application/json"}, body:"{\"transcribe\":false}"});
     toast("Анализ завершён"); await selectProject(projectId);
+  });
+  if (action === "anatomy-run") await guarded("Строю Video Anatomy и durable checkpoints…", async () => {
+    const assetId = $("#anatomy-asset").value;
+    const pinnedFrames = String($("#anatomy-pins").value || "").split(",").map((item) => Number(item.trim())).filter((item) => Number.isInteger(item) && item >= 0);
+    const result = await api(`/api/projects/${projectId}/assets/${assetId}/video-anatomy`, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({profile:$("#anatomy-profile").value, pinned_frames:pinnedFrames, explicit_provider_opt_in:$("#anatomy-provider-opt-in").checked})});
+    state.anatomyPlanId = result.anatomy.plan.id;
+    toast(`Video Anatomy: ${result.anatomy.status}; ${result.anatomy.structure.shots.length} shots`);
+    await selectProject(projectId);
+  });
+  if (action === "anatomy-estimate") await guarded("Оцениваю decode, артефакты и свободное место…", async () => {
+    const assetId = $("#anatomy-asset").value;
+    state.anatomyEstimate = await api(`/api/projects/${projectId}/assets/${assetId}/video-anatomy/estimate`, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({profile:$("#anatomy-profile").value})});
+    renderAnatomy();
+    toast(state.anatomyEstimate.admitted ? "Resource preflight допускает запуск" : "Resource preflight отказал в запуске", !state.anatomyEstimate.admitted);
+  });
+  if (action === "anatomy-select-shot") {
+    document.querySelector(`[data-shot-card="${button.dataset.shot}"]`)?.scrollIntoView({behavior:"smooth", block:"center"});
+  }
+  if (action === "anatomy-pin-frame") {
+    const input = $("#anatomy-pins");
+    const values = new Set(String(input.value || "").split(",").map((item) => item.trim()).filter(Boolean));
+    values.add(String(button.dataset.frame));
+    input.value = [...values].sort((left, right) => Number(left) - Number(right)).join(", ");
+    toast(`Frame ${button.dataset.frame} закреплён для следующего прохода`);
+  }
+  if (action === "anatomy-deepen-shot") await guarded("Углубляю только выбранный shot…", async () => {
+    const anatomy = anatomyForView();
+    const result = await api(`/api/projects/${projectId}/video-anatomy/${anatomy.plan.id}/shots/${button.dataset.shot}/deepen`, {method:"POST"});
+    state.anatomyPlanId = result.anatomy.plan.id;
+    toast("Focused motion pass завершён; исходный агрегат сохранён");
+    await selectProject(projectId);
+  });
+  if (action === "anatomy-focused-plans") await guarded("Строю планы только для пробелов и неоднозначностей…", async () => {
+    const anatomy = anatomyForView();
+    state.anatomyFocusedPlans = await api(`/api/projects/${projectId}/video-anatomy/${anatomy.plan.id}/focused-plans`, {method:"POST"});
+    renderAnatomy();
+    toast(`${state.anatomyFocusedPlans.length} focused plans; анализ ещё не запущен`);
+  });
+  if (action === "anatomy-correct-evidence") await guarded("Записываю human correction без перезаписи analyzer evidence…", async () => {
+    const payload = JSON.parse($("#anatomy-correction-payload").value);
+    const rationale = $("#anatomy-correction-rationale").value.trim();
+    if (!rationale) throw new Error("Нужна причина human correction");
+    await api(`/api/projects/${projectId}/evidence/corrections`, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({asset_id:button.dataset.asset, kind:button.dataset.kind, payload, supersedes:[button.dataset.evidence], rationale})});
+    toast("Human correction сохранён отдельным evidence");
+    await selectProject(projectId);
+  });
+  if (action === "anatomy-create-editorial") await guarded("Формирую editorial proposal отдельно от evidence…", async () => {
+    const anatomy = anatomyForView();
+    await api(`/api/projects/${projectId}/video-anatomy/${anatomy.plan.id}/editorial-proposals`, {method:"POST"});
+    toast("Editorial proposal создан; timeline не изменён");
+    await selectProject(projectId);
+  });
+  if (action === "anatomy-create-reconstruction") await guarded("Формирую source-neutral reconstruction proposal…", async () => {
+    const anatomy = anatomyForView();
+    const targetAssetId = $("#anatomy-target-asset").value || null;
+    const baseVersionId = $("#anatomy-base-version").value || null;
+    if ((targetAssetId && !baseVersionId) || (!targetAssetId && baseVersionId)) throw new Error("Target asset и base version нужны вместе для patch preview");
+    await api(`/api/projects/${projectId}/video-anatomy/${anatomy.plan.id}/reconstruction-proposals`, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({target_asset_id:targetAssetId, base_version_id:baseVersionId})});
+    toast("Reconstruction proposal создан; reference pixels не встроены");
+    await selectProject(projectId);
+  });
+  if (action === "anatomy-review-proposal") await guarded("Записываю явное человеческое решение…", async () => {
+    const proposalId = button.dataset.proposal;
+    const reviewer = document.querySelector(`[data-reviewer="${proposalId}"]`).value.trim();
+    const rationale = document.querySelector(`[data-rationale="${proposalId}"]`).value.trim();
+    if (!reviewer || !rationale) throw new Error("Для review нужны автор и причина");
+    const collection = button.dataset.kind === "editorial" ? "video-editorial-proposals" : "video-reconstruction-proposals";
+    await api(`/api/projects/${projectId}/${collection}/${proposalId}/review`, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({decision:button.dataset.decision, reviewer, rationale})});
+    toast(`Proposal ${button.dataset.decision}; canonical timeline не изменён`);
+    await selectProject(projectId);
+  });
+  if (action === "anatomy-accept-reconstruction") await guarded("Провожу approved proposal через обычный reversible patch…", async () => {
+    await api(`/api/projects/${projectId}/video-reconstruction-proposals/${button.dataset.proposal}/accept/${button.dataset.review}`, {method:"POST"});
+    toast("Создана canonical version с inverse operations");
+    await selectProject(projectId);
   });
   if (action === "propose") await guarded("Собираю treatment…", async () => {
     const duration = Number($("#proposal-duration")?.value) || null;

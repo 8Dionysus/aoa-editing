@@ -38,6 +38,19 @@ Failure:
 | `project.revise_brief` | `project_id`, partial `intent`, `rationale` | Append Brief revision |
 | `asset.ingest` | `project_id`, `source` | Immutable ingest |
 | `asset.analyze` | `project_id`, `asset_id` | Produce evidence |
+| `video_anatomy.estimate` | project, asset, profile/range/pins | Predict resources without starting work |
+| `video_anatomy.run` | project, asset, profile/range/pins/provider opt-in | Run the durable progressive pipeline |
+| `video_anatomy.show` | project, plan, optional children | Read compact or complete anatomy |
+| `video_anatomy.shots` | project, plan, optional shot/range | Read bounded shot projections |
+| `video_anatomy.deepen_shot` | project, plan, shot | Run focused dense motion analysis |
+| `video_anatomy.focused_plans` | project, plan | Derive plans from gaps and ambiguity |
+| `video_anatomy.contact_sheet` | project, plan | Return project-relative artifact and hash |
+| `video_anatomy.job` / `cancel` / `retry` | project and job | Inspect or control durable phase work |
+| `video_anatomy.prune_cache` | optional `apply` | Dry-run or remove only rebuildable cache |
+| `video_anatomy.editorial_proposal` | project, plan | Create noncanonical editorial proposal |
+| `video_anatomy.reconstruction_proposal` | project, plan, optional target/base | Create source-neutral patch preview |
+| `video_anatomy.review_reconstruction` | project, proposal, decision/reviewer/rationale | Record human decision only |
+| `video_anatomy.accept_reconstruction` | project, proposal, review | Create ordinary reversible version |
 | `evidence.correct` | project/asset/kind/payload/supersedes/rationale | Append human correction |
 | `style.confirm` | scope, `explicit_opt_in=true`, confirmations | Save explicit Style Memory |
 | `style.list` | none | Read confirmed profiles |

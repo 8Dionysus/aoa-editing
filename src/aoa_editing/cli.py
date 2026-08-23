@@ -28,6 +28,8 @@ from aoa_editing.application.screen_workflow_experience import (
     admit_screen_workflow_experience,
 )
 from aoa_editing.application.service import EditingService
+from aoa_editing.application.video_jobs import VideoAnatomyJobService
+from aoa_editing.application.video_proposals import VideoProposalService
 from aoa_editing.config import Settings
 from aoa_editing.domain.models import (
     FrameRange,
@@ -47,6 +49,7 @@ from aoa_editing.domain.models import (
     ScreenWorkflowPlan,
     ScreenWorkflowVoiceoverCue,
     ScreenWorkflowVoiceoverTiming,
+    VideoAnatomyProfile,
 )
 from aoa_editing.evals.clean_rerun import run_clean_rerun
 from aoa_editing.evals.clean_rerun_v2 import run_clean_rerun_v2
@@ -76,6 +79,7 @@ from aoa_editing.evals.transfer_v2 import (
     run_technique_transfer_corpus_v2,
     system_photograph_provenance,
 )
+from aoa_editing.evals.video_anatomy import run_video_anatomy_eval
 from aoa_editing.evals.workflow_reference import run_reference_workflow_study
 from aoa_editing.infrastructure.media import sha256_file
 from aoa_editing.infrastructure.probes import doctor_report
@@ -115,6 +119,10 @@ workflow_app = typer.Typer(
     no_args_is_help=True,
     help="Plan terminal-first screen capture before media exists",
 )
+anatomy_app = typer.Typer(
+    no_args_is_help=True,
+    help="Decompose video into typed evidence and reviewed reconstruction proposals",
+)
 app.add_typer(project_app, name="project")
 app.add_typer(asset_app, name="asset")
 app.add_typer(treatment_app, name="treatment")
@@ -126,6 +134,7 @@ app.add_typer(migration_app, name="migrate")
 app.add_typer(reference_app, name="reference")
 app.add_typer(provider_app, name="provider")
 app.add_typer(workflow_app, name="workflow")
+app.add_typer(anatomy_app, name="anatomy")
 
 
 def _services() -> tuple[ProjectStore, EditingService]:
@@ -262,6 +271,285 @@ def provider_invoke(
     _emit(result)
     if result.receipt.outcome not in {"succeeded", "partial"}:
         raise typer.Exit(2)
+
+
+def _optional_frame_range(
+    start_frame: int | None,
+    duration_frames: int | None,
+) -> FrameRange | None:
+    if start_frame is None and duration_frames is None:
+        return None
+    if start_frame is None or duration_frames is None:
+        raise typer.BadParameter("--start-frame and --duration-frames must appear together")
+    return FrameRange(start=start_frame, duration=duration_frames)
+
+
+@anatomy_app.command("run")
+def anatomy_run(
+    project_id: str,
+    asset_id: str,
+    profile: Annotated[VideoAnatomyProfile, typer.Option("--profile")] = (
+        VideoAnatomyProfile.STRUCTURAL
+    ),
+    start_frame: Annotated[int | None, typer.Option("--start-frame", min=0)] = None,
+    duration_frames: Annotated[int | None, typer.Option("--duration-frames", min=1)] = None,
+    pinned_frame: Annotated[list[int] | None, typer.Option("--pin", min=0)] = None,
+    explicit_provider_opt_in: bool = typer.Option(False, "--explicit-provider-opt-in"),
+) -> None:
+    """Run one profile through the canonical receipt and cache spine."""
+
+    store, _ = _services()
+    result = VideoAnatomyJobService(store).run(
+        project_id,
+        asset_id,
+        profile=profile,
+        analysis_range=_optional_frame_range(start_frame, duration_frames),
+        pinned_frames=tuple(sorted(set(pinned_frame or []))),
+        explicit_provider_opt_in=explicit_provider_opt_in,
+    )
+    _emit(
+        {
+            "job": result.receipt.model_dump(mode="json"),
+            "anatomy": result.anatomy.model_dump(mode="json"),
+            "editorial_proposal": (
+                result.editorial_proposal.model_dump(mode="json")
+                if result.editorial_proposal is not None
+                else None
+            ),
+            "reconstruction_proposal": (
+                result.reconstruction_proposal.model_dump(mode="json")
+                if result.reconstruction_proposal is not None
+                else None
+            ),
+        }
+    )
+
+
+@anatomy_app.command("estimate")
+def anatomy_estimate(
+    project_id: str,
+    asset_id: str,
+    profile: Annotated[VideoAnatomyProfile, typer.Option("--profile")] = (
+        VideoAnatomyProfile.STRUCTURAL
+    ),
+    start_frame: Annotated[int | None, typer.Option("--start-frame", min=0)] = None,
+    duration_frames: Annotated[int | None, typer.Option("--duration-frames", min=1)] = None,
+    pinned_frame: Annotated[list[int] | None, typer.Option("--pin", min=0)] = None,
+) -> None:
+    """Estimate decode cost and fail-closed disk admission without starting a job."""
+
+    store, _ = _services()
+    _emit(
+        VideoAnatomyJobService(store).estimate(
+            project_id,
+            asset_id,
+            profile=profile,
+            analysis_range=_optional_frame_range(start_frame, duration_frames),
+            pinned_frames=tuple(sorted(set(pinned_frame or []))),
+        )
+    )
+
+
+@anatomy_app.command("prune-cache")
+def anatomy_prune_cache(
+    apply: Annotated[
+        bool,
+        typer.Option("--apply", help="Delete the selected rebuildable cache after the dry run"),
+    ] = False,
+) -> None:
+    """Inspect by default; only --apply removes the dedicated rebuildable cache."""
+
+    store, _ = _services()
+    _emit(VideoAnatomyJobService(store).prune_rebuildable_cache(dry_run=not apply))
+
+
+@anatomy_app.command("show")
+def anatomy_show(project_id: str, plan_id: str) -> None:
+    store, _ = _services()
+    _emit(store.load_video_anatomy(project_id, plan_id))
+
+
+@anatomy_app.command("contact-sheet")
+def anatomy_contact_sheet(project_id: str, plan_id: str) -> None:
+    """Print the project-owned contact-sheet path and hash."""
+
+    store, _ = _services()
+    path = store.video_anatomy_path(project_id, plan_id) / "contact-sheet.jpg"
+    if not path.is_file():
+        raise typer.BadParameter("contact sheet does not exist for this plan")
+    _emit({"path": str(path), "sha256": sha256_file(path)})
+
+
+@anatomy_app.command("focused-plans")
+def anatomy_focused_plans(project_id: str, plan_id: str) -> None:
+    store, _ = _services()
+    anatomy = store.load_video_anatomy(project_id, plan_id)
+    from aoa_editing.analysis.video_pipeline import VideoAnatomyPipelineService
+
+    _emit(
+        [
+            item.model_dump(mode="json")
+            for item in VideoAnatomyPipelineService(store).create_focused_plans(anatomy)
+        ]
+    )
+
+
+@anatomy_app.command("deepen-shot")
+def anatomy_deepen_shot(project_id: str, plan_id: str, shot_id: str) -> None:
+    store, _ = _services()
+    anatomy = store.load_video_anatomy(project_id, plan_id)
+    shot = next((item for item in anatomy.structure.shots if item.id == shot_id), None)
+    if shot is None:
+        raise typer.BadParameter("unknown shot id")
+    result = VideoAnatomyJobService(store).run(
+        project_id,
+        anatomy.asset_id,
+        profile=VideoAnatomyProfile.MOTION,
+        analysis_range=shot.frame_range,
+        pinned_frames=(shot.frame_range.start, shot.frame_range.end - 1),
+    )
+    _emit(
+        {
+            "job": result.receipt.model_dump(mode="json"),
+            "anatomy": result.anatomy.model_dump(mode="json"),
+        }
+    )
+
+
+@anatomy_app.command("job")
+def anatomy_job(project_id: str, job_id: str) -> None:
+    store, _ = _services()
+    _emit(store.load_job(project_id, job_id))
+
+
+@anatomy_app.command("cancel")
+def anatomy_cancel(project_id: str, job_id: str) -> None:
+    store, _ = _services()
+    _emit(VideoAnatomyJobService(store).cancel(project_id, job_id))
+
+
+@anatomy_app.command("retry")
+def anatomy_retry(project_id: str, job_id: str) -> None:
+    store, _ = _services()
+    result = VideoAnatomyJobService(store).retry(project_id, job_id)
+    _emit(
+        {
+            "job": result.receipt.model_dump(mode="json"),
+            "anatomy": result.anatomy.model_dump(mode="json"),
+        }
+    )
+
+
+@anatomy_app.command("editorial-proposal")
+def anatomy_editorial_proposal(project_id: str, plan_id: str) -> None:
+    store, _ = _services()
+    _emit(
+        VideoProposalService(store).create_editorial_structure(
+            store.load_video_anatomy(project_id, plan_id)
+        )
+    )
+
+
+@anatomy_app.command("reconstruction-proposal")
+def anatomy_reconstruction_proposal(
+    project_id: str,
+    plan_id: str,
+    target_asset_id: Annotated[str | None, typer.Option("--target-asset")] = None,
+    base_version_id: Annotated[str | None, typer.Option("--base-version")] = None,
+    precise_motion_spec_path: Annotated[
+        Path | None,
+        typer.Option("--precise-motion-spec", help="Frozen all-frame Spec v2 JSON"),
+    ] = None,
+    precise_motion_spec_ref: Annotated[
+        str | None,
+        typer.Option("--precise-motion-spec-ref", help="Immutable evidence reference"),
+    ] = None,
+) -> None:
+    if (precise_motion_spec_path is None) != (precise_motion_spec_ref is None):
+        raise typer.BadParameter(
+            "--precise-motion-spec and --precise-motion-spec-ref must appear together"
+        )
+    store, _ = _services()
+    precise_spec = (
+        ReferenceReconstructionSpecV2.model_validate_json(
+            precise_motion_spec_path.read_text(encoding="utf-8")
+        )
+        if precise_motion_spec_path is not None
+        else None
+    )
+    _emit(
+        VideoProposalService(store).create_reference_reconstruction(
+            store.load_video_anatomy(project_id, plan_id),
+            target_asset_id=target_asset_id,
+            base_version_id=base_version_id,
+            precise_motion_spec=precise_spec,
+            precise_motion_spec_ref=precise_motion_spec_ref,
+        )
+    )
+
+
+@anatomy_app.command("review-reconstruction")
+def anatomy_review_reconstruction(
+    project_id: str,
+    proposal_id: str,
+    decision: Annotated[str, typer.Option("--decision")],
+    reviewer: Annotated[str, typer.Option("--reviewer")],
+    rationale: Annotated[str, typer.Option("--rationale")],
+) -> None:
+    store, _ = _services()
+    _emit(
+        VideoProposalService(store).review_reconstruction(
+            project_id,
+            proposal_id,
+            decision=decision,
+            reviewer=reviewer,
+            rationale=rationale,
+        )
+    )
+
+
+@anatomy_app.command("accept-reconstruction")
+def anatomy_accept_reconstruction(
+    project_id: str,
+    proposal_id: str,
+    review_id: str,
+) -> None:
+    store, _ = _services()
+    _emit(
+        VideoProposalService(store).accept_reconstruction(
+            project_id,
+            proposal_id,
+            review_id,
+        )
+    )
+
+
+@anatomy_app.command("correct-evidence")
+def anatomy_correct_evidence(
+    project_id: str,
+    asset_id: str,
+    kind: Annotated[str, typer.Option("--kind")],
+    payload: Annotated[Path, typer.Option("--payload")],
+    supersedes: Annotated[list[str], typer.Option("--supersedes")],
+    rationale: Annotated[str, typer.Option("--rationale")],
+) -> None:
+    _, editing = _services()
+    try:
+        parsed = json.loads(payload.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise typer.BadParameter(f"cannot read evidence payload: {error}") from error
+    if not isinstance(parsed, dict):
+        raise typer.BadParameter("evidence payload must be a JSON object")
+    _emit(
+        editing.correct_evidence(
+            project_id,
+            asset_id=asset_id,
+            kind=kind,
+            payload=parsed,
+            supersedes=supersedes,
+            rationale=rationale,
+        )
+    )
 
 
 @project_app.command("create")
@@ -644,9 +932,7 @@ def reference_review(
     """Apply only explicitly approved corrections through the canonical patch service."""
 
     payload = json.loads(decisions.read_text(encoding="utf-8"))
-    parsed = TypeAdapter(list[MotionCorrectionReviewDecisionV2]).validate_python(
-        payload
-    )
+    parsed = TypeAdapter(list[MotionCorrectionReviewDecisionV2]).validate_python(payload)
     _store, _workspaces, corrections = _reference_services()
     _emit(corrections.review(project_id, proposal_id, parsed))
 
@@ -772,6 +1058,32 @@ def eval_generic(
     settings = Settings.from_env()
     root = output or settings.evals_root / "generic" / "manual"
     _emit(run_generic_suite(root))
+
+
+@eval_app.command("video-anatomy")
+def eval_video_anatomy(
+    output: Annotated[Path | None, typer.Option("--output", help="Fresh eval run root")] = None,
+) -> None:
+    """Run the independent, network-free Video Anatomy quality corpus."""
+
+    settings = Settings.from_env()
+    repository = Path(__file__).resolve().parents[2]
+    revision = _git(repository, ["rev-parse", "HEAD"]).strip()
+    clean = not bool(_git(repository, ["status", "--porcelain"]).strip())
+    root = output or (
+        settings.evals_root
+        / "video-anatomy"
+        / f"{revision[:12]}-{datetime.now(UTC).strftime('%Y%m%dT%H%M%SZ')}"
+    )
+    report = run_video_anatomy_eval(
+        root,
+        repository=repository,
+        implementation_revision=revision,
+        git_clean=clean,
+    )
+    _emit(report)
+    if report.overall != "pass":
+        raise typer.Exit(2)
 
 
 @eval_app.command("reference-analyze")
@@ -1170,12 +1482,8 @@ def eval_clean_rerun_v2(
     settings = Settings.from_env()
     readiness = require_readiness(settings)
     repo = Path(__file__).resolve().parents[2]
-    lock = json.loads(
-        (repo / "evals" / "reference.lock.json").read_text(encoding="utf-8")
-    )
-    ReferenceReconstructionSpecV2.model_validate_json(
-        spec_path.read_text(encoding="utf-8")
-    )
+    lock = json.loads((repo / "evals" / "reference.lock.json").read_text(encoding="utf-8"))
+    ReferenceReconstructionSpecV2.model_validate_json(spec_path.read_text(encoding="utf-8"))
     report = run_clean_rerun_v2(
         spec_path,
         Path(lock["source_image"]["path"]),
@@ -1256,9 +1564,7 @@ def eval_technique_transfer_corpus_v2(
     require_readiness(settings)
     repo = Path(__file__).resolve().parents[2]
     lock = json.loads((repo / "evals" / "reference.lock.json").read_text(encoding="utf-8"))
-    spec = ReferenceReconstructionSpecV2.model_validate_json(
-        spec_path.read_text(encoding="utf-8")
-    )
+    spec = ReferenceReconstructionSpecV2.model_validate_json(spec_path.read_text(encoding="utf-8"))
     selected_pass = ReferenceReconstructionPassReceiptV2.model_validate_json(
         selected_pass_path.read_text(encoding="utf-8")
     )

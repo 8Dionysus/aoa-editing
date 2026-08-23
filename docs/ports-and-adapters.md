@@ -5,6 +5,9 @@
 | Project store | Atomic immutable canonical JSON, rebuildable index | Filesystem + SQLite index | transactional/local object store |
 | Media probe | Metadata plus provenance | ffprobe | another decoder probe |
 | Analyzer | One typed evidence capability or localized failure | FFmpeg, Pillow/NumPy, provider-alias STT through path-free host normalization | OpenVINO, pyannote, CLIP, detectors |
+| Video sampling/structure | Hash-bound plan, full coverage, competing transition evidence | FFprobe/FFmpeg keyframes plus OpenCV/NumPy multi-signal detector | another calibrated detector emitting the same evidence contracts |
+| Video semantics | Selected frames -> normalized observations or typed partial failure | `vision.describe` provider alias with revision-bound cache | OCR/regions/tracking/segmentation/depth adapters |
+| Video motion | Shot range -> measured global/independent hypotheses and uncertainty | dense OpenCV optical flow/transform summaries | GPU flow or tracked-object adapter |
 | AI provider resolver | Declaration + untracked binding + live health -> redacted receipt | shell-free machine CLI and loopback HTTP | stack service adapters with the same receipt contract |
 | Editorial planner | Evidence + Brief -> reversible Treatment | deterministic scenario planners | `local-ai://editorial/plan/default` proposal |
 | Voiceover timing | immutable narration + transcript/pause evidence -> review-required beat cues | segment alignment with silence-weighted fallback | stronger local forced aligner behind the same human-review gate |

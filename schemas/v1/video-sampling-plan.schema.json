@@ -1,0 +1,340 @@
+{
+  "$defs": {
+    "FrameRange": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "duration": {
+          "exclusiveMinimum": 0,
+          "title": "Duration",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "duration"
+      ],
+      "title": "FrameRange",
+      "type": "object"
+    },
+    "FrameRate": {
+      "additionalProperties": false,
+      "properties": {
+        "numerator": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        }
+      },
+      "title": "FrameRate",
+      "type": "object"
+    },
+    "MotionTimeV2": {
+      "additionalProperties": false,
+      "description": "Exact non-negative frame time with a canonical rational subframe.",
+      "properties": {
+        "frame": {
+          "minimum": 0,
+          "title": "Frame",
+          "type": "integer"
+        },
+        "subframe_numerator": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Subframe Numerator",
+          "type": "integer"
+        },
+        "subframe_denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Subframe Denominator",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "frame"
+      ],
+      "title": "MotionTimeV2",
+      "type": "object"
+    },
+    "VideoAnatomyProfile": {
+      "enum": [
+        "quick",
+        "structural",
+        "semantic",
+        "motion",
+        "reconstruct"
+      ],
+      "title": "VideoAnatomyProfile",
+      "type": "string"
+    },
+    "VideoDeduplicationPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "luminance_delta_min": {
+          "default": 0.02,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Luminance Delta Min",
+          "type": "number"
+        },
+        "histogram_distance_min": {
+          "default": 0.04,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Histogram Distance Min",
+          "type": "number"
+        },
+        "perceptual_hash_distance_min": {
+          "default": 4,
+          "maximum": 64,
+          "minimum": 0,
+          "title": "Perceptual Hash Distance Min",
+          "type": "integer"
+        },
+        "ssim_change_min": {
+          "default": 0.01,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Ssim Change Min",
+          "type": "number"
+        },
+        "edge_change_min": {
+          "default": 0.02,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Edge Change Min",
+          "type": "number"
+        },
+        "motion_activity_min": {
+          "default": 0.01,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Motion Activity Min",
+          "type": "number"
+        },
+        "protect_boundary_samples": {
+          "const": true,
+          "default": true,
+          "title": "Protect Boundary Samples",
+          "type": "boolean"
+        },
+        "protect_pinned_samples": {
+          "const": true,
+          "default": true,
+          "title": "Protect Pinned Samples",
+          "type": "boolean"
+        },
+        "compare_across_shots": {
+          "const": false,
+          "default": false,
+          "title": "Compare Across Shots",
+          "type": "boolean"
+        }
+      },
+      "title": "VideoDeduplicationPolicy",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Deterministic budget and coverage contract for one anatomy pass.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "duration_seconds": {
+      "exclusiveMinimum": 0,
+      "title": "Duration Seconds",
+      "type": "number"
+    },
+    "time_base": {
+      "$ref": "#/$defs/FrameRate"
+    },
+    "stream_time_base": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FrameRate"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "variable_frame_rate": {
+      "default": false,
+      "title": "Variable Frame Rate",
+      "type": "boolean"
+    },
+    "frame_timestamp_count": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Frame Timestamp Count"
+    },
+    "frame_timestamps_artifact": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Frame Timestamps Artifact"
+    },
+    "frame_timestamps_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Frame Timestamps Sha256"
+    },
+    "profile": {
+      "$ref": "#/$defs/VideoAnatomyProfile"
+    },
+    "analysis_range": {
+      "$ref": "#/$defs/FrameRange"
+    },
+    "strategies": {
+      "items": {
+        "enum": [
+          "scene-score",
+          "keyframe",
+          "histogram-change",
+          "luma-progression",
+          "motion-activity",
+          "audio-change",
+          "uniform-fallback",
+          "semantic-change"
+        ],
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Strategies",
+      "type": "array"
+    },
+    "minimum_samples_per_shot": {
+      "default": 3,
+      "minimum": 1,
+      "title": "Minimum Samples Per Shot",
+      "type": "integer"
+    },
+    "global_frame_budget": {
+      "minimum": 2,
+      "title": "Global Frame Budget",
+      "type": "integer"
+    },
+    "per_shot_frame_budget": {
+      "minimum": 1,
+      "title": "Per Shot Frame Budget",
+      "type": "integer"
+    },
+    "pinned_times": {
+      "items": {
+        "$ref": "#/$defs/MotionTimeV2"
+      },
+      "title": "Pinned Times",
+      "type": "array"
+    },
+    "deduplication": {
+      "$ref": "#/$defs/VideoDeduplicationPolicy"
+    },
+    "required_capabilities": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Required Capabilities",
+      "type": "array"
+    },
+    "focused_rescan_reasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Focused Rescan Reasons",
+      "type": "array"
+    },
+    "artifact_budget_bytes": {
+      "exclusiveMinimum": 0,
+      "title": "Artifact Budget Bytes",
+      "type": "integer"
+    },
+    "plan_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Plan Sha256",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "project_id",
+    "asset_id",
+    "source_sha256",
+    "duration_seconds",
+    "time_base",
+    "profile",
+    "analysis_range",
+    "strategies",
+    "global_frame_budget",
+    "per_shot_frame_budget",
+    "artifact_budget_bytes"
+  ],
+  "title": "VideoSamplingPlan",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/video-sampling-plan.schema.json"
+}

@@ -6,6 +6,7 @@ import hashlib
 from datetime import UTC, datetime
 from pathlib import Path
 
+from aoa_editing import __version__
 from aoa_editing.domain.decisions import (
     approve_graph,
     approved_patch_graph,
@@ -652,7 +653,7 @@ class EditingService:
                 ranges=[FrameRange(start=0, duration=spec.duration_frames)],
                 provenance=Provenance(
                     tool="aoa-editing",
-                    tool_version="0.1.0",
+                    tool_version=__version__,
                     parameters={
                         "operation": "persist-frozen-reference-parameters",
                         "reference_pixels_persisted": False,
@@ -724,7 +725,7 @@ class EditingService:
                 ranges=[FrameRange(start=0, duration=spec.duration_frames)],
                 provenance=Provenance(
                     tool="aoa-editing",
-                    tool_version="0.1.0",
+                    tool_version=__version__,
                     parameters={
                         "operation": "persist-frozen-reference-parameters-v2",
                         "reference_pixels_persisted": False,
@@ -772,7 +773,7 @@ class EditingService:
                     ranges=list(phase_correction.identity_ranges),
                     provenance=Provenance(
                         tool="aoa-editing",
-                        tool_version="0.1.0",
+                        tool_version=__version__,
                         parameters={
                             "operation": "persist-reference-phase-correction-v2",
                             "algorithm_revision": phase_correction.algorithm_revision,
@@ -874,7 +875,7 @@ class EditingService:
             supersedes=[record.id for record in existing],
             provenance=Provenance(
                 tool="aoa-editing-composition-applicability-v2",
-                tool_version="0.1.0",
+                tool_version=__version__,
                 parameters={
                     "authority": assessment.authority,
                     "semantic_claim": True,
@@ -923,7 +924,7 @@ class EditingService:
             payload=decision.model_dump(mode="json"),
             provenance=Provenance(
                 tool="aoa-editing-application-service",
-                tool_version="0.1.0",
+                tool_version=__version__,
                 parameters={
                     "operation": "propose-technique-v2",
                     "outcome": decision.outcome,

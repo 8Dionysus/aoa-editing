@@ -210,6 +210,46 @@ audio { width: 100%; margin-top: 8px; }
 .transcript { max-height: 300px; overflow: auto; }
 .transcript p { margin: 0; padding: 8px 0; border-bottom: 1px solid var(--line); }
 .transcript time { color: var(--cyan); font: 11px ui-monospace, monospace; margin-right: 8px; }
+.authority-legend { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 18px; }
+.authority { display:inline-flex; align-items:center; gap:5px; padding:4px 7px; border-radius:7px; font:10px ui-monospace, monospace; border:1px solid currentColor; }
+.authority.measured { color:var(--cyan); background:rgba(117,203,210,.07); }
+.authority.normalized { color:#b6aaff; background:rgba(143,125,244,.08); }
+.authority.proposed { color:var(--gold); background:rgba(233,184,93,.07); }
+.authority.human { color:#ffadcf; background:rgba(255,126,181,.07); }
+.authority.canonical { color:var(--green); background:rgba(100,214,154,.08); }
+.anatomy-controls { display:grid; grid-template-columns:1.25fr 1fr 1fr 1.1fr auto; gap:10px; align-items:end; }
+.anatomy-controls.secondary-row { grid-template-columns:minmax(260px,1fr) auto auto; margin-top:12px; }
+.resource-estimate { display:grid; grid-template-columns:auto 1fr; gap:5px 12px; align-items:center; margin-top:11px; padding:10px 12px; border:1px solid rgba(100,214,154,.25); border-radius:10px; background:rgba(100,214,154,.05); font-size:11px; }
+.resource-estimate.refused { border-color:rgba(239,125,125,.35); background:rgba(239,125,125,.06); }
+.resource-estimate small { grid-column:1/-1; color:var(--gold); }
+.check-label { display:flex; grid-template-columns:auto 1fr; align-items:center; gap:8px; min-height:40px; }
+.check-label input { width:auto; }
+.anatomy-metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:9px; margin:16px 0; }
+.anatomy-metrics > div { padding:12px; border:1px solid var(--line); border-radius:12px; background:rgba(0,0,0,.16); }
+.anatomy-metrics span, .anatomy-metrics b, .anatomy-metrics small { display:block; }
+.anatomy-metrics span, .anatomy-metrics small { color:var(--muted); font-size:10px; }
+.anatomy-metrics b { margin:4px 0; font:18px Georgia,serif; }
+.anatomy-metrics progress { width:100%; height:5px; accent-color:var(--cyan); }
+.anatomy-ruler { display:grid; gap:7px; overflow:hidden; }
+.anatomy-shot-lane, .anatomy-audio-lane { position:relative; height:58px; border:1px solid var(--line); border-radius:10px; background:repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0,rgba(255,255,255,.035) 1px,transparent 1px,transparent 10%); }
+.anatomy-audio-lane { height:28px; background:rgba(100,214,154,.035); }
+.anatomy-shot { position:absolute; top:5px; height:46px; min-width:3px; overflow:hidden; display:flex; justify-content:space-between; align-items:center; padding:6px; color:#d6f8fa; background:linear-gradient(135deg,rgba(117,203,210,.25),rgba(143,125,244,.18)); border:1px solid rgba(117,203,210,.3); border-radius:7px; cursor:pointer; }
+.anatomy-shot b { font-size:11px; }.anatomy-shot span { font-size:9px; color:var(--muted); }
+.anatomy-transition { position:absolute; z-index:3; top:0; width:6px; height:58px; padding:0; transform:translateX(-3px); border-radius:4px; background:var(--gold); box-shadow:0 0 9px rgba(233,184,93,.6); cursor:pointer; }
+.anatomy-transition.unknown { background:var(--red); box-shadow:0 0 9px rgba(239,125,125,.6); }
+.audio-event { position:absolute; top:5px; height:16px; min-width:3px; border-radius:4px; background:rgba(100,214,154,.58); }
+.audio-event.silence { background:rgba(151,155,168,.32); }.audio-event.accent,.audio-event.onset,.audio-event.beat { background:rgba(233,184,93,.65); }
+.lane-empty { position:absolute; left:9px; top:6px; color:var(--muted); font-size:9px; }
+.anatomy-shot-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:12px; margin-top:16px; }
+.anatomy-shot-card, .proposal-card { padding:15px; border:1px solid var(--line); border-radius:14px; background:rgba(10,12,18,.58); }
+.anatomy-shot-card:target { border-color:var(--gold); }
+.anatomy-shot-card small { display:block; color:var(--muted); margin-top:3px; }
+.sample-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(70px,1fr)); gap:5px; }
+.sample-strip figure { margin:0; min-width:0; }.sample-strip img { width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:6px; border:1px solid var(--line); }.sample-strip figcaption { color:var(--muted); font-size:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.anatomy-contact-sheet { display:block; width:100%; max-height:620px; object-fit:contain; border-radius:10px; background:#050608; border:1px solid var(--line); }
+.proposal-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:12px; }
+.proposal-review { display:grid; grid-template-columns:1fr 1.5fr auto auto; gap:7px; align-items:center; }
+.proposal-card pre, #tab-anatomy .card pre { max-height:360px; overflow:auto; padding:11px; border-radius:9px; background:#090b10; color:#bfc9d9; font-size:10px; }
 dialog { width: min(680px, calc(100vw - 30px)); max-height: calc(100vh - 36px); overflow:auto; border: 1px solid var(--line-strong); border-radius: 22px; background: #12151d; color: var(--text); padding: 0; box-shadow: var(--shadow); }
 .compact-fields { gap: 10px; }
 dialog::backdrop { background: rgba(0,0,0,.72); backdrop-filter: blur(8px); }
@@ -253,4 +293,5 @@ dialog::backdrop { background: rgba(0,0,0,.72); backdrop-filter: blur(8px); }
   .plot-grid { grid-template-columns: 1fr; }
   .review-choice { grid-template-columns: 1fr 1fr; }
   .decision-rationale { grid-column: 1 / -1; min-width: 0; }
+  .anatomy-controls, .anatomy-controls.secondary-row, .proposal-review { grid-template-columns: 1fr; }
 }

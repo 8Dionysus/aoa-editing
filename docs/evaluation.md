@@ -19,6 +19,30 @@ The gate emits a machine-readable receipt with check IDs, commands, timestamps,
 Git revision, tool versions, and artifact hashes. A skipped mandatory check is a
 failure.
 
+## Video Anatomy generic gate
+
+Before sealed media is decoded, run the independent network-free corpus:
+
+```bash
+./scripts/aoa-editing eval video-anatomy --output /new/video-anatomy-eval
+```
+
+It renders synthetic fixtures from authored truth and measures boundary
+precision/recall and timing, transition classification, complete shot coverage,
+short-event selection, duplicate reduction, semantic/audio coverage, motion
+error, VFR and fractional-FPS identity, unresolved ratio, runtime, and artifact
+size. It also exercises provider absence/timeout/malformed responses,
+cancellation/resume, cache invalidation, legacy `video.scenes`, schema and
+CLI/API/agent/workbench contracts, and reference non-leakage. A passing report
+has zero mandatory skips and explicitly records `reference_media_used=false`.
+
+The post-gate named reference route runs `quick`, `structural`, and
+`reconstruct`, then joins the source-neutral proposal to the existing all-frame
+Reference Spec/Comparison Protocol v2. Proposal review and candidate editorial
+review remain two attributable human decisions. Objective success without the
+exact candidate-hash verdict stays `warn`; reference absence from render
+lineage is mandatory.
+
 For `screen.workflow`, generic contract coverage includes multi-segment beats,
 source and camera continuity, gradual speed tiers, real-time prompt entry,
 explicit risk above 24x, live-region loopability, natural holds, and aggregation

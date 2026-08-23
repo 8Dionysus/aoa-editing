@@ -17,6 +17,7 @@ host capability receipts remain stronger evidence for what is installed now.
 | Whisper / faster-whisper | Whisper code and weights and faster-whisper are MIT; faster-whisper uses CTranslate2 and quantization. The host already owns proven OpenVINO Whisper profiles. | Use the host bridge; download no duplicate model. ASR remains correctable evidence. |
 | pyannote.audio | MIT code supports local diarization, but community pretrained pipelines require model agreement/download; telemetry behavior must be reviewed or disabled for strict local privacy. | Reserve a diarization port; do not add heavy weights to the baseline. |
 | Local image/video-text | Sampling frames into a local image-text embedding port is more portable than making a video foundation model mandatory. | Reserve retrieval ports; keep chronology/technical evidence as honest fallback. |
+| `bradautomates/claude-video` | Progressive frame extraction and compositional decomposition are useful workflow principles, but its skill/runtime shape and provider coupling are not product architecture. | Adopt only progressive coverage and focused re-analysis as independently implemented, typed `aoa-editing` evidence; add no dependency or copied skill. |
 | Premiere UXP | Current UXP exposes Premiere projects, sequences, tracks, clips, effects, and export inside a proprietary desktop host with version-coupled APIs. | Future consumer adapter only; not Linux/headless baseline authority. |
 | DaVinci Resolve scripting | Resolve/Fusion exposes Python/Lua scripting but requires the proprietary installed host and its project/runtime semantics. | Future optional interchange adapter, not canonical IR. |
 | Remotion | Strong React/programmatic rendering, but current company licensing changes beyond individuals/teams of up to three and adds a Node/Chromium stack. | Reject as baseline renderer; reconsider only for a licensed template-render lane. |
@@ -37,6 +38,7 @@ Primary sources:
 - <https://github.com/openai/whisper>
 - <https://github.com/SYSTRAN/faster-whisper>
 - <https://github.com/pyannote/pyannote-audio>
+- <https://github.com/bradautomates/claude-video>
 - <https://developer.adobe.com/premiere-pro/uxp/>
 - <https://documents.blackmagicdesign.com/UserManuals/Fusion8_Scripting_Guide.pdf>
 - <https://www.remotion.pro/license>

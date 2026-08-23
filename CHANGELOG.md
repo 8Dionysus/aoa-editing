@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.2.0 - 2026-08-23
+
+- Added progressive Video Anatomy profiles, adaptive sampling, contiguous shot
+  and boundary evidence, protected multi-signal deduplication, exact VFR timing,
+  contact sheets and synchronized audio evidence.
+- Added provider-neutral visual observations and dense per-shot motion with
+  typed partial and failure behaviour.
+- Added immutable anatomy, editorial/reconstruction proposals, explicit human
+  review, reversible acceptance and dense normalized Motion v2 compilation.
+- Added durable phase jobs, checkpoints, cancellation/retry/resume,
+  revision-bound caches, resource admission and cache-prune receipts.
+- Added shared CLI, HTTP, agent and workbench Video Anatomy surfaces plus an
+  independent network-free evaluation corpus.
+- Sealed reference analysis remains readiness-gated and no reference pixels,
+  audio, masks or source-specific matrices can enter reconstruction lineage.
+- Product provenance now reports package version `0.2.0` instead of hard-coded
+  prototype version strings.
+
 ## Unreleased
 
 - Added reviewed transcript/pause-backed voiceover timing for `screen.workflow`,

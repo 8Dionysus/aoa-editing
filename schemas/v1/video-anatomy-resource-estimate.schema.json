@@ -1,0 +1,222 @@
+{
+  "$defs": {
+    "FrameRange": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "duration": {
+          "exclusiveMinimum": 0,
+          "title": "Duration",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "duration"
+      ],
+      "title": "FrameRange",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "VideoAnatomyProfile": {
+      "enum": [
+        "quick",
+        "structural",
+        "semantic",
+        "motion",
+        "reconstruct"
+      ],
+      "title": "VideoAnatomyProfile",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Preflight estimate; measured free space is distinct from predicted cost.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "profile": {
+      "$ref": "#/$defs/VideoAnatomyProfile"
+    },
+    "analysis_range": {
+      "$ref": "#/$defs/FrameRange"
+    },
+    "source_duration_seconds": {
+      "exclusiveMinimum": 0,
+      "title": "Source Duration Seconds",
+      "type": "number"
+    },
+    "requested_frame_count": {
+      "exclusiveMinimum": 0,
+      "title": "Requested Frame Count",
+      "type": "integer"
+    },
+    "estimated_decode_frame_count": {
+      "exclusiveMinimum": 0,
+      "title": "Estimated Decode Frame Count",
+      "type": "integer"
+    },
+    "estimated_runtime_seconds": {
+      "exclusiveMinimum": 0,
+      "title": "Estimated Runtime Seconds",
+      "type": "number"
+    },
+    "estimated_artifact_bytes": {
+      "exclusiveMinimum": 0,
+      "title": "Estimated Artifact Bytes",
+      "type": "integer"
+    },
+    "estimated_peak_temporary_bytes": {
+      "exclusiveMinimum": 0,
+      "title": "Estimated Peak Temporary Bytes",
+      "type": "integer"
+    },
+    "free_bytes_at_preflight": {
+      "minimum": 0,
+      "title": "Free Bytes At Preflight",
+      "type": "integer"
+    },
+    "required_free_bytes": {
+      "exclusiveMinimum": 0,
+      "title": "Required Free Bytes",
+      "type": "integer"
+    },
+    "admitted": {
+      "title": "Admitted",
+      "type": "boolean"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    },
+    "refusal_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Refusal Reason"
+    },
+    "measured_at": {
+      "format": "date-time",
+      "title": "Measured At",
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "project_id",
+    "asset_id",
+    "source_sha256",
+    "profile",
+    "analysis_range",
+    "source_duration_seconds",
+    "requested_frame_count",
+    "estimated_decode_frame_count",
+    "estimated_runtime_seconds",
+    "estimated_artifact_bytes",
+    "estimated_peak_temporary_bytes",
+    "free_bytes_at_preflight",
+    "required_free_bytes",
+    "admitted",
+    "provenance"
+  ],
+  "title": "VideoAnatomyResourceEstimate",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/video-anatomy-resource-estimate.schema.json"
+}
