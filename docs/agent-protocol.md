@@ -48,7 +48,7 @@ Failure:
 | `video_anatomy.job` / `cancel` / `retry` | project and job | Inspect or control durable phase work |
 | `video_anatomy.prune_cache` | optional `apply` | Dry-run or remove only rebuildable cache |
 | `video_anatomy.editorial_proposal` | project, plan | Create noncanonical editorial proposal |
-| `video_anatomy.reconstruction_proposal` | project, plan, optional target/base | Create source-neutral patch preview |
+| `video_anatomy.reconstruction_proposal` | project, plan, optional target/base, precise spec and comparison-bound correction | Create a source-neutral, hash-bound, inert patch preview |
 | `video_anatomy.review_reconstruction` | project, proposal, decision/reviewer/rationale | Record human decision only |
 | `video_anatomy.accept_reconstruction` | project, proposal, review | Create ordinary reversible version |
 | `evidence.correct` | project/asset/kind/payload/supersedes/rationale | Append human correction |

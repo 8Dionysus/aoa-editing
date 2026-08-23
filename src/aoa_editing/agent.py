@@ -28,6 +28,7 @@ from aoa_editing.domain.models import (
     Intent,
     MotionCorrectionOperationV2,
     MotionCorrectionReviewDecisionV2,
+    ReferencePhaseCorrectionV2,
     ReferenceReconstructionSpecV2,
     Scenario,
     ScreenWorkflowBeatInput,
@@ -369,6 +370,19 @@ class AgentProtocol:
         )
         if (precise_spec is None) != (precise_ref is None):
             raise ValueError("precise motion spec and immutable ref must appear together")
+        raw_correction = params.get("phase_correction")
+        phase_correction = (
+            ReferencePhaseCorrectionV2.model_validate(raw_correction)
+            if raw_correction is not None
+            else None
+        )
+        phase_correction_ref = (
+            str(params["phase_correction_ref"])
+            if params.get("phase_correction_ref") is not None
+            else None
+        )
+        if (phase_correction is None) != (phase_correction_ref is None):
+            raise ValueError("phase correction and immutable ref must appear together")
         return self.video_proposals.create_reference_reconstruction(
             anatomy,
             target_asset_id=(
@@ -383,6 +397,8 @@ class AgentProtocol:
             ),
             precise_motion_spec=precise_spec,
             precise_motion_spec_ref=precise_ref,
+            phase_correction=phase_correction,
+            phase_correction_ref=phase_correction_ref,
         )
 
     def _video_review_reconstruction(self, params: dict[str, Any]) -> Any:

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +27,7 @@ from aoa_editing.domain.models import (
     RationaleItem,
     ReconstructionShotSkeleton,
     ReconstructionTransformSample,
+    ReferencePhaseCorrectionV2,
     ReferenceReconstructionProposal,
     ReferenceReconstructionSpecV2,
     ScalarKeyframe,
@@ -46,13 +48,14 @@ from aoa_editing.domain.models import (
     VideoTransitionType,
 )
 from aoa_editing.infrastructure.store import ProjectStore
+from aoa_editing.scenarios.reference_v2 import evaluate_time_warp_v2
 
 
 class VideoProposalError(ValueError):
     """A proposal or human review is not safe to compile or accept."""
 
 
-def _model_sha256(model: Any) -> str:
+def canonical_model_sha256(model: Any) -> str:
     payload = json.dumps(
         model.model_dump(mode="json"),
         sort_keys=True,
@@ -165,6 +168,8 @@ class VideoProposalService:
         base_version_id: str | None = None,
         precise_motion_spec: ReferenceReconstructionSpecV2 | None = None,
         precise_motion_spec_ref: str | None = None,
+        phase_correction: ReferencePhaseCorrectionV2 | None = None,
+        phase_correction_ref: str | None = None,
     ) -> ReferenceReconstructionProposal:
         if anatomy.status.value in {"failed", "insufficient"}:
             raise VideoProposalError("insufficient Video Anatomy cannot support reconstruction")
@@ -172,11 +177,28 @@ class VideoProposalService:
             raise VideoProposalError(
                 "precise motion spec and its immutable evidence ref must appear together"
             )
+        if (phase_correction is None) != (phase_correction_ref is None):
+            raise VideoProposalError(
+                "phase correction and its immutable evidence ref must appear together"
+            )
+        if phase_correction is not None and precise_motion_spec is None:
+            raise VideoProposalError(
+                "phase correction requires the exact frozen precise motion spec"
+            )
         if precise_motion_spec is not None:
             self._validate_precise_motion_spec(
                 anatomy,
                 precise_motion_spec,
                 target_asset_id=target_asset_id,
+            )
+        if phase_correction is not None:
+            if precise_motion_spec is None or precise_motion_spec_ref is None:
+                raise AssertionError("validated precise motion inputs disappeared")
+            self._validate_phase_correction(
+                precise_motion_spec,
+                precise_motion_spec_ref=precise_motion_spec_ref,
+                phase_correction=phase_correction,
+                phase_correction_ref=phase_correction_ref,
             )
         skeleton: list[ReconstructionShotSkeleton] = []
         cursor = 0
@@ -204,6 +226,7 @@ class VideoProposalService:
                         motion,
                         timeline_range,
                         precise_motion_spec=precise_motion_spec,
+                        phase_correction=phase_correction,
                     ),
                     transition_in=transition_in,
                     transition_out=transition_out,
@@ -217,6 +240,11 @@ class VideoProposalService:
                                 *(
                                     [precise_motion_spec_ref]
                                     if precise_motion_spec_ref is not None
+                                    else []
+                                ),
+                                *(
+                                    [phase_correction_ref]
+                                    if phase_correction_ref is not None
                                     else []
                                 ),
                                 *shot.representative_sample_ids,
@@ -307,11 +335,20 @@ class VideoProposalService:
                     if precise_motion_spec_ref is not None
                     else []
                 ),
+                *([phase_correction_ref] if phase_correction_ref is not None else []),
             ],
             confidence=min(anatomy.confidence_summary.values()),
             refinement_plan=[
                 "Run focused analysis for every unresolved range.",
                 "Review boundary triplets and measured transform curves.",
+                *(
+                    [
+                        "Review the comparison-bound phase correction, its protected "
+                        "identity range, and every predicted frozen check."
+                    ]
+                    if phase_correction is not None
+                    else []
+                ),
                 "Approve only after patch preview and source-lineage inspection.",
             ],
             patch_preview=preview,
@@ -326,6 +363,38 @@ class VideoProposalService:
                 precise_motion_spec_ref=precise_motion_spec_ref,
                 dense_normalized_transform_samples=(
                     precise_motion_spec is not None
+                ),
+                phase_correction_id=(
+                    phase_correction.id if phase_correction is not None else None
+                ),
+                phase_correction_ref=phase_correction_ref,
+                phase_correction_sha256=(
+                    canonical_model_sha256(phase_correction)
+                    if phase_correction is not None
+                    else None
+                ),
+                phase_correction_comparison_report_id=(
+                    phase_correction.comparison_report_id
+                    if phase_correction is not None
+                    else None
+                ),
+                phase_correction_comparison_report_sha256=(
+                    phase_correction.comparison_report_sha256
+                    if phase_correction is not None
+                    else None
+                ),
+                phase_correction_candidate_motion_sha256=(
+                    phase_correction.candidate_motion_sha256
+                    if phase_correction is not None
+                    else None
+                ),
+                phase_correction_prior_candidate_sha256=(
+                    phase_correction.prior_candidate_sha256
+                    if phase_correction is not None
+                    else None
+                ),
+                phase_correction_applied_to_dense_normalized_channels=(
+                    phase_correction is not None
                 ),
             ),
         )
@@ -378,7 +447,7 @@ class VideoProposalService:
     ) -> VideoProposalAcceptanceReceipt:
         proposal = self.store.load_reference_reconstruction_proposal(project_id, proposal_id)
         review = self.store.load_video_proposal_review(project_id, review_id)
-        proposal_hash = _model_sha256(proposal)
+        proposal_hash = canonical_model_sha256(proposal)
         if (
             review.proposal_kind != "reference-reconstruction"
             or review.proposal_id != proposal.id
@@ -427,7 +496,7 @@ class VideoProposalService:
             project_id=project_id,
             proposal_kind=proposal_kind,  # type: ignore[arg-type]
             proposal_id=proposal.id,
-            proposal_sha256=_model_sha256(proposal),
+            proposal_sha256=canonical_model_sha256(proposal),
             decision=decision,  # type: ignore[arg-type]
             reviewer=reviewer,
             rationale=rationale,
@@ -597,30 +666,72 @@ class VideoProposalService:
         if not spec.frozen_before_first_v2_render or spec.reference_media_allowed_in_render:
             raise VideoProposalError("precise motion spec does not preserve reference isolation")
 
+    def _validate_phase_correction(
+        self,
+        spec: ReferenceReconstructionSpecV2,
+        *,
+        precise_motion_spec_ref: str,
+        phase_correction: ReferencePhaseCorrectionV2,
+        phase_correction_ref: str | None,
+    ) -> None:
+        if (
+            phase_correction.spec_id != spec.id
+            or phase_correction.source_sha256 != spec.source_sha256
+            or phase_correction.reference_sha256 != spec.reference_sha256
+            or phase_correction.duration_frames != spec.duration_frames
+        ):
+            raise VideoProposalError("phase correction does not match the precise motion spec")
+        expected_spec_ref = f"reference-spec-v2:{spec.id}:{phase_correction.spec_sha256}"
+        if precise_motion_spec_ref != expected_spec_ref:
+            raise VideoProposalError(
+                "phase correction is not bound to the exact precise motion spec ref"
+            )
+        correction_sha256 = canonical_model_sha256(phase_correction)
+        expected_correction_ref = (
+            f"reference-phase-correction-v2:{phase_correction.id}:{correction_sha256}"
+        )
+        if phase_correction_ref != expected_correction_ref:
+            raise VideoProposalError(
+                "phase correction ref does not bind the exact correction semantics"
+            )
+
     def _transform_samples(
         self,
         motion: VideoMotionEvidence | None,
         timeline_range: FrameRange,
         *,
         precise_motion_spec: ReferenceReconstructionSpecV2 | None = None,
+        phase_correction: ReferencePhaseCorrectionV2 | None = None,
     ) -> list[ReconstructionTransformSample]:
         if precise_motion_spec is not None:
-            frames = precise_motion_spec.motion_frames[
-                timeline_range.start : timeline_range.end
-            ]
-            if len(frames) != timeline_range.duration:
+            if timeline_range.end > precise_motion_spec.duration_frames:
                 raise VideoProposalError(
                     "precise motion spec does not cover the reconstruction shot"
                 )
+            if phase_correction is None:
+                frames = precise_motion_spec.motion_frames[
+                    timeline_range.start : timeline_range.end
+                ]
+                return [
+                    ReconstructionTransformSample(
+                        time=MotionTimeV2(frame=frame.frame),
+                        center_x=frame.center_x,
+                        center_y=frame.center_y,
+                        contain_relative_scale=frame.scale_relative_to_contain,
+                        rotation_degrees=frame.rotation_degrees,
+                    )
+                    for frame in frames
+                ]
             return [
-                ReconstructionTransformSample(
-                    time=MotionTimeV2(frame=frame.frame),
-                    center_x=frame.center_x,
-                    center_y=frame.center_y,
-                    contain_relative_scale=frame.scale_relative_to_contain,
-                    rotation_degrees=frame.rotation_degrees,
+                self._phase_compensated_transform_sample(
+                    precise_motion_spec,
+                    phase_correction,
+                    output_frame=output_frame,
                 )
-                for frame in frames
+                for output_frame in range(
+                    timeline_range.start,
+                    timeline_range.end,
+                )
             ]
         if motion is None or motion.all_frame_evidence_ref is None:
             return [
@@ -669,6 +780,33 @@ class VideoProposalService:
                     )
                 )
         return output
+
+    @staticmethod
+    def _phase_compensated_transform_sample(
+        spec: ReferenceReconstructionSpecV2,
+        correction: ReferencePhaseCorrectionV2,
+        *,
+        output_frame: int,
+    ) -> ReconstructionTransformSample:
+        source_frame = evaluate_time_warp_v2(correction, output_frame)
+        lower = math.floor(source_frame)
+        upper = math.ceil(source_frame)
+        progress = source_frame - lower
+        left = spec.motion_frames[lower]
+        right = spec.motion_frames[upper]
+
+        def interpolate(attribute: str) -> float:
+            left_value = float(getattr(left, attribute))
+            right_value = float(getattr(right, attribute))
+            return left_value + (right_value - left_value) * progress
+
+        return ReconstructionTransformSample(
+            time=MotionTimeV2(frame=output_frame),
+            center_x=interpolate("center_x"),
+            center_y=interpolate("center_y"),
+            contain_relative_scale=interpolate("scale_relative_to_contain"),
+            rotation_degrees=interpolate("rotation_degrees"),
+        )
 
     @staticmethod
     def _clip_local_transforms(

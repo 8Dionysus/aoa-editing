@@ -33,6 +33,7 @@ from aoa_editing.domain.models import (
     MotionCorrectionOperationV2,
     MotionCorrectionReviewDecisionV2,
     PatchOperation,
+    ReferencePhaseCorrectionV2,
     ReferenceReconstructionSpecV2,
     Scenario,
     ScreenWorkflowBeatInput,
@@ -132,6 +133,8 @@ class VideoReconstructionProposalRequest(RequestModel):
     base_version_id: str | None = None
     precise_motion_spec: ReferenceReconstructionSpecV2 | None = None
     precise_motion_spec_ref: str | None = None
+    phase_correction: ReferencePhaseCorrectionV2 | None = None
+    phase_correction_ref: str | None = None
 
 
 class VideoProposalReviewRequest(RequestModel):
@@ -471,12 +474,19 @@ def create_app(
                 status_code=422,
                 detail="precise motion spec and immutable ref must appear together",
             )
+        if (request.phase_correction is None) != (request.phase_correction_ref is None):
+            raise HTTPException(
+                status_code=422,
+                detail="phase correction and immutable ref must appear together",
+            )
         return video_proposals.create_reference_reconstruction(
             anatomy,
             target_asset_id=request.target_asset_id,
             base_version_id=request.base_version_id,
             precise_motion_spec=request.precise_motion_spec,
             precise_motion_spec_ref=request.precise_motion_spec_ref,
+            phase_correction=request.phase_correction,
+            phase_correction_ref=request.phase_correction_ref,
         ).model_dump(mode="json")
 
     @app.post(

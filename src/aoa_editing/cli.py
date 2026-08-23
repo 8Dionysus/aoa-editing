@@ -17,6 +17,7 @@ from rich.console import Console
 
 from aoa_editing import __version__
 from aoa_editing.agent import run_stdio
+from aoa_editing.analysis.phase_correction import derive_phase_correction_v2
 from aoa_editing.analysis.service import AnalysisService
 from aoa_editing.api.app import create_app
 from aoa_editing.application.language import NaturalLanguagePatchService
@@ -29,7 +30,10 @@ from aoa_editing.application.screen_workflow_experience import (
 )
 from aoa_editing.application.service import EditingService
 from aoa_editing.application.video_jobs import VideoAnatomyJobService
-from aoa_editing.application.video_proposals import VideoProposalService
+from aoa_editing.application.video_proposals import (
+    VideoProposalService,
+    canonical_model_sha256,
+)
 from aoa_editing.config import Settings
 from aoa_editing.domain.models import (
     FrameRange,
@@ -37,7 +41,10 @@ from aoa_editing.domain.models import (
     Intent,
     MotionCorrectionOperationV2,
     MotionCorrectionReviewDecisionV2,
+    MotionRecoveryReport,
     ReferenceComparisonReport,
+    ReferenceComparisonReportV2,
+    ReferencePhaseCorrectionV2,
     ReferenceReconstructionPassKindV2,
     ReferenceReconstructionPassReceiptV2,
     ReferenceReconstructionSpec,
@@ -464,10 +471,25 @@ def anatomy_reconstruction_proposal(
         str | None,
         typer.Option("--precise-motion-spec-ref", help="Immutable evidence reference"),
     ] = None,
+    phase_correction_path: Annotated[
+        Path | None,
+        typer.Option(
+            "--phase-correction",
+            help="Approved comparison-bound ReferencePhaseCorrectionV2 JSON",
+        ),
+    ] = None,
+    phase_correction_ref: Annotated[
+        str | None,
+        typer.Option("--phase-correction-ref", help="Hash-bound correction reference"),
+    ] = None,
 ) -> None:
     if (precise_motion_spec_path is None) != (precise_motion_spec_ref is None):
         raise typer.BadParameter(
             "--precise-motion-spec and --precise-motion-spec-ref must appear together"
+        )
+    if (phase_correction_path is None) != (phase_correction_ref is None):
+        raise typer.BadParameter(
+            "--phase-correction and --phase-correction-ref must appear together"
         )
     store, _ = _services()
     precise_spec = (
@@ -477,6 +499,13 @@ def anatomy_reconstruction_proposal(
         if precise_motion_spec_path is not None
         else None
     )
+    phase_correction = (
+        ReferencePhaseCorrectionV2.model_validate_json(
+            phase_correction_path.read_text(encoding="utf-8")
+        )
+        if phase_correction_path is not None
+        else None
+    )
     _emit(
         VideoProposalService(store).create_reference_reconstruction(
             store.load_video_anatomy(project_id, plan_id),
@@ -484,6 +513,8 @@ def anatomy_reconstruction_proposal(
             base_version_id=base_version_id,
             precise_motion_spec=precise_spec,
             precise_motion_spec_ref=precise_motion_spec_ref,
+            phase_correction=phase_correction,
+            phase_correction_ref=phase_correction_ref,
         )
     )
 
@@ -1255,6 +1286,78 @@ def eval_reference_review_v2(
             review_path,
             output,
         )
+    )
+
+
+@eval_app.command("reference-derive-phase-correction-v2")
+def eval_reference_derive_phase_correction_v2(
+    spec_path: Annotated[
+        Path, typer.Option("--spec", help="Frozen Reference Reconstruction Spec v2")
+    ],
+    comparison_path: Annotated[
+        Path, typer.Option("--comparison", help="Failed objective Comparison v2 report")
+    ],
+    output: Annotated[
+        Path, typer.Option("--output", help="New immutable phase-correction root")
+    ],
+) -> None:
+    """Derive an inert, comparison-bound correction without accepting or rendering."""
+
+    require_readiness(Settings.from_env())
+    selected_spec = spec_path.expanduser().resolve(strict=True)
+    selected_comparison = comparison_path.expanduser().resolve(strict=True)
+    selected_output = output.expanduser().resolve()
+    if selected_output.exists():
+        raise typer.BadParameter(
+            f"phase-correction output root already exists: {selected_output}"
+        )
+    spec = ReferenceReconstructionSpecV2.model_validate_json(
+        selected_spec.read_text(encoding="utf-8")
+    )
+    comparison = ReferenceComparisonReportV2.model_validate_json(
+        selected_comparison.read_text(encoding="utf-8")
+    )
+    candidate_motion_ref = comparison.artifacts.get("candidate_motion")
+    if not candidate_motion_ref:
+        raise typer.BadParameter(
+            "Comparison v2 report has no candidate motion artifact"
+        )
+    candidate_motion = Path(candidate_motion_ref).expanduser()
+    if not candidate_motion.is_absolute():
+        candidate_motion = selected_comparison.parent / candidate_motion
+    candidate_motion = candidate_motion.resolve(strict=True)
+    recovery = MotionRecoveryReport.model_validate_json(
+        candidate_motion.read_text(encoding="utf-8")
+    )
+    correction = derive_phase_correction_v2(
+        spec,
+        comparison,
+        recovery,
+        spec_path=str(selected_spec),
+        spec_sha256=sha256_file(selected_spec),
+        comparison_path=str(selected_comparison),
+        comparison_sha256=sha256_file(selected_comparison),
+        candidate_motion_path=str(candidate_motion),
+        candidate_motion_sha256=sha256_file(candidate_motion),
+    )
+    selected_output.mkdir(parents=True, exist_ok=False)
+    correction_path = selected_output / "phase-correction-v2.json"
+    with correction_path.open("x", encoding="utf-8") as stream:
+        stream.write(correction.model_dump_json(indent=2))
+        stream.write("\n")
+    model_sha256 = canonical_model_sha256(correction)
+    _emit(
+        {
+            "correction": correction.model_dump(mode="json"),
+            "path": str(correction_path),
+            "file_sha256": sha256_file(correction_path),
+            "canonical_model_sha256": model_sha256,
+            "immutable_ref": (
+                f"reference-phase-correction-v2:{correction.id}:{model_sha256}"
+            ),
+            "timeline_mutated": False,
+            "render_started": False,
+        }
     )
 
 

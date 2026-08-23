@@ -61,6 +61,21 @@ certainty is represented as `unknown`.
 ./scripts/aoa-editing anatomy contact-sheet PROJECT PLAN
 ./scripts/aoa-editing anatomy focused-plans PROJECT PLAN
 ./scripts/aoa-editing anatomy deepen-shot PROJECT PLAN shot-0001
+
+# A phase-only failed frozen comparison may produce a new inert refinement.
+# The exact correction and spec refs are part of the proposal hash; this does
+# not accept or render the proposal.
+./scripts/aoa-editing eval reference-derive-phase-correction-v2 \
+  --spec /path/reference-spec-v2.json \
+  --comparison /path/comparison-v2.json \
+  --output /new/phase-correction-root
+
+./scripts/aoa-editing anatomy reconstruction-proposal PROJECT PLAN \
+  --target-asset ASSET --base-version VERSION \
+  --precise-motion-spec /path/reference-spec-v2.json \
+  --precise-motion-spec-ref reference-spec-v2:SPEC_ID:SPEC_SHA256 \
+  --phase-correction /path/phase-correction-v2.json \
+  --phase-correction-ref reference-phase-correction-v2:CORRECTION_ID:MODEL_SHA256
 ```
 
 Long work uses durable parent and phase receipts. `job`, `cancel`, and `retry`
@@ -165,6 +180,14 @@ Comparison Protocol v2, create the source-neutral proposal, review its exact
 hash, accept through the normal reversible path, render from the permitted
 image, compare every frame, and attach a human rubric to the exact candidate
 hash. Objective pass without that final human review remains `warn`.
+
+If the first candidate fails only the frozen onset/duration/settle checks, the
+accepted comparison-bound phase-compensation rule may create one localized
+`ReferencePhaseCorrectionV2`. Video Anatomy binds its exact canonical model
+hash, the frozen spec hash, prior comparison and candidate-motion hashes into a
+new reconstruction proposal and retimes only the dense normalized curves.
+That proposal is inert until a new attributable review approves its exact hash;
+the earlier approved version is never rewritten.
 
 ## Known limits
 

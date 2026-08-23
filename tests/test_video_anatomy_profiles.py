@@ -14,10 +14,15 @@ from aoa_editing.analysis.video_motion import VideoMotionAnalysisService
 from aoa_editing.analysis.video_pipeline import VideoAnatomyPipelineService
 from aoa_editing.application.service import EditingService
 from aoa_editing.application.video_jobs import VideoAnatomyJobService
-from aoa_editing.application.video_proposals import VideoProposalService
+from aoa_editing.application.video_proposals import (
+    VideoProposalError,
+    VideoProposalService,
+    canonical_model_sha256,
+)
 from aoa_editing.config import Settings
 from aoa_editing.domain.models import (
     AICapabilityDeclaration,
+    CheckResult,
     FrameRange,
     FrameRate,
     Intent,
@@ -29,8 +34,10 @@ from aoa_editing.domain.models import (
     ProviderHealthEvidence,
     ReferenceAudioStructure,
     ReferenceMotionFrameV2,
+    ReferencePhaseCorrectionV2,
     ReferenceReconstructionSpecV2,
     Scenario,
+    TimeWarpAnchorV2,
     TransformEffectV2,
     VideoAnatomyProfile,
     VideoAnatomyStatus,
@@ -253,6 +260,57 @@ def _precise_spec(
         comparison_criteria={},
         artifacts={},
         provenance=Provenance(tool="synthetic", tool_version="1", deterministic=True),
+    )
+
+
+def _phase_correction(
+    spec: ReferenceReconstructionSpecV2,
+    *,
+    spec_sha256: str,
+) -> ReferencePhaseCorrectionV2:
+    return ReferencePhaseCorrectionV2(
+        spec_id=spec.id,
+        spec_sha256=spec_sha256,
+        source_sha256=spec.source_sha256,
+        reference_sha256=spec.reference_sha256,
+        comparison_report_id="comparison_" + "a" * 32,
+        comparison_report_path="comparison-v2.json",
+        comparison_report_sha256="d" * 64,
+        candidate_motion_report_id="motionrecovery_" + "b" * 32,
+        candidate_motion_path="candidate-motion-recovery.json",
+        candidate_motion_sha256="e" * 64,
+        prior_candidate_sha256="f" * 64,
+        duration_frames=spec.duration_frames,
+        anchors=[
+            TimeWarpAnchorV2(output_frame=0, source_frame=0),
+            TimeWarpAnchorV2(output_frame=10, source_frame=8),
+            TimeWarpAnchorV2(output_frame=20, source_frame=20),
+            TimeWarpAnchorV2(output_frame=90, source_frame=90),
+            TimeWarpAnchorV2(output_frame=110, source_frame=108),
+            TimeWarpAnchorV2(
+                output_frame=spec.duration_frames - 1,
+                source_frame=spec.duration_frames - 1,
+            ),
+        ],
+        identity_ranges=[FrameRange(start=20, duration=71)],
+        protected_coupling_range=FrameRange(start=30, duration=50),
+        previous_phase={"onset": 12, "peak_velocity": 60, "settle": 108},
+        predicted_phase={"onset": 10, "peak_velocity": 60, "settle": 110},
+        predicted_metrics={"fixture": True},
+        predicted_checks=[
+            CheckResult(
+                id="predicted-phase",
+                status="pass",
+                summary="synthetic correction stays within frozen bounds",
+            )
+        ],
+        failed_check_ids=["temporal-phase-onset", "temporal-phase-settle"],
+        selection={"fixture": True},
+        provenance=Provenance(
+            tool="synthetic-phase-correction",
+            tool_version="1",
+            deterministic=True,
+        ),
     )
 
 
@@ -597,6 +655,90 @@ def test_precise_focused_spec_compiles_dense_normalized_motion_without_reference
     lineage = json.loads((lineage_path.parent / "lineage.json").read_text(encoding="utf-8"))
     assert lineage["input_hashes"] == [target_asset.sha256]
     assert reference_asset.sha256 not in lineage["input_hashes"]
+
+
+def test_comparison_bound_phase_correction_creates_new_inert_hash_bound_preview(
+    tmp_path: Path,
+) -> None:
+    reference_like = tmp_path / "reference-like.mp4"
+    target_path = tmp_path / "target.png"
+    _hard_cut_video(reference_like)
+    Image.new("RGB", (320, 180), "#cc7722").save(target_path)
+    store = ProjectStore(Settings.for_home(tmp_path / "editing-home"))
+    project_id = _project(store, "Comparison-bound refinement")
+    reference_asset, _ = store.ingest_asset(project_id, reference_like)
+    target_asset, _ = store.ingest_asset(project_id, target_path)
+    assert reference_asset.metadata.frame_rate is not None
+    editing = EditingService(store)
+    base = editing.initialize_timeline(
+        project_id,
+        duration_frames=120,
+        width=320,
+        height=180,
+        frame_rate=reference_asset.metadata.frame_rate,
+    )
+    anatomy = (
+        VideoAnatomyPipelineService(store)
+        .analyze(
+            project_id,
+            reference_asset.id,
+            profile=VideoAnatomyProfile.RECONSTRUCT,
+        )
+        .anatomy
+    )
+    spec = _precise_spec(
+        source_sha256=target_asset.sha256,
+        reference_sha256=reference_asset.sha256,
+        frame_rate=reference_asset.metadata.frame_rate,
+        duration_frames=120,
+    )
+    spec_sha256 = "c" * 64
+    correction = _phase_correction(spec, spec_sha256=spec_sha256)
+    spec_ref = f"reference-spec-v2:{spec.id}:{spec_sha256}"
+    correction_sha256 = canonical_model_sha256(correction)
+    correction_ref = f"reference-phase-correction-v2:{correction.id}:{correction_sha256}"
+
+    proposals = VideoProposalService(store)
+    proposal = proposals.create_reference_reconstruction(
+        anatomy,
+        target_asset_id=target_asset.id,
+        base_version_id=base.id,
+        precise_motion_spec=spec,
+        precise_motion_spec_ref=spec_ref,
+        phase_correction=correction,
+        phase_correction_ref=correction_ref,
+    )
+
+    assert proposal.patch_preview is not None
+    assert store.load_project(project_id).current_version_id == base.id
+    assert correction_ref in proposal.evidence_refs
+    assert proposal.provenance.parameters["phase_correction_id"] == correction.id
+    assert proposal.provenance.parameters["phase_correction_sha256"] == correction_sha256
+    assert (
+        proposal.provenance.parameters["phase_correction_comparison_report_sha256"]
+        == correction.comparison_report_sha256
+    )
+    tracks = proposal.patch_preview.patch.operations[-1].value
+    assert isinstance(tracks, list)
+    keyframes = tracks[0]["clips"][0]["effects"][0]["motion"]["position"]["keyframes"]
+    assert keyframes[10]["time"]["frame"] == 10
+    expected_source_progress = 8 / (spec.duration_frames - 1)
+    assert keyframes[10]["value"]["x"] == pytest.approx(0.5 + 0.05 * expected_source_progress)
+    assert keyframes[50]["value"]["x"] == pytest.approx(spec.motion_frames[50].center_x)
+
+    with pytest.raises(
+        VideoProposalError,
+        match="does not bind the exact correction semantics",
+    ):
+        proposals.create_reference_reconstruction(
+            anatomy,
+            target_asset_id=target_asset.id,
+            base_version_id=base.id,
+            precise_motion_spec=spec,
+            precise_motion_spec_ref=spec_ref,
+            phase_correction=correction,
+            phase_correction_ref=(f"reference-phase-correction-v2:{correction.id}:{'0' * 64}"),
+        )
 
 
 def test_job_spine_records_stages_cache_hit_cancellation_and_retry(tmp_path: Path) -> None:
