@@ -332,6 +332,47 @@ def test_quick_profile_uses_bounded_sparse_keyframe_and_uniform_scan(
     assert store.load_project(project_id).current_version_id is None
 
 
+def test_high_resolution_samples_use_bounded_analysis_frames_and_estimate(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "high-resolution.mp4"
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-v",
+            "error",
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc2=size=1280x720:rate=24:duration=0.5",
+            "-c:v",
+            "libx264",
+            "-pix_fmt",
+            "yuv420p",
+            str(source),
+        ],
+        check=True,
+    )
+    store = ProjectStore(Settings.for_home(tmp_path / "editing-home"))
+    project_id = _project(store, "Bounded sample memory")
+    asset, _ = store.ingest_asset(project_id, source)
+    jobs = VideoAnatomyJobService(store)
+
+    estimate = jobs.estimate(project_id, asset.id, profile=VideoAnatomyProfile.RECONSTRUCT)
+    result = jobs.run(project_id, asset.id, profile=VideoAnatomyProfile.QUICK)
+
+    assert estimate.provenance.parameters["analysis_pixel_bytes"] == 320 * 180 * 3
+    assert 512 * 1024 * 1024 <= estimate.estimated_peak_temporary_bytes < 768 * 1024 * 1024
+    assert all(
+        item.width <= 320 and item.height <= 180
+        for item in result.anatomy.frame_manifest.samples
+    )
+    assert all(
+        item.extraction_parameters["full_resolution_source_retained_in_memory"] is False
+        for item in result.anatomy.frame_manifest.samples
+    )
+
+
 @pytest.mark.parametrize(
     ("failure", "failure_code"),
     [("timeout", "provider_timeout"), ("malformed", "malformed_response")],

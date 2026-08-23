@@ -11,6 +11,10 @@
   review, reversible acceptance and dense normalized Motion v2 compilation.
 - Added durable phase jobs, checkpoints, cancellation/retry/resume,
   revision-bound caches, resource admission and cache-prune receipts.
+- Bounded retained-frame materialization to analysis resolution so high-resolution
+  sources do not accumulate hundreds of full 4K frames in memory; resource
+  estimates now account separately for decode buffers, retained samples, and
+  dense motion.
 - Added shared CLI, HTTP, agent and workbench Video Anatomy surfaces plus an
   independent network-free evaluation corpus.
 - Sealed reference analysis remains readiness-gated and no reference pixels,

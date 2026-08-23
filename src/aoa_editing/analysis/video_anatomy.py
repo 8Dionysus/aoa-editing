@@ -896,8 +896,8 @@ class VideoAnatomyService:
             edges,
         )
 
-    @staticmethod
     def _decode_frame_indices(
+        self,
         source: Path,
         requested: list[int],
     ) -> dict[int, NDArray[Any]]:
@@ -910,7 +910,7 @@ class VideoAnatomyService:
                 capture.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
                 ok, frame = capture.read()
                 if ok:
-                    frames[frame_index] = cast(NDArray[Any], frame)
+                    frames[frame_index] = self._analysis_frame(cast(NDArray[Any], frame))
         finally:
             capture.release()
         missing = sorted(set(requested) - set(frames))
@@ -1398,7 +1398,7 @@ class VideoAnatomyService:
                 if not ok:
                     break
                 if frame_index in requested:
-                    frames[frame_index] = cast(NDArray[Any], frame)
+                    frames[frame_index] = self._analysis_frame(cast(NDArray[Any], frame))
         finally:
             capture.release()
         missing = sorted(requested - set(frames))
@@ -1468,11 +1468,14 @@ class VideoAnatomyService:
                     artifact_sha256=artifact_hash,
                     width=width,
                     height=height,
-                    pixel_format="bgr24-decoded-to-jpeg",
+                    pixel_format="bgr24-analysis-jpeg",
                     extraction_parameters={
                         "decoder": "opencv-video-capture",
                         "jpeg_quality": 92,
                         "requested_frame": candidate.frame,
+                        "analysis_max_width": 320,
+                        "analysis_max_height": 180,
+                        "full_resolution_source_retained_in_memory": False,
                     },
                     provenance=self._sample_provenance(
                         plan,

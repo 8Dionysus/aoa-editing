@@ -125,7 +125,10 @@ competing interpretations. Thresholds must be visible in provenance.
 Canonical packets and retained samples live under
 `var/projects/<project>/analysis/video-anatomy/<plan>`. Temporary decode products
 use `var/tmp`; provider-result caches use `var/cache/video-anatomy`; raw provider
-responses remain project evidence. Not every decoded frame is persisted.
+responses remain project evidence. Retained review frames are explicitly
+materialized at the bounded analysis resolution (maximum 320×180), while their
+exact source frame/time identity remains in the manifest; full-resolution 4K
+frames are not accumulated in memory. Not every decoded frame is persisted.
 Resource preflight predicts decoded frames, runtime, artifact bytes and peak
 temporary space, warns on long/deep work, and refuses a deep profile when free
 space is insufficient.

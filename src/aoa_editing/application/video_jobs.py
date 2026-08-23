@@ -142,7 +142,16 @@ class VideoAnatomyJobService:
         pinned = set(pinned_frames)
         if any(frame < selected.start or frame >= selected.end for frame in pinned):
             raise ValueError("resource estimate pinned frame is outside the selected range")
-        pixel_bytes = max(1, (metadata.width or 1920) * (metadata.height or 1080) * 3)
+        source_width = metadata.width or 1920
+        source_height = metadata.height or 1080
+        pixel_bytes = max(1, source_width * source_height * 3)
+        analysis_scale = min(1.0, 320 / source_width, 180 / source_height)
+        analysis_pixel_bytes = max(
+            1,
+            round(source_width * analysis_scale)
+            * round(source_height * analysis_scale)
+            * 3,
+        )
         speed_fps = {
             VideoAnatomyProfile.QUICK: 160.0,
             VideoAnatomyProfile.STRUCTURAL: 90.0,
@@ -170,7 +179,37 @@ class VideoAnatomyJobService:
             artifact_cap,
             max(8 * 1024 * 1024, estimated_decode_frames * 96 * 1024),
         )
-        peak_temporary = max(64 * 1024 * 1024, pixel_bytes * 12)
+        retained_frame_budget = {
+            VideoAnatomyProfile.QUICK: 24,
+            VideoAnatomyProfile.STRUCTURAL: 96,
+            VideoAnatomyProfile.SEMANTIC: 128,
+            VideoAnatomyProfile.MOTION: 192,
+            VideoAnatomyProfile.RECONSTRUCT: 256,
+        }[profile]
+        retained_frame_memory = analysis_pixel_bytes * min(
+            selected.duration,
+            retained_frame_budget + len(pinned),
+        )
+        dense_motion_memory = (
+            analysis_pixel_bytes * selected.duration // 3
+            if profile in {VideoAnatomyProfile.MOTION, VideoAnatomyProfile.RECONSTRUCT}
+            else 0
+        )
+        runtime_baseline = 384 * 1024 * 1024
+        codec_working_set = pixel_bytes * 8
+        memory_safety_factor = 1.25
+        peak_temporary = max(
+            512 * 1024 * 1024,
+            round(
+                (
+                    runtime_baseline
+                    + codec_working_set
+                    + retained_frame_memory
+                    + dense_motion_memory
+                )
+                * memory_safety_factor
+            ),
+        )
         reserve = 512 * 1024 * 1024
         required = estimated_artifacts + peak_temporary + reserve
         project_root = self.store.project_path(project_id)
@@ -213,6 +252,13 @@ class VideoAnatomyJobService:
                     "reserve_bytes": reserve,
                     "speed_model_fps": speed_fps,
                     "pixel_bytes": pixel_bytes,
+                    "analysis_pixel_bytes": analysis_pixel_bytes,
+                    "retained_frame_budget": retained_frame_budget,
+                    "retained_frame_memory_bytes": retained_frame_memory,
+                    "dense_motion_memory_bytes": dense_motion_memory,
+                    "runtime_baseline_bytes": runtime_baseline,
+                    "codec_working_set_bytes": codec_working_set,
+                    "memory_safety_factor": memory_safety_factor,
                 },
                 deterministic=False,
             ),
