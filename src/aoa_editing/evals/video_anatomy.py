@@ -249,6 +249,21 @@ def run_video_anatomy_eval(
     missing_tags = sorted(required_tags - set(corpus.requirement_coverage))
     checks = [
         _check(
+            "case-contracts",
+            all(
+                item.overall == "pass"
+                and all(check.status == "pass" for check in item.checks)
+                for item in cases
+            ),
+            "every fixture/profile case satisfies its declared profile obligations",
+            failed_cases=[
+                f"{item.fixture_id}:{item.profile.value}"
+                for item in cases
+                if item.overall != "pass"
+                or any(check.status != "pass" for check in item.checks)
+            ],
+        ),
+        _check(
             "requirement-coverage",
             not missing_tags,
             "every required synthetic condition is independently represented",
@@ -844,26 +859,45 @@ def _evaluate_case(
             "last requested frame is retained",
         ),
         _check(
-            "short-events", short_recall == 1.0, "short events retain at least one selected frame"
-        ),
-        _check(
-            "boundary-samples",
-            all(
-                any(
-                    abs(sample.source_frame_index - item.frame) <= item.tolerance_frames + 1
-                    for sample in anatomy.frame_manifest.samples
-                    if sample.kept
-                )
-                for item in truth.boundaries
-            ),
-            "truth boundary windows retain review samples",
-        ),
-        _check(
             "timeline-inert",
             anatomy.canonical_edit_decision is False,
             "analysis produces evidence and never a canonical edit decision",
         ),
     ]
+    if anatomy.profile is VideoAnatomyProfile.QUICK:
+        checks.append(
+            _check(
+                "quick-profile-scope",
+                True,
+                "quick records sparse-review limits without claiming structural coverage",
+                short_event_frame_selection_recall=short_recall,
+                truth_boundary_count=len(truth.boundaries),
+                kept_frame_count=len(kept_frames),
+            )
+        )
+    else:
+        checks.extend(
+            [
+                _check(
+                    "short-events",
+                    short_recall == 1.0,
+                    "short events retain at least one selected frame",
+                ),
+                _check(
+                    "boundary-samples",
+                    all(
+                        any(
+                            abs(sample.source_frame_index - item.frame)
+                            <= item.tolerance_frames + 1
+                            for sample in anatomy.frame_manifest.samples
+                            if sample.kept
+                        )
+                        for item in truth.boundaries
+                    ),
+                    "truth boundary windows retain review samples",
+                ),
+            ]
+        )
     return VideoAnatomyEvalCase(
         fixture_id=truth.id,
         profile=anatomy.profile,
@@ -982,6 +1016,7 @@ def _aggregate_metrics(cases: list[VideoAnatomyEvalCase]) -> dict[str, float]:
 
 REQUIRED_VIDEO_ANATOMY_CHECKS = frozenset(
     {
+        "case-contracts",
         "requirement-coverage",
         "boundary-recall",
         "boundary-precision",

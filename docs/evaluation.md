@@ -34,7 +34,11 @@ error, VFR and fractional-FPS identity, unresolved ratio, runtime, and artifact
 size. It also exercises provider absence/timeout/malformed responses,
 cancellation/resume, cache invalidation, legacy `video.scenes`, schema and
 CLI/API/agent/workbench contracts, and reference non-leakage. A passing report
-has zero mandatory skips and explicitly records `reference_media_used=false`.
+has zero mandatory skips, requires every fixture/profile case to satisfy its
+declared profile obligations, and explicitly records
+`reference_media_used=false`. Sparse `quick` cases retain their measured
+short-event and boundary limitations without pretending to provide the
+mandatory structural coverage that is evaluated on `structural` cases.
 
 The post-gate named reference route runs `quick`, `structural`, and
 `reconstruct`, then joins the source-neutral proposal to the existing all-frame

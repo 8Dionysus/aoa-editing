@@ -172,7 +172,11 @@ It reports boundary precision/recall and temporal error, transition accuracy,
 shot coverage, short-event frame recall, duplicate reduction, semantic and
 audio coverage, motion error, VFR/fractional-rate identity, unresolved ratio,
 runtime and artifact size. Fixture truth is authored before and independently
-of detector output, and sealed reference media is never accessed.
+of detector output, and sealed reference media is never accessed. The report
+fails closed if any fixture/profile case misses an obligation declared for that
+profile. `quick` remains an explicitly sparse overview: its measured misses are
+preserved in the case metrics, while short-event and boundary-window retention
+are mandatory for `structural` and deeper cases.
 
 The named golden case remains a separate post-readiness evaluation. Run
 `quick`, `structural`, and `reconstruct`, freeze all-frame Reference Spec v2 and

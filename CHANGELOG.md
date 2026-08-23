@@ -22,6 +22,9 @@
 - Completion Audit v2 now consumes the current independent Video Anatomy eval
   and maps the `video-anatomy` Definition of Done row instead of silently
   omitting it.
+- Made the Video Anatomy corpus fail closed over every fixture/profile case and
+  aligned case obligations with the documented sparse `quick` versus complete
+  `structural` profile boundary without hiding quick-profile misses.
 - Product provenance now reports package version `0.2.0` instead of hard-coded
   prototype version strings.
 

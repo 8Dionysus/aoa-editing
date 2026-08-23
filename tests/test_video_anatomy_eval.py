@@ -33,6 +33,28 @@ def test_network_free_video_anatomy_gate_covers_declared_truth(tmp_path: Path) -
     assert report.aggregate_metrics["audio_event_coverage"] == 1
     assert report.aggregate_metrics["vfr_timestamp_exactness"] == 1
     assert report.aggregate_metrics["fractional_rate_identity"] == 1
+    assert all(
+        case.overall == "pass"
+        and all(check.status == "pass" for check in case.checks)
+        for case in report.cases
+    )
+    fractional_quick = next(
+        case
+        for case in report.cases
+        if case.fixture_id == "fractional-long" and case.profile.value == "quick"
+    )
+    assert fractional_quick.metrics["short_event_frame_selection_recall"] < 1
+    assert {check.id for check in fractional_quick.checks} >= {
+        "complete-coverage",
+        "first-frame",
+        "last-frame",
+        "timeline-inert",
+        "quick-profile-scope",
+    }
+    assert {check.id for check in fractional_quick.checks}.isdisjoint(
+        {"short-events", "boundary-samples"}
+    )
+    assert next(check for check in report.checks if check.id == "case-contracts").status == "pass"
     payload = json.loads(
         (tmp_path / "video-anatomy-eval" / "video-anatomy-eval.json").read_text(
             encoding="utf-8"
