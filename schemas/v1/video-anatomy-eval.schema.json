@@ -1,0 +1,305 @@
+{
+  "$defs": {
+    "CheckResult": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "warn",
+            "skip"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "measured": {
+          "additionalProperties": true,
+          "title": "Measured",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "summary"
+      ],
+      "title": "CheckResult",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "VideoAnatomyEvalCase": {
+      "additionalProperties": false,
+      "description": "Measured outcome for one profile over one synthetic fixture.",
+      "properties": {
+        "fixture_id": {
+          "title": "Fixture Id",
+          "type": "string"
+        },
+        "profile": {
+          "$ref": "#/$defs/VideoAnatomyProfile"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "plan_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Plan Sha256",
+          "type": "string"
+        },
+        "anatomy_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Anatomy Sha256",
+          "type": "string"
+        },
+        "detected_boundaries": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Detected Boundaries",
+          "type": "array"
+        },
+        "metrics": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Metrics",
+          "type": "object"
+        },
+        "runtime_seconds": {
+          "minimum": 0,
+          "title": "Runtime Seconds",
+          "type": "number"
+        },
+        "artifact_bytes": {
+          "minimum": 0,
+          "title": "Artifact Bytes",
+          "type": "integer"
+        },
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/CheckResult"
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "overall": {
+          "enum": [
+            "pass",
+            "fail"
+          ],
+          "title": "Overall",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fixture_id",
+        "profile",
+        "source_sha256",
+        "plan_sha256",
+        "anatomy_sha256",
+        "metrics",
+        "runtime_seconds",
+        "artifact_bytes",
+        "checks",
+        "overall"
+      ],
+      "title": "VideoAnatomyEvalCase",
+      "type": "object"
+    },
+    "VideoAnatomyProfile": {
+      "enum": [
+        "quick",
+        "structural",
+        "semantic",
+        "motion",
+        "reconstruct"
+      ],
+      "title": "VideoAnatomyProfile",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Fail-closed generic quality gate for Video Anatomy.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "git_revision": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Git Revision",
+      "type": "string"
+    },
+    "git_clean": {
+      "title": "Git Clean",
+      "type": "boolean"
+    },
+    "corpus_path": {
+      "title": "Corpus Path",
+      "type": "string"
+    },
+    "corpus_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Corpus Sha256",
+      "type": "string"
+    },
+    "cases": {
+      "items": {
+        "$ref": "#/$defs/VideoAnatomyEvalCase"
+      },
+      "minItems": 1,
+      "title": "Cases",
+      "type": "array"
+    },
+    "aggregate_metrics": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Aggregate Metrics",
+      "type": "object"
+    },
+    "requirement_coverage": {
+      "additionalProperties": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "title": "Requirement Coverage",
+      "type": "object"
+    },
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/CheckResult"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
+    "mandatory_skips": {
+      "minimum": 0,
+      "title": "Mandatory Skips",
+      "type": "integer"
+    },
+    "reference_media_used": {
+      "const": false,
+      "default": false,
+      "title": "Reference Media Used",
+      "type": "boolean"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "overall": {
+      "enum": [
+        "pass",
+        "fail"
+      ],
+      "title": "Overall",
+      "type": "string"
+    }
+  },
+  "required": [
+    "git_revision",
+    "git_clean",
+    "corpus_path",
+    "corpus_sha256",
+    "cases",
+    "aggregate_metrics",
+    "requirement_coverage",
+    "checks",
+    "mandatory_skips",
+    "provenance",
+    "overall"
+  ],
+  "title": "VideoAnatomyEvalReport",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/video-anatomy-eval.schema.json"
+}

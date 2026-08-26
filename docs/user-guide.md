@@ -10,6 +10,22 @@ AoA Editing separates five things that ordinary generator demos often blur:
 4. **Patch/version** is the accepted, reversible change to the canonical graph.
 5. **Render/export** is derived output that can be regenerated.
 
+## Video Anatomy
+
+For any ingested video, open **Video Anatomy** or use `anatomy estimate` and
+`anatomy run`. Start with `quick` for sparse orientation or `structural` for a
+complete shot and boundary pass. `semantic` adds optional provider-neutral
+descriptions, `motion` adds dense per-shot motion, and `reconstruct` returns the
+maximum evidence plus inert editorial and reconstruction proposals.
+
+Read the coverage bars, unresolved ranges, competing transition labels,
+retained frame hashes, audio events, transcript, and provenance before using a
+proposal. Pin a timestamp or deepen one shot when the first pass is ambiguous.
+A human correction appends superseding evidence; it does not change the
+analyzer record. Approving a proposal still does not edit the timeline until the
+separate **Apply through reversible patch** action. See
+[Video Anatomy](video-anatomy.md) for the complete command and authority model.
+
 ## Workbench path
 
 1. Open AoA Editing from the desktop launcher or run

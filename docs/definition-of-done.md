@@ -18,6 +18,7 @@ receipt paths are populated in closeout reports rather than committed here.
 | `three-scenarios` | Three scenarios | scenario planners | generic E2E receipt |
 | `restart-resume` | Restart/resume | atomic store, idempotent ingest/analysis, partial render | interruption/idempotency tests |
 | `partial-evidence-corrections` | Partial evidence and corrections | analyzer port, authority/supersession | injected failure and human-correction tests |
+| `video-anatomy` | Progressive typed video decomposition and reviewed reconstruction | sampling/structure/audio/visual/motion pipeline, proposals, shared surfaces | synthetic corpus, standalone fresh-home run, complete coverage, durable resume, reversible acceptance, and post-gate golden comparison |
 | `brief-style-memory` | Brief and Style Memory | immutable Brief revisions, explicit Style profiles | API, agent, and Chromium consent path |
 | `editing-language` | Editing language | typed effects, captions, gain curves, pin/exclude, segment render | compile and real FFmpeg tests |
 | `motion-ground-truth-recovery` | Motion ground-truth recovery | synthetic corpus and recovery gate | every known curve/model recovered with uncertainty and zero mandatory skips on current revision |

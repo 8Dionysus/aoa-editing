@@ -33,6 +33,24 @@ not promote `video.partial.mp4`. Correct the typed timeline or environment and
 retry. Point renders use `--start-frame` and `--duration-frames`; both options
 must be supplied together and must remain inside the timeline.
 
+## Video Anatomy is partial or a transition is `unknown`
+
+Partial is not data loss. Inspect `incompleteness_reasons`, unresolved ranges,
+provider failure code, detector signals, and competing transition types. Run
+`anatomy focused-plans` or `anatomy deepen-shot`; use `semantic` only when a
+declared provider is healthy and privacy permits it. Sparse `quick` intentionally
+keeps uncertain transition shapes as `unknown`; use `structural` for a dense
+boundary window.
+
+## A Video Anatomy retry or deep profile is refused
+
+Read the job checkpoint and the resource estimate. Retry verifies every saved
+artifact hash before reusing sibling phases. A deep profile is refused before
+decode if the free-space reserve is insufficient; narrow the frame range, clear
+only rebuildable cache with `anatomy prune-cache --apply`, or choose a lighter
+profile. Do not delete project `analysis/video-anatomy` packets to make a retry
+pass.
+
 ## The UI created data but did not update
 
 Run `./scripts/ui-smoke --output var/tmp/ui-smoke` from the repository home. It

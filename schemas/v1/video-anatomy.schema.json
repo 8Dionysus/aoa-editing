@@ -1,0 +1,2132 @@
+{
+  "$defs": {
+    "CoverageInterval": {
+      "additionalProperties": false,
+      "properties": {
+        "frame_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "reasons": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Reasons",
+          "type": "array"
+        },
+        "sample_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Sample Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "frame_range",
+        "reasons"
+      ],
+      "title": "CoverageInterval",
+      "type": "object"
+    },
+    "EvidenceLineageEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "source_ref": {
+          "minLength": 1,
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "target_ref": {
+          "minLength": 1,
+          "title": "Target Ref",
+          "type": "string"
+        },
+        "relation": {
+          "enum": [
+            "derived-from",
+            "summarizes",
+            "supersedes",
+            "supports",
+            "contradicts"
+          ],
+          "title": "Relation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_ref",
+        "target_ref",
+        "relation"
+      ],
+      "title": "EvidenceLineageEdge",
+      "type": "object"
+    },
+    "FrameRange": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "duration": {
+          "exclusiveMinimum": 0,
+          "title": "Duration",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "duration"
+      ],
+      "title": "FrameRange",
+      "type": "object"
+    },
+    "FrameRate": {
+      "additionalProperties": false,
+      "properties": {
+        "numerator": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        }
+      },
+      "title": "FrameRate",
+      "type": "object"
+    },
+    "MediaMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_seconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Seconds"
+        },
+        "width": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Width"
+        },
+        "height": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Height"
+        },
+        "frame_rate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameRate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "nominal_frame_rate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameRate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "video_time_base": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameRate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "video_frame_count": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Video Frame Count"
+        },
+        "variable_frame_rate": {
+          "default": false,
+          "title": "Variable Frame Rate",
+          "type": "boolean"
+        },
+        "sample_rate": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sample Rate"
+        },
+        "channels": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channels"
+        },
+        "format_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Format Name"
+        },
+        "video_codec": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Video Codec"
+        },
+        "audio_codec": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Audio Codec"
+        },
+        "pixel_format": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pixel Format"
+        },
+        "color_space": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Color Space"
+        },
+        "has_video": {
+          "default": false,
+          "title": "Has Video",
+          "type": "boolean"
+        },
+        "has_audio": {
+          "default": false,
+          "title": "Has Audio",
+          "type": "boolean"
+        }
+      },
+      "title": "MediaMetadata",
+      "type": "object"
+    },
+    "MotionTimeV2": {
+      "additionalProperties": false,
+      "description": "Exact non-negative frame time with a canonical rational subframe.",
+      "properties": {
+        "frame": {
+          "minimum": 0,
+          "title": "Frame",
+          "type": "integer"
+        },
+        "subframe_numerator": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Subframe Numerator",
+          "type": "integer"
+        },
+        "subframe_denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Subframe Denominator",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "frame"
+      ],
+      "title": "MotionTimeV2",
+      "type": "object"
+    },
+    "NormalizedRegion": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "box_normalized": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Box Normalized",
+          "type": "array"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "label",
+        "box_normalized",
+        "confidence"
+      ],
+      "title": "NormalizedRegion",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ShotEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^shot-[0-9]{4,}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "frame_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "representative_sample_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Representative Sample Ids",
+          "type": "array"
+        },
+        "boundary_sample_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Boundary Sample Ids",
+          "type": "array"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "unresolved_questions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unresolved Questions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "frame_range",
+        "representative_sample_ids",
+        "confidence"
+      ],
+      "title": "ShotEvidence",
+      "type": "object"
+    },
+    "TranscriptWord": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "start_seconds": {
+          "minimum": 0,
+          "title": "Start Seconds",
+          "type": "number"
+        },
+        "end_seconds": {
+          "minimum": 0,
+          "title": "End Seconds",
+          "type": "number"
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        }
+      },
+      "required": [
+        "text",
+        "start_seconds",
+        "end_seconds"
+      ],
+      "title": "TranscriptWord",
+      "type": "object"
+    },
+    "TransitionCandidate": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "frame": {
+          "minimum": 0,
+          "title": "Frame",
+          "type": "integer"
+        },
+        "time_seconds": {
+          "minimum": 0,
+          "title": "Time Seconds",
+          "type": "number"
+        },
+        "window": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "transition_type": {
+          "$ref": "#/$defs/VideoTransitionType",
+          "default": "unknown"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "detector_signals": {
+          "items": {
+            "$ref": "#/$defs/TransitionDetectorSignal"
+          },
+          "minItems": 1,
+          "title": "Detector Signals",
+          "type": "array"
+        },
+        "competing_types": {
+          "items": {
+            "$ref": "#/$defs/VideoTransitionType"
+          },
+          "title": "Competing Types",
+          "type": "array"
+        },
+        "sample_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Sample Ids",
+          "type": "array"
+        },
+        "ambiguity_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Ambiguity Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "frame",
+        "time_seconds",
+        "window",
+        "confidence",
+        "detector_signals"
+      ],
+      "title": "TransitionCandidate",
+      "type": "object"
+    },
+    "TransitionDetectorSignal": {
+      "additionalProperties": false,
+      "properties": {
+        "detector": {
+          "minLength": 1,
+          "title": "Detector",
+          "type": "string"
+        },
+        "score": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Score",
+          "type": "number"
+        },
+        "supports": {
+          "items": {
+            "$ref": "#/$defs/VideoTransitionType"
+          },
+          "minItems": 1,
+          "title": "Supports",
+          "type": "array"
+        },
+        "artifact_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Ref"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "detector",
+        "score",
+        "supports"
+      ],
+      "title": "TransitionDetectorSignal",
+      "type": "object"
+    },
+    "VideoAnatomyProfile": {
+      "enum": [
+        "quick",
+        "structural",
+        "semantic",
+        "motion",
+        "reconstruct"
+      ],
+      "title": "VideoAnatomyProfile",
+      "type": "string"
+    },
+    "VideoAnatomyStatus": {
+      "enum": [
+        "complete",
+        "partial",
+        "insufficient",
+        "failed"
+      ],
+      "title": "VideoAnatomyStatus",
+      "type": "string"
+    },
+    "VideoAudioEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "speech",
+            "silence",
+            "loudness-change",
+            "music",
+            "beat",
+            "onset",
+            "accent",
+            "cue"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "start_seconds": {
+          "minimum": 0,
+          "title": "Start Seconds",
+          "type": "number"
+        },
+        "end_seconds": {
+          "minimum": 0,
+          "title": "End Seconds",
+          "type": "number"
+        },
+        "strength": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Strength"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "start_seconds",
+        "end_seconds"
+      ],
+      "title": "VideoAudioEvent",
+      "type": "object"
+    },
+    "VideoAudioTimelineEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "duration_seconds": {
+          "exclusiveMinimum": 0,
+          "title": "Duration Seconds",
+          "type": "number"
+        },
+        "transcript_segments": {
+          "items": {
+            "$ref": "#/$defs/VideoTranscriptSegment"
+          },
+          "title": "Transcript Segments",
+          "type": "array"
+        },
+        "events": {
+          "items": {
+            "$ref": "#/$defs/VideoAudioEvent"
+          },
+          "title": "Events",
+          "type": "array"
+        },
+        "speakers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Speakers",
+          "type": "array"
+        },
+        "unknown_intervals": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Unknown Intervals",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "partial": {
+          "title": "Partial",
+          "type": "boolean"
+        },
+        "provenance": {
+          "items": {
+            "$ref": "#/$defs/Provenance"
+          },
+          "minItems": 1,
+          "title": "Provenance",
+          "type": "array"
+        }
+      },
+      "required": [
+        "project_id",
+        "asset_id",
+        "source_sha256",
+        "duration_seconds",
+        "partial",
+        "provenance"
+      ],
+      "title": "VideoAudioTimelineEvidence",
+      "type": "object"
+    },
+    "VideoCoverageReport": {
+      "additionalProperties": false,
+      "properties": {
+        "requested_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "covered_intervals": {
+          "items": {
+            "$ref": "#/$defs/CoverageInterval"
+          },
+          "title": "Covered Intervals",
+          "type": "array"
+        },
+        "uncovered_ranges": {
+          "items": {
+            "$ref": "#/$defs/FrameRange"
+          },
+          "title": "Uncovered Ranges",
+          "type": "array"
+        },
+        "per_shot_sample_counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Per Shot Sample Counts",
+          "type": "object"
+        },
+        "protected_sample_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Protected Sample Ids",
+          "type": "array"
+        },
+        "coverage_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Coverage Ratio",
+          "type": "number"
+        }
+      },
+      "required": [
+        "requested_range",
+        "per_shot_sample_counts",
+        "coverage_ratio"
+      ],
+      "title": "VideoCoverageReport",
+      "type": "object"
+    },
+    "VideoDeduplicationPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "luminance_delta_min": {
+          "default": 0.02,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Luminance Delta Min",
+          "type": "number"
+        },
+        "histogram_distance_min": {
+          "default": 0.04,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Histogram Distance Min",
+          "type": "number"
+        },
+        "perceptual_hash_distance_min": {
+          "default": 4,
+          "maximum": 64,
+          "minimum": 0,
+          "title": "Perceptual Hash Distance Min",
+          "type": "integer"
+        },
+        "ssim_change_min": {
+          "default": 0.01,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Ssim Change Min",
+          "type": "number"
+        },
+        "edge_change_min": {
+          "default": 0.02,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Edge Change Min",
+          "type": "number"
+        },
+        "motion_activity_min": {
+          "default": 0.01,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Motion Activity Min",
+          "type": "number"
+        },
+        "protect_boundary_samples": {
+          "const": true,
+          "default": true,
+          "title": "Protect Boundary Samples",
+          "type": "boolean"
+        },
+        "protect_pinned_samples": {
+          "const": true,
+          "default": true,
+          "title": "Protect Pinned Samples",
+          "type": "boolean"
+        },
+        "compare_across_shots": {
+          "const": false,
+          "default": false,
+          "title": "Compare Across Shots",
+          "type": "boolean"
+        }
+      },
+      "title": "VideoDeduplicationPolicy",
+      "type": "object"
+    },
+    "VideoFrameSample": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "shot_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shot Id"
+        },
+        "time": {
+          "$ref": "#/$defs/MotionTimeV2"
+        },
+        "time_seconds": {
+          "minimum": 0,
+          "title": "Time Seconds",
+          "type": "number"
+        },
+        "source_frame_index": {
+          "minimum": 0,
+          "title": "Source Frame Index",
+          "type": "integer"
+        },
+        "role": {
+          "$ref": "#/$defs/VideoSampleRole"
+        },
+        "selection_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Selection Reasons",
+          "type": "array"
+        },
+        "artifact_path": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Path"
+        },
+        "artifact_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Sha256"
+        },
+        "width": {
+          "exclusiveMinimum": 0,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "exclusiveMinimum": 0,
+          "title": "Height",
+          "type": "integer"
+        },
+        "pixel_format": {
+          "minLength": 1,
+          "title": "Pixel Format",
+          "type": "string"
+        },
+        "extraction_parameters": {
+          "additionalProperties": true,
+          "title": "Extraction Parameters",
+          "type": "object"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "seek_precision": {
+          "enum": [
+            "exact-frame",
+            "decoded-nearest",
+            "keyframe-snapped"
+          ],
+          "title": "Seek Precision",
+          "type": "string"
+        },
+        "seek_limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Seek Limitations",
+          "type": "array"
+        },
+        "confidence": {
+          "default": 1.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "kept": {
+          "default": true,
+          "title": "Kept",
+          "type": "boolean"
+        },
+        "duplicate_of_sample_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duplicate Of Sample Id"
+        },
+        "duplicate_metrics": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Duplicate Metrics",
+          "type": "object"
+        }
+      },
+      "required": [
+        "time",
+        "time_seconds",
+        "source_frame_index",
+        "role",
+        "selection_reasons",
+        "width",
+        "height",
+        "pixel_format",
+        "extraction_parameters",
+        "provenance",
+        "seek_precision"
+      ],
+      "title": "VideoFrameSample",
+      "type": "object"
+    },
+    "VideoFrameSampleManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "plan_id": {
+          "title": "Plan Id",
+          "type": "string"
+        },
+        "plan_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Plan Sha256",
+          "type": "string"
+        },
+        "samples": {
+          "items": {
+            "$ref": "#/$defs/VideoFrameSample"
+          },
+          "minItems": 1,
+          "title": "Samples",
+          "type": "array"
+        },
+        "selected_count": {
+          "minimum": 1,
+          "title": "Selected Count",
+          "type": "integer"
+        },
+        "duplicate_count": {
+          "minimum": 0,
+          "title": "Duplicate Count",
+          "type": "integer"
+        },
+        "artifact_bytes": {
+          "minimum": 0,
+          "title": "Artifact Bytes",
+          "type": "integer"
+        },
+        "manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Manifest Sha256",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id",
+        "asset_id",
+        "source_sha256",
+        "plan_id",
+        "plan_sha256",
+        "samples",
+        "selected_count",
+        "duplicate_count",
+        "artifact_bytes",
+        "provenance"
+      ],
+      "title": "VideoFrameSampleManifest",
+      "type": "object"
+    },
+    "VideoMotionClassification": {
+      "enum": [
+        "static",
+        "global-motion",
+        "independent-motion",
+        "mixed-motion",
+        "unknown"
+      ],
+      "title": "VideoMotionClassification",
+      "type": "string"
+    },
+    "VideoMotionEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "shot_id": {
+          "title": "Shot Id",
+          "type": "string"
+        },
+        "frame_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "classification": {
+          "$ref": "#/$defs/VideoMotionClassification"
+        },
+        "global_transform_model": {
+          "enum": [
+            "none",
+            "translation",
+            "similarity",
+            "affine",
+            "homography",
+            "unknown"
+          ],
+          "title": "Global Transform Model",
+          "type": "string"
+        },
+        "camera_hypotheses": {
+          "items": {
+            "enum": [
+              "pan",
+              "tilt",
+              "zoom",
+              "rotation"
+            ],
+            "type": "string"
+          },
+          "title": "Camera Hypotheses",
+          "type": "array"
+        },
+        "independent_motion_detected": {
+          "title": "Independent Motion Detected",
+          "type": "boolean"
+        },
+        "motion_magnitude_mean": {
+          "minimum": 0,
+          "title": "Motion Magnitude Mean",
+          "type": "number"
+        },
+        "motion_magnitude_peak": {
+          "minimum": 0,
+          "title": "Motion Magnitude Peak",
+          "type": "number"
+        },
+        "direction_degrees": {
+          "anyOf": [
+            {
+              "maximum": 180,
+              "minimum": -180,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direction Degrees"
+        },
+        "phases": {
+          "items": {
+            "$ref": "#/$defs/VideoMotionPhase"
+          },
+          "title": "Phases",
+          "type": "array"
+        },
+        "uncertainty": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Uncertainty",
+          "type": "array"
+        },
+        "competing_models": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Competing Models",
+          "type": "array"
+        },
+        "analyzed_frame_count": {
+          "exclusiveMinimum": 0,
+          "title": "Analyzed Frame Count",
+          "type": "integer"
+        },
+        "source_frame_count": {
+          "exclusiveMinimum": 0,
+          "title": "Source Frame Count",
+          "type": "integer"
+        },
+        "all_frame_evidence_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "All Frame Evidence Ref"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        }
+      },
+      "required": [
+        "project_id",
+        "asset_id",
+        "source_sha256",
+        "shot_id",
+        "frame_range",
+        "classification",
+        "global_transform_model",
+        "independent_motion_detected",
+        "motion_magnitude_mean",
+        "motion_magnitude_peak",
+        "analyzed_frame_count",
+        "source_frame_count",
+        "confidence",
+        "provenance"
+      ],
+      "title": "VideoMotionEvidence",
+      "type": "object"
+    },
+    "VideoMotionPhase": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "enum": [
+            "onset",
+            "development",
+            "peak",
+            "settle"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "frame_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "role",
+        "frame_range",
+        "confidence"
+      ],
+      "title": "VideoMotionPhase",
+      "type": "object"
+    },
+    "VideoSampleRole": {
+      "enum": [
+        "first-frame",
+        "last-frame",
+        "interior",
+        "representative",
+        "pre-boundary",
+        "boundary",
+        "post-boundary",
+        "pinned"
+      ],
+      "title": "VideoSampleRole",
+      "type": "string"
+    },
+    "VideoSamplingPlan": {
+      "additionalProperties": false,
+      "description": "Deterministic budget and coverage contract for one anatomy pass.",
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "duration_seconds": {
+          "exclusiveMinimum": 0,
+          "title": "Duration Seconds",
+          "type": "number"
+        },
+        "time_base": {
+          "$ref": "#/$defs/FrameRate"
+        },
+        "stream_time_base": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameRate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "variable_frame_rate": {
+          "default": false,
+          "title": "Variable Frame Rate",
+          "type": "boolean"
+        },
+        "frame_timestamp_count": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frame Timestamp Count"
+        },
+        "frame_timestamps_artifact": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frame Timestamps Artifact"
+        },
+        "frame_timestamps_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frame Timestamps Sha256"
+        },
+        "profile": {
+          "$ref": "#/$defs/VideoAnatomyProfile"
+        },
+        "analysis_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "strategies": {
+          "items": {
+            "enum": [
+              "scene-score",
+              "keyframe",
+              "histogram-change",
+              "luma-progression",
+              "motion-activity",
+              "audio-change",
+              "uniform-fallback",
+              "semantic-change"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Strategies",
+          "type": "array"
+        },
+        "minimum_samples_per_shot": {
+          "default": 3,
+          "minimum": 1,
+          "title": "Minimum Samples Per Shot",
+          "type": "integer"
+        },
+        "global_frame_budget": {
+          "minimum": 2,
+          "title": "Global Frame Budget",
+          "type": "integer"
+        },
+        "per_shot_frame_budget": {
+          "minimum": 1,
+          "title": "Per Shot Frame Budget",
+          "type": "integer"
+        },
+        "pinned_times": {
+          "items": {
+            "$ref": "#/$defs/MotionTimeV2"
+          },
+          "title": "Pinned Times",
+          "type": "array"
+        },
+        "deduplication": {
+          "$ref": "#/$defs/VideoDeduplicationPolicy"
+        },
+        "required_capabilities": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Capabilities",
+          "type": "array"
+        },
+        "focused_rescan_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Focused Rescan Reasons",
+          "type": "array"
+        },
+        "artifact_budget_bytes": {
+          "exclusiveMinimum": 0,
+          "title": "Artifact Budget Bytes",
+          "type": "integer"
+        },
+        "plan_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Plan Sha256",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id",
+        "asset_id",
+        "source_sha256",
+        "duration_seconds",
+        "time_base",
+        "profile",
+        "analysis_range",
+        "strategies",
+        "global_frame_budget",
+        "per_shot_frame_budget",
+        "artifact_budget_bytes"
+      ],
+      "title": "VideoSamplingPlan",
+      "type": "object"
+    },
+    "VideoStructureEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "plan_id": {
+          "title": "Plan Id",
+          "type": "string"
+        },
+        "plan_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Plan Sha256",
+          "type": "string"
+        },
+        "analysis_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "shots": {
+          "items": {
+            "$ref": "#/$defs/ShotEvidence"
+          },
+          "minItems": 1,
+          "title": "Shots",
+          "type": "array"
+        },
+        "transitions": {
+          "items": {
+            "$ref": "#/$defs/TransitionCandidate"
+          },
+          "title": "Transitions",
+          "type": "array"
+        },
+        "coverage": {
+          "$ref": "#/$defs/VideoCoverageReport"
+        },
+        "ambiguous_ranges": {
+          "items": {
+            "$ref": "#/$defs/FrameRange"
+          },
+          "title": "Ambiguous Ranges",
+          "type": "array"
+        },
+        "detector_evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Detector Evidence Refs",
+          "type": "array"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id",
+        "asset_id",
+        "source_sha256",
+        "plan_id",
+        "plan_sha256",
+        "analysis_range",
+        "shots",
+        "coverage",
+        "detector_evidence_refs",
+        "provenance"
+      ],
+      "title": "VideoStructureEvidence",
+      "type": "object"
+    },
+    "VideoTranscriptSegment": {
+      "additionalProperties": false,
+      "properties": {
+        "start_seconds": {
+          "minimum": 0,
+          "title": "Start Seconds",
+          "type": "number"
+        },
+        "end_seconds": {
+          "minimum": 0,
+          "title": "End Seconds",
+          "type": "number"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "speaker": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Speaker"
+        },
+        "words": {
+          "items": {
+            "$ref": "#/$defs/TranscriptWord"
+          },
+          "title": "Words",
+          "type": "array"
+        },
+        "provider_receipt_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Receipt Id"
+        },
+        "partial": {
+          "default": false,
+          "title": "Partial",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "start_seconds",
+        "end_seconds",
+        "text"
+      ],
+      "title": "VideoTranscriptSegment",
+      "type": "object"
+    },
+    "VideoTransitionType": {
+      "enum": [
+        "hard-cut",
+        "fade-in",
+        "fade-out",
+        "cross-dissolve",
+        "flash",
+        "wipe-or-directional",
+        "continuous-motion",
+        "unknown"
+      ],
+      "title": "VideoTransitionType",
+      "type": "string"
+    },
+    "VideoVisualObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "shot_id": {
+          "title": "Shot Id",
+          "type": "string"
+        },
+        "frame_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "sample_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Sample Ids",
+          "type": "array"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "subjects": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Subjects",
+          "type": "array"
+        },
+        "composition_regions": {
+          "items": {
+            "$ref": "#/$defs/NormalizedRegion"
+          },
+          "title": "Composition Regions",
+          "type": "array"
+        },
+        "focus_point_normalized": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Focus Point Normalized"
+        },
+        "background": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Background"
+        },
+        "visible_text": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Visible Text",
+          "type": "array"
+        },
+        "overlays": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Overlays",
+          "type": "array"
+        },
+        "change_from_previous": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Change From Previous"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "raw_response_artifact": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Response Artifact"
+        },
+        "raw_response_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Response Sha256"
+        },
+        "normalization_version": {
+          "minLength": 1,
+          "title": "Normalization Version",
+          "type": "string"
+        },
+        "provider_receipt_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Receipt Id"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        }
+      },
+      "required": [
+        "project_id",
+        "asset_id",
+        "source_sha256",
+        "shot_id",
+        "frame_range",
+        "sample_ids",
+        "description",
+        "confidence",
+        "normalization_version",
+        "provenance"
+      ],
+      "title": "VideoVisualObservation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Hash-bound aggregate of measurements; never an editorial decision.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "profile": {
+      "$ref": "#/$defs/VideoAnatomyProfile"
+    },
+    "technical_metadata": {
+      "$ref": "#/$defs/MediaMetadata"
+    },
+    "track_summary": {
+      "additionalProperties": true,
+      "title": "Track Summary",
+      "type": "object"
+    },
+    "plan": {
+      "$ref": "#/$defs/VideoSamplingPlan"
+    },
+    "frame_manifest": {
+      "$ref": "#/$defs/VideoFrameSampleManifest"
+    },
+    "structure": {
+      "$ref": "#/$defs/VideoStructureEvidence"
+    },
+    "visual_observations": {
+      "items": {
+        "$ref": "#/$defs/VideoVisualObservation"
+      },
+      "title": "Visual Observations",
+      "type": "array"
+    },
+    "motion_evidence": {
+      "items": {
+        "$ref": "#/$defs/VideoMotionEvidence"
+      },
+      "title": "Motion Evidence",
+      "type": "array"
+    },
+    "audio_timeline": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/VideoAudioTimelineEvidence"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "recurring_motifs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Recurring Motifs",
+      "type": "array"
+    },
+    "unresolved_ranges": {
+      "items": {
+        "$ref": "#/$defs/FrameRange"
+      },
+      "title": "Unresolved Ranges",
+      "type": "array"
+    },
+    "contradictions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Contradictions",
+      "type": "array"
+    },
+    "coverage_matrix": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Coverage Matrix",
+      "type": "object"
+    },
+    "confidence_summary": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Confidence Summary",
+      "type": "object"
+    },
+    "provenance_graph": {
+      "items": {
+        "$ref": "#/$defs/EvidenceLineageEdge"
+      },
+      "title": "Provenance Graph",
+      "type": "array"
+    },
+    "evidence_refs": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Evidence Refs",
+      "type": "array"
+    },
+    "status": {
+      "$ref": "#/$defs/VideoAnatomyStatus"
+    },
+    "incompleteness_reasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Incompleteness Reasons",
+      "type": "array"
+    },
+    "anatomy_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Anatomy Sha256",
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "canonical_edit_decision": {
+      "const": false,
+      "default": false,
+      "title": "Canonical Edit Decision",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "project_id",
+    "asset_id",
+    "source_sha256",
+    "profile",
+    "technical_metadata",
+    "track_summary",
+    "plan",
+    "frame_manifest",
+    "structure",
+    "coverage_matrix",
+    "confidence_summary",
+    "provenance_graph",
+    "evidence_refs",
+    "status",
+    "provenance"
+  ],
+  "title": "VideoAnatomy",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/video-anatomy.schema.json"
+}

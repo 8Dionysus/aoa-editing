@@ -7,6 +7,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, cast
 
+from aoa_editing import __version__
 from aoa_editing.domain.models import (
     CameraMotionRecipe,
     DecomposedTransformMotionV2,
@@ -181,7 +182,7 @@ def extract_contain_reveal_technique(
         ],
         provenance=Provenance(
             tool="aoa-editing-technique-extractor",
-            tool_version="0.1.0",
+            tool_version=__version__,
             parameters={
                 "source_contract": "passing frozen comparison",
                 "spec_id": spec.id,
@@ -381,7 +382,7 @@ def upgrade_contain_reveal_technique_v2(
             ],
             "provenance": Provenance(
                 tool="aoa-editing-technique-upgrade-v2",
-                tool_version="0.1.0",
+                tool_version=__version__,
                 parameters={
                     "source_contract": "passing_selected_v2_semantics",
                     "media_identifiers_retained": False,

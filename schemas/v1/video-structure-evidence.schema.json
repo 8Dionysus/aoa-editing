@@ -1,0 +1,446 @@
+{
+  "$defs": {
+    "CoverageInterval": {
+      "additionalProperties": false,
+      "properties": {
+        "frame_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "reasons": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Reasons",
+          "type": "array"
+        },
+        "sample_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Sample Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "frame_range",
+        "reasons"
+      ],
+      "title": "CoverageInterval",
+      "type": "object"
+    },
+    "FrameRange": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "duration": {
+          "exclusiveMinimum": 0,
+          "title": "Duration",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "duration"
+      ],
+      "title": "FrameRange",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ShotEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^shot-[0-9]{4,}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "frame_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "representative_sample_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Representative Sample Ids",
+          "type": "array"
+        },
+        "boundary_sample_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Boundary Sample Ids",
+          "type": "array"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "unresolved_questions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unresolved Questions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "frame_range",
+        "representative_sample_ids",
+        "confidence"
+      ],
+      "title": "ShotEvidence",
+      "type": "object"
+    },
+    "TransitionCandidate": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "frame": {
+          "minimum": 0,
+          "title": "Frame",
+          "type": "integer"
+        },
+        "time_seconds": {
+          "minimum": 0,
+          "title": "Time Seconds",
+          "type": "number"
+        },
+        "window": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "transition_type": {
+          "$ref": "#/$defs/VideoTransitionType",
+          "default": "unknown"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "detector_signals": {
+          "items": {
+            "$ref": "#/$defs/TransitionDetectorSignal"
+          },
+          "minItems": 1,
+          "title": "Detector Signals",
+          "type": "array"
+        },
+        "competing_types": {
+          "items": {
+            "$ref": "#/$defs/VideoTransitionType"
+          },
+          "title": "Competing Types",
+          "type": "array"
+        },
+        "sample_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Sample Ids",
+          "type": "array"
+        },
+        "ambiguity_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Ambiguity Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "frame",
+        "time_seconds",
+        "window",
+        "confidence",
+        "detector_signals"
+      ],
+      "title": "TransitionCandidate",
+      "type": "object"
+    },
+    "TransitionDetectorSignal": {
+      "additionalProperties": false,
+      "properties": {
+        "detector": {
+          "minLength": 1,
+          "title": "Detector",
+          "type": "string"
+        },
+        "score": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Score",
+          "type": "number"
+        },
+        "supports": {
+          "items": {
+            "$ref": "#/$defs/VideoTransitionType"
+          },
+          "minItems": 1,
+          "title": "Supports",
+          "type": "array"
+        },
+        "artifact_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Ref"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "detector",
+        "score",
+        "supports"
+      ],
+      "title": "TransitionDetectorSignal",
+      "type": "object"
+    },
+    "VideoCoverageReport": {
+      "additionalProperties": false,
+      "properties": {
+        "requested_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "covered_intervals": {
+          "items": {
+            "$ref": "#/$defs/CoverageInterval"
+          },
+          "title": "Covered Intervals",
+          "type": "array"
+        },
+        "uncovered_ranges": {
+          "items": {
+            "$ref": "#/$defs/FrameRange"
+          },
+          "title": "Uncovered Ranges",
+          "type": "array"
+        },
+        "per_shot_sample_counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Per Shot Sample Counts",
+          "type": "object"
+        },
+        "protected_sample_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Protected Sample Ids",
+          "type": "array"
+        },
+        "coverage_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Coverage Ratio",
+          "type": "number"
+        }
+      },
+      "required": [
+        "requested_range",
+        "per_shot_sample_counts",
+        "coverage_ratio"
+      ],
+      "title": "VideoCoverageReport",
+      "type": "object"
+    },
+    "VideoTransitionType": {
+      "enum": [
+        "hard-cut",
+        "fade-in",
+        "fade-out",
+        "cross-dissolve",
+        "flash",
+        "wipe-or-directional",
+        "continuous-motion",
+        "unknown"
+      ],
+      "title": "VideoTransitionType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "plan_id": {
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "plan_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Plan Sha256",
+      "type": "string"
+    },
+    "analysis_range": {
+      "$ref": "#/$defs/FrameRange"
+    },
+    "shots": {
+      "items": {
+        "$ref": "#/$defs/ShotEvidence"
+      },
+      "minItems": 1,
+      "title": "Shots",
+      "type": "array"
+    },
+    "transitions": {
+      "items": {
+        "$ref": "#/$defs/TransitionCandidate"
+      },
+      "title": "Transitions",
+      "type": "array"
+    },
+    "coverage": {
+      "$ref": "#/$defs/VideoCoverageReport"
+    },
+    "ambiguous_ranges": {
+      "items": {
+        "$ref": "#/$defs/FrameRange"
+      },
+      "title": "Ambiguous Ranges",
+      "type": "array"
+    },
+    "detector_evidence_refs": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Detector Evidence Refs",
+      "type": "array"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "project_id",
+    "asset_id",
+    "source_sha256",
+    "plan_id",
+    "plan_sha256",
+    "analysis_range",
+    "shots",
+    "coverage",
+    "detector_evidence_refs",
+    "provenance"
+  ],
+  "title": "VideoStructureEvidence",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/video-structure-evidence.schema.json"
+}

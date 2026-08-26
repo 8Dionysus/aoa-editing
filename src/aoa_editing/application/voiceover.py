@@ -9,6 +9,7 @@ from itertools import pairwise
 from math import floor
 from typing import Any, Literal
 
+from aoa_editing import __version__
 from aoa_editing.domain.models import (
     Asset,
     EvidenceRecord,
@@ -99,7 +100,7 @@ def build_voiceover_timing_draft(
         analysis_evidence_refs=evidence_refs,
         provenance=Provenance(
             tool="aoa-editing-voiceover-timing",
-            tool_version="0.1.0",
+            tool_version=__version__,
             parameters={
                 "alignment_method": method,
                 "transcript_segment_count": len(transcript_segments),

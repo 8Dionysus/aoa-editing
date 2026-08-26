@@ -150,6 +150,10 @@ class MediaMetadata(FrozenModel):
     width: int | None = Field(default=None, gt=0)
     height: int | None = Field(default=None, gt=0)
     frame_rate: FrameRate | None = None
+    nominal_frame_rate: FrameRate | None = None
+    video_time_base: FrameRate | None = None
+    video_frame_count: int | None = Field(default=None, gt=0)
+    variable_frame_rate: bool = False
     sample_rate: int | None = Field(default=None, gt=0)
     channels: int | None = Field(default=None, gt=0)
     format_name: str | None = None
@@ -1008,8 +1012,7 @@ class ScreenWorkflowExperienceAdmission(FrozenModel):
         if len(claim_ids) != len(set(claim_ids)):
             raise ValueError("experience claim ids must be unique")
         if not any(
-            item.disposition is ScreenWorkflowExperienceDisposition.ACCEPTED
-            for item in self.claims
+            item.disposition is ScreenWorkflowExperienceDisposition.ACCEPTED for item in self.claims
         ):
             raise ValueError("an experience admission requires at least one accepted claim")
         if self.reviewed_at.utcoffset() is None:
@@ -1137,9 +1140,7 @@ class ScreenWorkflowLiveRegion(FrozenModel):
     def validate_loop_claim(self) -> ScreenWorkflowLiveRegion:
         if self.loopable and self.temporal_behavior is not ScreenWorkflowTemporalBehavior.PERIODIC:
             raise ValueError("only a reviewed periodic live region may be marked loopable")
-        if self.loopable and (
-            self.loop_period_frames is None or self.seam_strategy is None
-        ):
+        if self.loopable and (self.loop_period_frames is None or self.seam_strategy is None):
             raise ValueError("a loopable live region requires a reviewed period and seam strategy")
         if not self.loopable and (
             self.loop_period_frames is not None or self.seam_strategy is not None
@@ -1206,9 +1207,8 @@ class ScreenWorkflowSourceBinding(FrozenModel):
             and not isclose(self.speed, 1.0, abs_tol=1e-9)
         ):
             raise ValueError("prompt entry must remain at real-time speed")
-        if (
-            self.temporal_intent.hold_policy == "natural-source"
-            and not isclose(self.speed, 1.0, abs_tol=1e-9)
+        if self.temporal_intent.hold_policy == "natural-source" and not isclose(
+            self.speed, 1.0, abs_tol=1e-9
         ):
             raise ValueError("a natural-source hold must remain at real-time speed")
         if (
@@ -1297,9 +1297,7 @@ class ScreenWorkflowVoiceoverTiming(FrozenModel):
                 raise ValueError("voiceover cue ranges must be contiguous")
         if self.cues[-1].timeline_range.end != self.duration_frames:
             raise ValueError("voiceover cue ranges must cover the complete narration")
-        if self.edit_ready and any(
-            item.alignment_basis != "human-reviewed" for item in self.cues
-        ):
+        if self.edit_ready and any(item.alignment_basis != "human-reviewed" for item in self.cues):
             raise ValueError("reviewed voiceover timing requires human-reviewed cues")
         return self
 
@@ -1392,9 +1390,7 @@ class ReferenceWorkflowRangePlan(FrozenModel):
         if self.end_seconds <= self.start_seconds:
             raise ValueError("reference workflow range must have positive duration")
         allowed = {"terminal", "ide", "browser-workflow", "workflow-ui", "diagram"}
-        if self.decision == "include" and (
-            self.human_present or self.content_class not in allowed
-        ):
+        if self.decision == "include" and (self.human_present or self.content_class not in allowed):
             raise ValueError("included workflow ranges must be human-free workflow content")
         return self
 
@@ -1432,9 +1428,7 @@ class ReferenceWorkflowStudyPlan(FrozenModel):
     sources: list[ReferenceWorkflowSourcePlan] = Field(min_length=1)
     candidate_rules: list[ReferenceWorkflowCandidateRule] = Field(default_factory=list)
     manual_review_complete: Literal[True]
-    reference_media_role: Literal["analysis-and-evaluation-only"] = (
-        "analysis-and-evaluation-only"
-    )
+    reference_media_role: Literal["analysis-and-evaluation-only"] = "analysis-and-evaluation-only"
     provenance: Provenance
 
     @model_validator(mode="after")
@@ -1670,9 +1664,7 @@ class MotionCorrectionProposalItemV2(FrozenModel):
         if self.executable and (self.blockers or self.diff is None):
             raise ValueError("executable correction requires a diff and no blockers")
         if not self.executable and (not self.blockers or self.diff is not None):
-            raise ValueError(
-                "non-executable correction requires blockers and cannot carry a diff"
-            )
+            raise ValueError("non-executable correction requires blockers and cannot carry a diff")
         return self
 
 
@@ -1701,9 +1693,7 @@ class MotionCorrectionProposalSetV2(FrozenModel):
                 item.diff.target_path != self.target_effect_path
                 or item.diff.before_sha256 != self.base_effect_sha256
             ):
-                raise ValueError(
-                    "motion correction diff must join the proposal target and base"
-                )
+                raise ValueError("motion correction diff must join the proposal target and base")
         return self
 
 
@@ -1783,9 +1773,7 @@ class ReferenceMotionHumanCorrectionV2(FrozenModel):
             or set(accepted) & set(rejected)
             or not accepted + rejected
         ):
-            raise ValueError(
-                "human correction decisions must be unique, disjoint, and non-empty"
-            )
+            raise ValueError("human correction decisions must be unique, disjoint, and non-empty")
         return self
 
 
@@ -1985,9 +1973,7 @@ class TechniqueCurveModelV2(FrozenModel):
     rotation_space: Literal["unwrapped_degrees"] = "unwrapped_degrees"
     pivot_policy: Literal["fixed_normalized_source_center"] = "fixed_normalized_source_center"
     maximum_interpolation_overshoot_fraction: float = Field(default=0.01, ge=0)
-    transform_order: list[TransformOperationV2] = Field(
-        default_factory=_default_transform_order_v2
-    )
+    transform_order: list[TransformOperationV2] = Field(default_factory=_default_transform_order_v2)
 
 
 class TechniquePhaseModelV2(FrozenModel):
@@ -2024,9 +2010,7 @@ class TechniqueResolutionConstraintV2(FrozenModel):
     )
     maximum_effective_upscale: float = Field(gt=0)
     violation_policy: Literal["refuse_without_render"] = "refuse_without_render"
-    refusal_code: Literal["insufficient_source_resolution"] = (
-        "insufficient_source_resolution"
-    )
+    refusal_code: Literal["insufficient_source_resolution"] = "insufficient_source_resolution"
 
 
 class PortableCameraMotionRecipeV2(FrozenModel):
@@ -2076,10 +2060,7 @@ class TechniqueCompositionEvidenceV2(FrozenModel):
 
     @model_validator(mode="after")
     def validate_composition_claim(self) -> TechniqueCompositionEvidenceV2:
-        if (
-            self.single_global_transform_sufficient
-            == self.independent_layer_motion_required
-        ):
+        if self.single_global_transform_sufficient == self.independent_layer_motion_required:
             raise ValueError(
                 "composition evidence must choose either one global transform "
                 "or independent layer motion"
@@ -2218,6 +2199,12 @@ class JobReceipt(FrozenModel):
     kind: str
     project_id: str
     version_id: str | None = None
+    asset_id: str | None = None
+    plan_id: str | None = None
+    plan_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    profile: str | None = None
+    phase: str | None = None
+    progress: float = Field(default=0.0, ge=0, le=1)
     status: JobStatus = JobStatus.QUEUED
     created_at: datetime = Field(default_factory=utc_now)
     started_at: datetime | None = None
@@ -2226,7 +2213,45 @@ class JobReceipt(FrozenModel):
     input_hashes: list[str] = Field(default_factory=list)
     output_paths: list[str] = Field(default_factory=list)
     output_hashes: list[str] = Field(default_factory=list)
+    checkpoint_path: str | None = None
+    checkpoint_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    cache_key: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    cache_hit: bool = False
+    cancellation_requested: bool = False
+    parent_job_id: str | None = None
+    resume_from_job_id: str | None = None
+    attempt: int = Field(default=1, ge=1)
+    request_parameters: dict[str, Any] = Field(default_factory=dict)
+    completed_phases: list[str] = Field(default_factory=list)
+    partial_evidence_refs: list[str] = Field(default_factory=list)
     error: str | None = None
+
+    @model_validator(mode="after")
+    def validate_lifecycle(self) -> JobReceipt:
+        if (self.checkpoint_path is None) != (self.checkpoint_sha256 is None):
+            raise ValueError("job checkpoint path and hash must appear together")
+        if self.status is JobStatus.QUEUED and self.started_at is not None:
+            raise ValueError("queued job cannot have a start time")
+        if self.status is JobStatus.RUNNING and self.started_at is None:
+            raise ValueError("running job requires a start time")
+        if (
+            self.status in {JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.CANCELLED}
+            and self.finished_at is None
+        ):
+            raise ValueError("terminal job requires a finish time")
+        if self.status is JobStatus.SUCCEEDED and self.error is not None:
+            raise ValueError("successful job must finish without an error")
+        if (
+            self.kind.startswith("video.anatomy")
+            and self.status is JobStatus.SUCCEEDED
+            and self.progress != 1
+        ):
+            raise ValueError("successful Video Anatomy job must report complete progress")
+        if self.status is JobStatus.FAILED and not self.error:
+            raise ValueError("failed job requires an error summary")
+        if self.cache_hit and self.status is not JobStatus.SUCCEEDED:
+            raise ValueError("only a successful job can be a cache hit")
+        return self
 
 
 class CheckResult(FrozenModel):
@@ -2269,9 +2294,7 @@ class AICapabilityDeclaration(FrozenModel):
 
     schema_version: Literal["1.0.0"] = SCHEMA_VERSION
     capability_id: str = Field(pattern=r"^(speech|vision|editorial)\.[a-z0-9][a-z0-9-]*$")
-    alias: str = Field(
-        pattern=r"^local-ai://(speech|vision|editorial)/[a-z0-9][a-z0-9-]*/default$"
-    )
+    alias: str = Field(pattern=r"^local-ai://(speech|vision|editorial)/[a-z0-9][a-z0-9-]*/default$")
     input_schema: dict[str, Any]
     output_schema: dict[str, Any]
     required: bool
@@ -2298,9 +2321,7 @@ class AICapabilityDeclaration(FrozenModel):
     def validate_alias_and_authority(self) -> AICapabilityDeclaration:
         expected_alias = f"local-ai://{self.capability_id.replace('.', '/')}/default"
         if self.alias != expected_alias:
-            raise ValueError(
-                f"capability alias must be canonical: expected {expected_alias}"
-            )
+            raise ValueError(f"capability alias must be canonical: expected {expected_alias}")
         required_provenance = {
             "resolved_owner",
             "adapter_kind",
@@ -2323,16 +2344,12 @@ class AICapabilityCatalog(FrozenModel):
     """The complete tracked alias surface owned by AoA Editing."""
 
     schema_version: Literal["1.0.0"] = SCHEMA_VERSION
-    id: Literal["aoa-editing-local-ai-capabilities"] = (
-        "aoa-editing-local-ai-capabilities"
-    )
+    id: Literal["aoa-editing-local-ai-capabilities"] = "aoa-editing-local-ai-capabilities"
     baseline_requires_ai: Literal[False] = False
     declarations: list[AICapabilityDeclaration] = Field(min_length=9)
     physical_model_paths_allowed: Literal[False] = False
     filesystem_links_allowed: Literal[False] = False
-    output_authority_contract: Literal["evidence-or-proposal-only"] = (
-        "evidence-or-proposal-only"
-    )
+    output_authority_contract: Literal["evidence-or-proposal-only"] = "evidence-or-proposal-only"
 
     @model_validator(mode="after")
     def validate_catalog(self) -> AICapabilityCatalog:
@@ -2391,9 +2408,7 @@ class LocalProviderBinding(FrozenModel):
     """Untracked alias resolution; never a tracked model or filesystem link."""
 
     schema_version: Literal["1.0.0"] = SCHEMA_VERSION
-    alias: str = Field(
-        pattern=r"^local-ai://(speech|vision|editorial)/[a-z0-9][a-z0-9-]*/default$"
-    )
+    alias: str = Field(pattern=r"^local-ai://(speech|vision|editorial)/[a-z0-9][a-z0-9-]*/default$")
     state: Literal["enabled", "disabled", "unavailable"]
     resolved_owner: Literal["abyss-stack", "abyss-machine", "aoa-editing"] | None = None
     adapter_kind: Literal[
@@ -2446,9 +2461,7 @@ class LocalProviderBinding(FrozenModel):
                 )
             if self.adapter_kind == "abyss-machine-cli":
                 if self.resolved_owner != "abyss-machine" or not self.command:
-                    raise ValueError(
-                        "abyss-machine CLI binding requires its owner and command"
-                    )
+                    raise ValueError("abyss-machine CLI binding requires its owner and command")
                 if self.endpoint is not None:
                     raise ValueError("CLI binding cannot carry an endpoint")
             else:
@@ -2510,11 +2523,14 @@ class ResolvedProviderReceipt(FrozenModel):
     generated_at: datetime = Field(default_factory=utc_now)
     requested_alias: str
     capability_id: str
-    resolved_owner: Literal[
-        "abyss-stack",
-        "abyss-machine",
-        "aoa-editing",
-    ] | None = None
+    resolved_owner: (
+        Literal[
+            "abyss-stack",
+            "abyss-machine",
+            "aoa-editing",
+        ]
+        | None
+    ) = None
     adapter_kind: Literal[
         "abyss-stack-service",
         "abyss-machine-cli",
@@ -2539,18 +2555,21 @@ class ResolvedProviderReceipt(FrozenModel):
     output_authority: Literal["evidence", "proposal"]
     fallback_status: Literal["not-used", "used", "unavailable", "failed"]
     outcome: Literal["succeeded", "partial", "failed", "refused"]
-    failure_code: Literal[
-        "provider_missing",
-        "provider_disabled",
-        "provider_unavailable",
-        "provider_stale",
-        "version_mismatch",
-        "provider_timeout",
-        "malformed_response",
-        "privacy_denied",
-        "invalid_request",
-        "fallback_failed",
-    ] | None = None
+    failure_code: (
+        Literal[
+            "provider_missing",
+            "provider_disabled",
+            "provider_unavailable",
+            "provider_stale",
+            "version_mismatch",
+            "provider_timeout",
+            "malformed_response",
+            "privacy_denied",
+            "invalid_request",
+            "fallback_failed",
+        ]
+        | None
+    ) = None
     failure_summary: str | None = None
     response_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     output_schema_valid: bool | None = None
@@ -2579,8 +2598,7 @@ class ResolvedProviderReceipt(FrozenModel):
         ):
             raise ValueError("denied privacy decision must refuse the provider call")
         if self.adapter_kind == "deterministic-fallback" and (
-            self.resolved_owner != "aoa-editing"
-            or self.fallback_status not in {"used", "failed"}
+            self.resolved_owner != "aoa-editing" or self.fallback_status not in {"used", "failed"}
         ):
             raise ValueError("deterministic fallback must remain AoA Editing-owned")
         return self
@@ -2838,12 +2856,15 @@ class TechniqueApplicabilityDecisionV2(FrozenModel):
     technique_id: str
     technique_revision: int = Field(gt=0)
     outcome: Literal["eligible", "refused"]
-    refusal_code: Literal[
-        "insufficient_source_resolution",
-        "inapplicable_composition",
-        "missing_required_evidence",
-        "output_aspect_mismatch",
-    ] | None = None
+    refusal_code: (
+        Literal[
+            "insufficient_source_resolution",
+            "inapplicable_composition",
+            "missing_required_evidence",
+            "output_aspect_mismatch",
+        ]
+        | None
+    ) = None
     checks: list[CheckResult] = Field(min_length=1)
     evidence_refs: list[str]
     measured: dict[str, Any]
@@ -2856,13 +2877,9 @@ class TechniqueApplicabilityDecisionV2(FrozenModel):
         if self.outcome == "refused" and self.refusal_code is None:
             raise ValueError("refused technique decision requires a refusal code")
         expected = "pass" if self.outcome == "eligible" else "fail"
-        if self.outcome == "eligible" and any(
-            item.status != expected for item in self.checks
-        ):
+        if self.outcome == "eligible" and any(item.status != expected for item in self.checks):
             raise ValueError("eligible technique decision requires passing checks")
-        if self.outcome == "refused" and not any(
-            item.status == "fail" for item in self.checks
-        ):
+        if self.outcome == "refused" and not any(item.status == "fail" for item in self.checks):
             raise ValueError("refused technique decision requires a failing check")
         if any(item.status == "skip" for item in self.checks):
             raise ValueError("technique applicability cannot skip a check")
@@ -2880,6 +2897,7 @@ class TechniqueProposalResultV2(FrozenModel):
         if (self.decision.outcome == "eligible") != (self.treatment is not None):
             raise ValueError("eligible proposal result must contain exactly one Treatment")
         return self
+
 
 class QCReport(FrozenModel):
     schema_version: Literal["1.0.0"] = SCHEMA_VERSION
@@ -3517,9 +3535,7 @@ class ReferenceWorkspaceRegistrationV2(FrozenModel):
     pivot_identifiable: bool
     artifacts: dict[str, ReferenceWorkspaceArtifactV2]
     provenance: Provenance
-    reference_media_role: Literal["analysis_and_comparison_only"] = (
-        "analysis_and_comparison_only"
-    )
+    reference_media_role: Literal["analysis_and_comparison_only"] = "analysis_and_comparison_only"
     reference_media_allowed_in_render: Literal[False] = False
     candidate_media_allowed_as_source: Literal[False] = False
 
@@ -3580,16 +3596,11 @@ class ReferenceWorkspaceRegistrationV2(FrozenModel):
             raise ValueError("workspace phase markers must be strictly ordered")
         reference = self.artifacts["reference_media"]
         candidate = self.artifacts["candidate_media"]
-        if (
-            reference.scope != "reference_binding"
-            or reference.sha256 != self.reference_sha256
-        ):
+        if reference.scope != "reference_binding" or reference.sha256 != self.reference_sha256:
             raise ValueError("reference media must resolve only through its sealed binding")
         if candidate.scope != "project" or candidate.sha256 != self.candidate_sha256:
             raise ValueError("candidate media must be a hash-matched project artifact")
-        if any(
-            frame < 0 or frame >= self.frame_count for frame in self.phase_markers.values()
-        ):
+        if any(frame < 0 or frame >= self.frame_count for frame in self.phase_markers.values()):
             raise ValueError("workspace phase marker is outside the timeline")
         return self
 
@@ -3647,9 +3658,7 @@ class ReferenceWorkbenchBundleV2(FrozenModel):
 
     @model_validator(mode="after")
     def validate_dense_samples(self) -> ReferenceWorkbenchBundleV2:
-        if [item.frame for item in self.samples] != list(
-            range(self.workspace.frame_count)
-        ):
+        if [item.frame for item in self.samples] != list(range(self.workspace.frame_count)):
             raise ValueError("reference workbench requires contiguous all-frame samples")
         return self
 
@@ -4342,6 +4351,956 @@ class MotionRecoveryGateReport(FrozenModel):
     overall: Literal["pass", "fail"]
 
 
+class VideoAnatomyProfile(StrEnum):
+    QUICK = "quick"
+    STRUCTURAL = "structural"
+    SEMANTIC = "semantic"
+    MOTION = "motion"
+    RECONSTRUCT = "reconstruct"
+
+
+class VideoAnatomyStatus(StrEnum):
+    COMPLETE = "complete"
+    PARTIAL = "partial"
+    INSUFFICIENT = "insufficient"
+    FAILED = "failed"
+
+
+class VideoAnatomyResourceEstimate(FrozenModel):
+    """Preflight estimate; measured free space is distinct from predicted cost."""
+
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    project_id: str
+    asset_id: str
+    source_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    profile: VideoAnatomyProfile
+    analysis_range: FrameRange
+    source_duration_seconds: float = Field(gt=0)
+    requested_frame_count: int = Field(gt=0)
+    estimated_decode_frame_count: int = Field(gt=0)
+    estimated_runtime_seconds: float = Field(gt=0)
+    estimated_artifact_bytes: int = Field(gt=0)
+    estimated_peak_temporary_bytes: int = Field(gt=0)
+    free_bytes_at_preflight: int = Field(ge=0)
+    required_free_bytes: int = Field(gt=0)
+    admitted: bool
+    warnings: list[str] = Field(default_factory=list)
+    refusal_reason: str | None = None
+    measured_at: datetime = Field(default_factory=utc_now)
+    provenance: Provenance
+
+    @model_validator(mode="after")
+    def validate_estimate(self) -> VideoAnatomyResourceEstimate:
+        if self.admitted == (self.refusal_reason is not None):
+            raise ValueError("resource admission and refusal reason disagree")
+        return self
+
+
+class VideoAnatomyCachePruneReceipt(FrozenModel):
+    """Receipt for deleting only the explicitly rebuildable Video Anatomy cache."""
+
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(default_factory=lambda: new_id("anatomycacheprune"))
+    scope: Literal["video-anatomy"] = "video-anatomy"
+    dry_run: bool
+    cache_root: str = Field(min_length=1)
+    files_selected: int = Field(ge=0)
+    bytes_selected: int = Field(ge=0)
+    files_removed: int = Field(ge=0)
+    bytes_removed: int = Field(ge=0)
+    canonical_evidence_preserved: Literal[True] = True
+    project_artifacts_removed: Literal[False] = False
+    completed_at: datetime = Field(default_factory=utc_now)
+    provenance: Provenance
+
+    @model_validator(mode="after")
+    def validate_prune_receipt(self) -> VideoAnatomyCachePruneReceipt:
+        if self.dry_run and (self.files_removed or self.bytes_removed):
+            raise ValueError("a cache-prune dry run cannot report removed data")
+        if self.files_removed > self.files_selected or self.bytes_removed > self.bytes_selected:
+            raise ValueError("removed cache totals exceed the selected rebuildable data")
+        return self
+
+
+class VideoSampleRole(StrEnum):
+    FIRST_FRAME = "first-frame"
+    LAST_FRAME = "last-frame"
+    INTERIOR = "interior"
+    REPRESENTATIVE = "representative"
+    PRE_BOUNDARY = "pre-boundary"
+    BOUNDARY = "boundary"
+    POST_BOUNDARY = "post-boundary"
+    PINNED = "pinned"
+
+
+class VideoTransitionType(StrEnum):
+    HARD_CUT = "hard-cut"
+    FADE_IN = "fade-in"
+    FADE_OUT = "fade-out"
+    CROSS_DISSOLVE = "cross-dissolve"
+    FLASH = "flash"
+    WIPE_OR_DIRECTIONAL = "wipe-or-directional"
+    CONTINUOUS_MOTION = "continuous-motion"
+    UNKNOWN = "unknown"
+
+
+class VideoMotionClassification(StrEnum):
+    STATIC = "static"
+    GLOBAL = "global-motion"
+    INDEPENDENT = "independent-motion"
+    MIXED = "mixed-motion"
+    UNKNOWN = "unknown"
+
+
+def _canonical_sha256(payload: object) -> str:
+    rendered = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return hashlib.sha256(rendered).hexdigest()
+
+
+class VideoDeduplicationPolicy(FrozenModel):
+    enabled: bool = True
+    luminance_delta_min: float = Field(default=0.02, ge=0, le=1)
+    histogram_distance_min: float = Field(default=0.04, ge=0, le=1)
+    perceptual_hash_distance_min: int = Field(default=4, ge=0, le=64)
+    ssim_change_min: float = Field(default=0.01, ge=0, le=1)
+    edge_change_min: float = Field(default=0.02, ge=0, le=1)
+    motion_activity_min: float = Field(default=0.01, ge=0, le=1)
+    protect_boundary_samples: Literal[True] = True
+    protect_pinned_samples: Literal[True] = True
+    compare_across_shots: Literal[False] = False
+
+
+class VideoSamplingPlan(FrozenModel):
+    """Deterministic budget and coverage contract for one anatomy pass."""
+
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(default_factory=lambda: new_id("samplingplan"))
+    project_id: str
+    asset_id: str
+    source_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    duration_seconds: float = Field(gt=0)
+    time_base: FrameRate
+    stream_time_base: FrameRate | None = None
+    variable_frame_rate: bool = False
+    frame_timestamp_count: int | None = Field(default=None, gt=0)
+    frame_timestamps_artifact: str | None = None
+    frame_timestamps_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    profile: VideoAnatomyProfile
+    analysis_range: FrameRange
+    strategies: list[
+        Literal[
+            "scene-score",
+            "keyframe",
+            "histogram-change",
+            "luma-progression",
+            "motion-activity",
+            "audio-change",
+            "uniform-fallback",
+            "semantic-change",
+        ]
+    ] = Field(min_length=1)
+    minimum_samples_per_shot: int = Field(default=3, ge=1)
+    global_frame_budget: int = Field(ge=2)
+    per_shot_frame_budget: int = Field(ge=1)
+    pinned_times: list[MotionTimeV2] = Field(default_factory=list)
+    deduplication: VideoDeduplicationPolicy = Field(default_factory=VideoDeduplicationPolicy)
+    required_capabilities: list[str] = Field(default_factory=list)
+    focused_rescan_reasons: list[str] = Field(default_factory=list)
+    artifact_budget_bytes: int = Field(gt=0)
+    plan_sha256: str = Field(
+        default_factory=lambda: "0" * 64,
+        pattern=r"^[0-9a-f]{64}$",
+    )
+    created_at: datetime = Field(default_factory=utc_now)
+
+    @model_validator(mode="after")
+    def validate_plan(self) -> VideoSamplingPlan:
+        permitted_end = self.duration_seconds + 1 / self.time_base.fps
+        if self.analysis_range.end / self.time_base.fps > permitted_end:
+            raise ValueError("analysis range exceeds the source duration")
+        pinned = [item.as_fraction for item in self.pinned_times]
+        if pinned != sorted(set(pinned)):
+            raise ValueError("pinned times must be sorted and unique")
+        if any(
+            item < self.analysis_range.start or item >= self.analysis_range.end for item in pinned
+        ):
+            raise ValueError("pinned time is outside the analysis range")
+        if len(self.strategies) != len(set(self.strategies)):
+            raise ValueError("sampling strategies must be unique")
+        if len(self.required_capabilities) != len(set(self.required_capabilities)):
+            raise ValueError("required capabilities must be unique")
+        timing_fields = (
+            self.frame_timestamp_count,
+            self.frame_timestamps_artifact,
+            self.frame_timestamps_sha256,
+        )
+        if self.variable_frame_rate and any(item is None for item in timing_fields):
+            raise ValueError("variable-frame-rate plans require a hashed timestamp map")
+        if any(item is not None for item in timing_fields) and any(
+            item is None for item in timing_fields
+        ):
+            raise ValueError("frame timestamp map identity must be complete")
+        if self.frame_timestamps_artifact is not None:
+            timing_path = Path(self.frame_timestamps_artifact)
+            if timing_path.is_absolute() or ".." in timing_path.parts:
+                raise ValueError("frame timestamp map must be project-relative")
+        payload = self.model_dump(
+            mode="json",
+            exclude={
+                "id",
+                "created_at",
+                "plan_sha256",
+                "frame_timestamps_artifact",
+            },
+        )
+        expected = _canonical_sha256(payload)
+        if self.plan_sha256 == "0" * 64:
+            object.__setattr__(self, "plan_sha256", expected)
+        elif self.plan_sha256 != expected:
+            raise ValueError("plan_sha256 does not match the deterministic plan")
+        return self
+
+
+class VideoFrameSample(FrozenModel):
+    id: str = Field(default_factory=lambda: new_id("sample"))
+    shot_id: str | None = None
+    time: MotionTimeV2
+    time_seconds: float = Field(ge=0)
+    source_frame_index: int = Field(ge=0)
+    role: VideoSampleRole
+    selection_reasons: list[str] = Field(min_length=1)
+    artifact_path: str | None = Field(default=None, min_length=1)
+    artifact_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    width: int = Field(gt=0)
+    height: int = Field(gt=0)
+    pixel_format: str = Field(min_length=1)
+    extraction_parameters: dict[str, Any]
+    provenance: Provenance
+    seek_precision: Literal["exact-frame", "decoded-nearest", "keyframe-snapped"]
+    seek_limitations: list[str] = Field(default_factory=list)
+    confidence: float = Field(default=1.0, ge=0, le=1)
+    kept: bool = True
+    duplicate_of_sample_id: str | None = None
+    duplicate_metrics: dict[str, float] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def validate_sample(self) -> VideoFrameSample:
+        if (self.artifact_path is None) != (self.artifact_sha256 is None):
+            raise ValueError("frame sample artifact path and hash must appear together")
+        if self.artifact_path is not None:
+            path = Path(self.artifact_path)
+            if path.is_absolute() or ".." in path.parts:
+                raise ValueError("frame sample artifact path must be project-relative")
+        protected = self.role in {
+            VideoSampleRole.FIRST_FRAME,
+            VideoSampleRole.LAST_FRAME,
+            VideoSampleRole.PRE_BOUNDARY,
+            VideoSampleRole.BOUNDARY,
+            VideoSampleRole.POST_BOUNDARY,
+            VideoSampleRole.PINNED,
+        }
+        if protected and not self.kept:
+            raise ValueError("protected boundary, endpoint, or pinned sample cannot be dropped")
+        if self.kept and self.duplicate_of_sample_id is not None:
+            raise ValueError("a kept sample cannot identify a duplicate survivor")
+        if self.kept and self.artifact_path is None:
+            raise ValueError("a retained sample requires an immutable frame artifact")
+        if not self.kept and self.duplicate_of_sample_id is None:
+            raise ValueError("a dropped duplicate must identify the retained sample")
+        if not self.kept and self.artifact_path is not None:
+            raise ValueError("a dropped duplicate cannot retain a frame artifact")
+        expected_seconds = (
+            float(self.time.as_fraction / self.provenance.parameters.get("time_base_fps", 1))
+            if "time_base_fps" in self.provenance.parameters
+            else None
+        )
+        if expected_seconds is not None and not isclose(
+            self.time_seconds,
+            expected_seconds,
+            abs_tol=1e-6,
+        ):
+            raise ValueError("sample time_seconds differs from its exact frame time")
+        return self
+
+
+class VideoFrameSampleManifest(FrozenModel):
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(default_factory=lambda: new_id("samplemanifest"))
+    project_id: str
+    asset_id: str
+    source_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    plan_id: str
+    plan_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    samples: list[VideoFrameSample] = Field(min_length=1)
+    selected_count: int = Field(ge=1)
+    duplicate_count: int = Field(ge=0)
+    artifact_bytes: int = Field(ge=0)
+    manifest_sha256: str = Field(
+        default_factory=lambda: "0" * 64,
+        pattern=r"^[0-9a-f]{64}$",
+    )
+    provenance: Provenance
+    generated_at: datetime = Field(default_factory=utc_now)
+
+    @model_validator(mode="after")
+    def validate_manifest(self) -> VideoFrameSampleManifest:
+        ids = [item.id for item in self.samples]
+        if len(ids) != len(set(ids)):
+            raise ValueError("frame sample ids must be unique")
+        ordered = [item.time.as_fraction for item in self.samples]
+        if ordered != sorted(ordered):
+            raise ValueError("frame samples must be chronological")
+        kept = sum(item.kept for item in self.samples)
+        duplicates = sum(not item.kept for item in self.samples)
+        if kept != self.selected_count or duplicates != self.duplicate_count:
+            raise ValueError("frame manifest counts do not match sample dispositions")
+        known = set(ids)
+        if any(
+            item.duplicate_of_sample_id not in known
+            for item in self.samples
+            if item.duplicate_of_sample_id is not None
+        ):
+            raise ValueError("duplicate sample points outside the manifest")
+        payload = self.model_dump(
+            mode="json",
+            exclude={"id", "generated_at", "manifest_sha256"},
+        )
+        expected = _canonical_sha256(payload)
+        if self.manifest_sha256 == "0" * 64:
+            object.__setattr__(self, "manifest_sha256", expected)
+        elif self.manifest_sha256 != expected:
+            raise ValueError("manifest_sha256 does not match the frame manifest")
+        return self
+
+
+class TransitionDetectorSignal(FrozenModel):
+    detector: str = Field(min_length=1)
+    score: float = Field(ge=0, le=1)
+    supports: list[VideoTransitionType] = Field(min_length=1)
+    artifact_ref: str | None = None
+    limitations: list[str] = Field(default_factory=list)
+
+
+class TransitionCandidate(FrozenModel):
+    id: str = Field(default_factory=lambda: new_id("transition"))
+    frame: int = Field(ge=0)
+    time_seconds: float = Field(ge=0)
+    window: FrameRange
+    transition_type: VideoTransitionType = VideoTransitionType.UNKNOWN
+    confidence: float = Field(ge=0, le=1)
+    detector_signals: list[TransitionDetectorSignal] = Field(min_length=1)
+    competing_types: list[VideoTransitionType] = Field(default_factory=list)
+    sample_ids: list[str] = Field(default_factory=list)
+    ambiguity_reasons: list[str] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_transition(self) -> TransitionCandidate:
+        if not self.window.start <= self.frame < self.window.end:
+            raise ValueError("transition frame must fall inside its dense analysis window")
+        supported = {
+            transition_type
+            for signal in self.detector_signals
+            for transition_type in signal.supports
+        }
+        if (
+            self.transition_type is not VideoTransitionType.UNKNOWN
+            and self.transition_type not in supported
+        ):
+            raise ValueError("classified transition is unsupported by detector evidence")
+        if self.transition_type is VideoTransitionType.UNKNOWN and not self.ambiguity_reasons:
+            raise ValueError("unknown transition requires an explicit ambiguity reason")
+        return self
+
+
+class ShotEvidence(FrozenModel):
+    id: str = Field(pattern=r"^shot-[0-9]{4,}$")
+    frame_range: FrameRange
+    representative_sample_ids: list[str] = Field(min_length=1)
+    boundary_sample_ids: list[str] = Field(default_factory=list)
+    confidence: float = Field(ge=0, le=1)
+    unresolved_questions: list[str] = Field(default_factory=list)
+
+
+class CoverageInterval(FrozenModel):
+    frame_range: FrameRange
+    reasons: list[str] = Field(min_length=1)
+    sample_ids: list[str] = Field(default_factory=list)
+
+
+class VideoCoverageReport(FrozenModel):
+    requested_range: FrameRange
+    covered_intervals: list[CoverageInterval] = Field(default_factory=list)
+    uncovered_ranges: list[FrameRange] = Field(default_factory=list)
+    per_shot_sample_counts: dict[str, int]
+    protected_sample_ids: list[str] = Field(default_factory=list)
+    coverage_ratio: float = Field(ge=0, le=1)
+
+    @model_validator(mode="after")
+    def validate_coverage(self) -> VideoCoverageReport:
+        for interval in [
+            *(item.frame_range for item in self.covered_intervals),
+            *self.uncovered_ranges,
+        ]:
+            if (
+                interval.start < self.requested_range.start
+                or interval.end > self.requested_range.end
+            ):
+                raise ValueError("coverage interval falls outside the requested range")
+        gaps = sorted(self.uncovered_ranges, key=lambda item: item.start)
+        if any(left.end > right.start for left, right in pairwise(gaps)):
+            raise ValueError("uncovered ranges must not overlap")
+        expected = 1 - sum(item.duration for item in gaps) / self.requested_range.duration
+        if not isclose(self.coverage_ratio, expected, abs_tol=1e-6):
+            raise ValueError("coverage ratio does not match uncovered ranges")
+        if any(value < 0 for value in self.per_shot_sample_counts.values()):
+            raise ValueError("per-shot sample counts must be non-negative")
+        return self
+
+
+class VideoStructureEvidence(FrozenModel):
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(default_factory=lambda: new_id("structure"))
+    project_id: str
+    asset_id: str
+    source_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    plan_id: str
+    plan_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    analysis_range: FrameRange
+    shots: list[ShotEvidence] = Field(min_length=1)
+    transitions: list[TransitionCandidate] = Field(default_factory=list)
+    coverage: VideoCoverageReport
+    ambiguous_ranges: list[FrameRange] = Field(default_factory=list)
+    detector_evidence_refs: list[str] = Field(min_length=1)
+    provenance: Provenance
+    generated_at: datetime = Field(default_factory=utc_now)
+
+    @model_validator(mode="after")
+    def validate_structure(self) -> VideoStructureEvidence:
+        if self.coverage.requested_range != self.analysis_range:
+            raise ValueError("structure coverage must use the analysis range")
+        if self.shots[0].frame_range.start != self.analysis_range.start:
+            raise ValueError("shot partition must begin at the analysis range")
+        for left, right in pairwise(self.shots):
+            if left.frame_range.end != right.frame_range.start:
+                raise ValueError("shot partition must be contiguous")
+        if self.shots[-1].frame_range.end != self.analysis_range.end:
+            raise ValueError("shot partition must end at the analysis range")
+        ids = [item.id for item in self.shots]
+        if len(ids) != len(set(ids)):
+            raise ValueError("shot ids must be unique")
+        if set(self.coverage.per_shot_sample_counts) != set(ids):
+            raise ValueError("coverage must report every shot exactly once")
+        for transition in self.transitions:
+            if not self.analysis_range.start <= transition.frame < self.analysis_range.end:
+                raise ValueError("transition lies outside the analysis range")
+        for interval in self.ambiguous_ranges:
+            if interval.start < self.analysis_range.start or interval.end > self.analysis_range.end:
+                raise ValueError("ambiguous range lies outside the analysis range")
+        return self
+
+
+class NormalizedRegion(FrozenModel):
+    label: str = Field(min_length=1)
+    box_normalized: tuple[float, float, float, float]
+    confidence: float = Field(ge=0, le=1)
+
+    @model_validator(mode="after")
+    def validate_region(self) -> NormalizedRegion:
+        x, y, width, height = self.box_normalized
+        if not all(0 <= value <= 1 for value in self.box_normalized):
+            raise ValueError("normalized region values must be between zero and one")
+        if width <= 0 or height <= 0 or x + width > 1 or y + height > 1:
+            raise ValueError("normalized region must fit inside the frame")
+        return self
+
+
+class VideoVisualObservation(FrozenModel):
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(default_factory=lambda: new_id("visualobservation"))
+    project_id: str
+    asset_id: str
+    source_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    shot_id: str
+    frame_range: FrameRange
+    sample_ids: list[str] = Field(min_length=1)
+    description: str = Field(min_length=1)
+    subjects: list[str] = Field(default_factory=list)
+    composition_regions: list[NormalizedRegion] = Field(default_factory=list)
+    focus_point_normalized: tuple[float, float] | None = None
+    background: str | None = None
+    visible_text: list[str] = Field(default_factory=list)
+    overlays: list[str] = Field(default_factory=list)
+    change_from_previous: str | None = None
+    confidence: float = Field(ge=0, le=1)
+    raw_response_artifact: str | None = None
+    raw_response_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    normalization_version: str = Field(min_length=1)
+    provider_receipt_id: str | None = None
+    provenance: Provenance
+
+    @model_validator(mode="after")
+    def validate_visual_observation(self) -> VideoVisualObservation:
+        if self.focus_point_normalized is not None and not all(
+            0 <= value <= 1 for value in self.focus_point_normalized
+        ):
+            raise ValueError("visual focus point must be normalized")
+        if (self.raw_response_artifact is None) != (self.raw_response_sha256 is None):
+            raise ValueError("raw response path and hash must appear together")
+        if self.raw_response_artifact is not None:
+            path = Path(self.raw_response_artifact)
+            if path.is_absolute() or ".." in path.parts:
+                raise ValueError("raw response artifact must be project-relative")
+        return self
+
+
+class VideoMotionPhase(FrozenModel):
+    role: Literal["onset", "development", "peak", "settle"]
+    frame_range: FrameRange
+    confidence: float = Field(ge=0, le=1)
+
+
+class VideoMotionEvidence(FrozenModel):
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(default_factory=lambda: new_id("videomotion"))
+    project_id: str
+    asset_id: str
+    source_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    shot_id: str
+    frame_range: FrameRange
+    classification: VideoMotionClassification
+    global_transform_model: Literal[
+        "none", "translation", "similarity", "affine", "homography", "unknown"
+    ]
+    camera_hypotheses: list[Literal["pan", "tilt", "zoom", "rotation"]] = Field(
+        default_factory=list
+    )
+    independent_motion_detected: bool
+    motion_magnitude_mean: float = Field(ge=0)
+    motion_magnitude_peak: float = Field(ge=0)
+    direction_degrees: float | None = Field(default=None, ge=-180, le=180)
+    phases: list[VideoMotionPhase] = Field(default_factory=list)
+    uncertainty: list[str] = Field(default_factory=list)
+    competing_models: list[str] = Field(default_factory=list)
+    analyzed_frame_count: int = Field(gt=0)
+    source_frame_count: int = Field(gt=0)
+    all_frame_evidence_ref: str | None = None
+    confidence: float = Field(ge=0, le=1)
+    provenance: Provenance
+
+    @model_validator(mode="after")
+    def validate_motion(self) -> VideoMotionEvidence:
+        if self.analyzed_frame_count > self.source_frame_count:
+            raise ValueError("analyzed motion frame count exceeds the source range")
+        if self.motion_magnitude_peak < self.motion_magnitude_mean:
+            raise ValueError("peak motion magnitude cannot be below its mean")
+        if self.camera_hypotheses and self.independent_motion_detected and not self.uncertainty:
+            raise ValueError("mixed camera/object motion requires explicit uncertainty")
+        if self.classification is VideoMotionClassification.UNKNOWN and not self.uncertainty:
+            raise ValueError("unknown motion classification requires uncertainty")
+        return self
+
+
+class TranscriptWord(FrozenModel):
+    text: str = Field(min_length=1)
+    start_seconds: float = Field(ge=0)
+    end_seconds: float = Field(ge=0)
+    confidence: float | None = Field(default=None, ge=0, le=1)
+
+
+class VideoTranscriptSegment(FrozenModel):
+    start_seconds: float = Field(ge=0)
+    end_seconds: float = Field(ge=0)
+    text: str = Field(min_length=1)
+    speaker: str | None = None
+    words: list[TranscriptWord] = Field(default_factory=list)
+    provider_receipt_id: str | None = None
+    partial: bool = False
+
+    @model_validator(mode="after")
+    def validate_segment(self) -> VideoTranscriptSegment:
+        if self.end_seconds < self.start_seconds:
+            raise ValueError("transcript segment end precedes its start")
+        if any(
+            word.start_seconds < self.start_seconds or word.end_seconds > self.end_seconds
+            for word in self.words
+        ):
+            raise ValueError("transcript word lies outside its segment")
+        return self
+
+
+class VideoAudioEvent(FrozenModel):
+    kind: Literal["speech", "silence", "loudness-change", "music", "beat", "onset", "accent", "cue"]
+    start_seconds: float = Field(ge=0)
+    end_seconds: float = Field(ge=0)
+    strength: float | None = Field(default=None, ge=0, le=1)
+    label: str | None = None
+    evidence_refs: list[str] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_event(self) -> VideoAudioEvent:
+        if self.end_seconds < self.start_seconds:
+            raise ValueError("audio event end precedes its start")
+        return self
+
+
+class VideoAudioTimelineEvidence(FrozenModel):
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(default_factory=lambda: new_id("audiotimeline"))
+    project_id: str
+    asset_id: str
+    source_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    duration_seconds: float = Field(gt=0)
+    transcript_segments: list[VideoTranscriptSegment] = Field(default_factory=list)
+    events: list[VideoAudioEvent] = Field(default_factory=list)
+    speakers: list[str] = Field(default_factory=list)
+    unknown_intervals: list[tuple[float, float]] = Field(default_factory=list)
+    evidence_refs: list[str] = Field(default_factory=list)
+    partial: bool
+    provenance: list[Provenance] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_audio_timeline(self) -> VideoAudioTimelineEvidence:
+        for start, end in self.unknown_intervals:
+            if start < 0 or end < start or end > self.duration_seconds:
+                raise ValueError("unknown audio interval is outside the source duration")
+        if any(item.end_seconds > self.duration_seconds for item in self.transcript_segments):
+            raise ValueError("audio evidence lies outside the source duration")
+        if any(item.end_seconds > self.duration_seconds for item in self.events):
+            raise ValueError("audio evidence lies outside the source duration")
+        return self
+
+
+class EvidenceLineageEdge(FrozenModel):
+    source_ref: str = Field(min_length=1)
+    target_ref: str = Field(min_length=1)
+    relation: Literal["derived-from", "summarizes", "supersedes", "supports", "contradicts"]
+
+
+class VideoAnatomy(FrozenModel):
+    """Hash-bound aggregate of measurements; never an editorial decision."""
+
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(default_factory=lambda: new_id("videoanatomy"))
+    project_id: str
+    asset_id: str
+    source_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    profile: VideoAnatomyProfile
+    technical_metadata: MediaMetadata
+    track_summary: dict[str, Any]
+    plan: VideoSamplingPlan
+    frame_manifest: VideoFrameSampleManifest
+    structure: VideoStructureEvidence
+    visual_observations: list[VideoVisualObservation] = Field(default_factory=list)
+    motion_evidence: list[VideoMotionEvidence] = Field(default_factory=list)
+    audio_timeline: VideoAudioTimelineEvidence | None = None
+    recurring_motifs: list[str] = Field(default_factory=list)
+    unresolved_ranges: list[FrameRange] = Field(default_factory=list)
+    contradictions: list[str] = Field(default_factory=list)
+    coverage_matrix: dict[str, float]
+    confidence_summary: dict[str, float]
+    provenance_graph: list[EvidenceLineageEdge]
+    evidence_refs: list[str] = Field(min_length=1)
+    status: VideoAnatomyStatus
+    incompleteness_reasons: list[str] = Field(default_factory=list)
+    anatomy_sha256: str = Field(
+        default_factory=lambda: "0" * 64,
+        pattern=r"^[0-9a-f]{64}$",
+    )
+    provenance: Provenance
+    generated_at: datetime = Field(default_factory=utc_now)
+    canonical_edit_decision: Literal[False] = False
+
+    @model_validator(mode="after")
+    def validate_anatomy(self) -> VideoAnatomy:
+        identities = {
+            (self.plan.project_id, self.plan.asset_id, self.plan.source_sha256),
+            (
+                self.frame_manifest.project_id,
+                self.frame_manifest.asset_id,
+                self.frame_manifest.source_sha256,
+            ),
+            (
+                self.structure.project_id,
+                self.structure.asset_id,
+                self.structure.source_sha256,
+            ),
+            (self.project_id, self.asset_id, self.source_sha256),
+        }
+        if len(identities) != 1:
+            raise ValueError("Video Anatomy child evidence does not share one source identity")
+        if (
+            self.plan.id != self.frame_manifest.plan_id
+            or self.plan.id != self.structure.plan_id
+            or self.plan.plan_sha256 != self.frame_manifest.plan_sha256
+            or self.plan.plan_sha256 != self.structure.plan_sha256
+        ):
+            raise ValueError("Video Anatomy child evidence is not bound to one sampling plan")
+        if self.profile is not self.plan.profile:
+            raise ValueError("Video Anatomy profile differs from its sampling plan")
+        shot_ids = {item.id for item in self.structure.shots}
+        if any(item.shot_id not in shot_ids for item in self.visual_observations):
+            raise ValueError("visual observation points outside the structure shots")
+        if any(item.shot_id not in shot_ids for item in self.motion_evidence):
+            raise ValueError("motion evidence points outside the structure shots")
+        if any(
+            not 0 <= value <= 1
+            for value in [
+                *self.confidence_summary.values(),
+                *self.coverage_matrix.values(),
+            ]
+        ):
+            raise ValueError("Video Anatomy confidence and coverage must be normalized")
+        if self.status is VideoAnatomyStatus.COMPLETE:
+            if self.incompleteness_reasons or self.unresolved_ranges:
+                raise ValueError("complete Video Anatomy cannot retain unresolved coverage")
+            if self.structure.coverage.coverage_ratio != 1:
+                raise ValueError("complete Video Anatomy requires full coverage")
+        elif not self.incompleteness_reasons:
+            raise ValueError("non-complete Video Anatomy requires an explicit reason")
+        payload = self.model_dump(
+            mode="json",
+            exclude={"id", "generated_at", "anatomy_sha256"},
+        )
+        expected = _canonical_sha256(payload)
+        if self.anatomy_sha256 == "0" * 64:
+            object.__setattr__(self, "anatomy_sha256", expected)
+        elif self.anatomy_sha256 != expected:
+            raise ValueError("anatomy_sha256 does not match the aggregate evidence")
+        return self
+
+
+class VideoAnatomyTruthBoundary(FrozenModel):
+    """Independently authored temporal truth for one synthetic boundary."""
+
+    frame: int = Field(ge=0)
+    transition_type: VideoTransitionType
+    tolerance_frames: int = Field(ge=0)
+    splits_shot: bool
+    label: str = Field(min_length=1)
+
+
+class VideoAnatomyFixtureTruth(FrozenModel):
+    """Hash-bound synthetic truth; it is never derived from detector output."""
+
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(pattern=r"^[a-z0-9][a-z0-9_.-]*$")
+    content_origin: Literal["synthetic_ground_truth"] = "synthetic_ground_truth"
+    video_path: str
+    video_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    frame_count: int = Field(gt=1)
+    frame_rate: FrameRate
+    variable_frame_rate: bool = False
+    has_audio: bool
+    boundaries: list[VideoAnatomyTruthBoundary] = Field(default_factory=list)
+    short_event_ranges: list[FrameRange] = Field(default_factory=list)
+    expected_motion_labels: list[str] = Field(default_factory=list)
+    expected_audio_labels: list[str] = Field(default_factory=list)
+    requirement_tags: list[str] = Field(min_length=1)
+    provenance: Provenance
+
+    @model_validator(mode="after")
+    def validate_fixture_truth(self) -> VideoAnatomyFixtureTruth:
+        if any(item.frame >= self.frame_count for item in self.boundaries):
+            raise ValueError("truth boundary lies outside the synthetic video")
+        if any(item.end > self.frame_count for item in self.short_event_ranges):
+            raise ValueError("truth event lies outside the synthetic video")
+        return self
+
+
+class VideoAnatomyEvalCorpus(FrozenModel):
+    """Manifest proving requirement coverage of the network-free corpus."""
+
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(default_factory=lambda: new_id("videoanatomycorpus"))
+    generated_at: datetime = Field(default_factory=utc_now)
+    content_origin: Literal["synthetic_ground_truth"] = "synthetic_ground_truth"
+    fixtures: list[VideoAnatomyFixtureTruth] = Field(min_length=1)
+    requirement_coverage: dict[str, list[str]]
+    reference_media_used: Literal[False] = False
+    provenance: Provenance
+
+
+class VideoAnatomyEvalCase(FrozenModel):
+    """Measured outcome for one profile over one synthetic fixture."""
+
+    fixture_id: str
+    profile: VideoAnatomyProfile
+    source_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    plan_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    anatomy_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    detected_boundaries: list[dict[str, Any]] = Field(default_factory=list)
+    metrics: dict[str, float]
+    runtime_seconds: float = Field(ge=0)
+    artifact_bytes: int = Field(ge=0)
+    checks: list[CheckResult]
+    overall: Literal["pass", "fail"]
+
+
+class VideoAnatomyEvalReport(FrozenModel):
+    """Fail-closed generic quality gate for Video Anatomy."""
+
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(default_factory=lambda: new_id("videoanatomyeval"))
+    generated_at: datetime = Field(default_factory=utc_now)
+    git_revision: str = Field(pattern=r"^[0-9a-f]{40}$")
+    git_clean: bool
+    corpus_path: str
+    corpus_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    cases: list[VideoAnatomyEvalCase] = Field(min_length=1)
+    aggregate_metrics: dict[str, float]
+    requirement_coverage: dict[str, list[str]]
+    checks: list[CheckResult]
+    mandatory_skips: int = Field(ge=0)
+    reference_media_used: Literal[False] = False
+    provenance: Provenance
+    overall: Literal["pass", "fail"]
+
+
+class EditorialStructureSection(FrozenModel):
+    role: Literal["hook", "setup", "development", "climax", "payoff", "conclusion", "cta"]
+    frame_range: FrameRange
+    shot_ids: list[str] = Field(min_length=1)
+    summary: str = Field(min_length=1)
+    confidence: float = Field(ge=0, le=1)
+    evidence_refs: list[str] = Field(min_length=1)
+
+
+class EditorialStructureProposal(FrozenModel):
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(default_factory=lambda: new_id("editorialproposal"))
+    project_id: str
+    asset_id: str
+    anatomy_id: str
+    anatomy_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    sections: list[EditorialStructureSection] = Field(min_length=1)
+    pacing_phases: list[str] = Field(default_factory=list)
+    shot_roles: dict[str, str]
+    likely_techniques: list[str] = Field(default_factory=list)
+    rationale: list[RationaleItem] = Field(min_length=1)
+    evidence_refs: list[str] = Field(min_length=1)
+    uncertainties: list[str] = Field(default_factory=list)
+    alternative_interpretations: list[str] = Field(default_factory=list)
+    status: Literal["proposed", "approved", "rejected"] = "proposed"
+    timeline_mutated: Literal[False] = False
+    provenance: Provenance
+
+
+class ReconstructionTransformSample(FrozenModel):
+    time: MotionTimeV2
+    center_x: float = Field(ge=-8, le=8)
+    center_y: float = Field(ge=-8, le=8)
+    contain_relative_scale: float = Field(gt=0)
+    rotation_degrees: float
+    opacity: float = Field(default=1.0, ge=0, le=1)
+
+
+class ReconstructionShotSkeleton(FrozenModel):
+    id: str = Field(pattern=r"^reconstruction-shot-[0-9]{4,}$")
+    source_shot_ids: list[str] = Field(min_length=1)
+    timeline_range: FrameRange
+    composition_summary: str = Field(min_length=1)
+    transforms: list[ReconstructionTransformSample] = Field(default_factory=list)
+    transition_in: VideoTransitionType | None = None
+    transition_out: VideoTransitionType | None = None
+    audio_events: list[str] = Field(default_factory=list)
+    overlays: list[str] = Field(default_factory=list)
+    technique_ids: list[str] = Field(default_factory=list)
+    evidence_refs: list[str] = Field(min_length=1)
+    confidence: float = Field(ge=0, le=1)
+
+    @model_validator(mode="after")
+    def validate_reconstruction_shot(self) -> ReconstructionShotSkeleton:
+        times = [item.time.as_fraction for item in self.transforms]
+        if times != sorted(set(times)):
+            raise ValueError("reconstruction transform samples must be sorted and unique")
+        if any(
+            time < self.timeline_range.start or time >= self.timeline_range.end for time in times
+        ):
+            raise ValueError("reconstruction transform sample lies outside its shot")
+        return self
+
+
+class ReferenceReconstructionProposal(FrozenModel):
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(default_factory=lambda: new_id("reconstructionproposal"))
+    project_id: str
+    reference_anatomy_id: str
+    reference_anatomy_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    output_width: int = Field(gt=0)
+    output_height: int = Field(gt=0)
+    output_frame_rate: FrameRate
+    duration_frames: int = Field(gt=0)
+    shot_skeleton: list[ReconstructionShotSkeleton] = Field(min_length=1)
+    motion_phases: list[str] = Field(default_factory=list)
+    audio_structure: list[str] = Field(default_factory=list)
+    unsupported_elements: list[str] = Field(default_factory=list)
+    unresolved_elements: list[str] = Field(default_factory=list)
+    evidence_refs: list[str] = Field(min_length=1)
+    confidence: float = Field(ge=0, le=1)
+    refinement_plan: list[str] = Field(default_factory=list)
+    patch_preview: PatchPreview | None = None
+    target_asset_id: str | None = None
+    source_neutral: Literal[True] = True
+    reference_media_embedded: Literal[False] = False
+    timeline_mutated: Literal[False] = False
+    provenance: Provenance
+
+    @model_validator(mode="after")
+    def validate_reconstruction_proposal(self) -> ReferenceReconstructionProposal:
+        if self.shot_skeleton[0].timeline_range.start != 0:
+            raise ValueError("reconstruction skeleton must begin at frame zero")
+        for left, right in pairwise(self.shot_skeleton):
+            if left.timeline_range.end != right.timeline_range.start:
+                raise ValueError("reconstruction shot skeleton must be contiguous")
+        if self.shot_skeleton[-1].timeline_range.end != self.duration_frames:
+            raise ValueError("reconstruction shot skeleton must span the output duration")
+        if self.patch_preview is not None:
+            if self.target_asset_id is None:
+                raise ValueError("patch preview requires an explicit target asset")
+            if self.patch_preview.project_id != self.project_id:
+                raise ValueError("patch preview belongs to a different project")
+        return self
+
+
+class VideoProposalReview(FrozenModel):
+    """Explicit human decision over one immutable Video Anatomy proposal revision."""
+
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(default_factory=lambda: new_id("proposalreview"))
+    project_id: str
+    proposal_kind: Literal["editorial-structure", "reference-reconstruction"]
+    proposal_id: str
+    proposal_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    decision: Literal["approved", "rejected"]
+    reviewer: str = Field(min_length=1)
+    rationale: str = Field(min_length=1)
+    reviewed_at: datetime = Field(default_factory=utc_now)
+    timeline_mutated: Literal[False] = False
+
+
+class VideoProposalAcceptanceReceipt(FrozenModel):
+    """Proof that an approved proposal entered the ordinary reversible version path."""
+
+    schema_version: Literal["1.0.0"] = SCHEMA_VERSION
+    id: str = Field(default_factory=lambda: new_id("proposalacceptance"))
+    project_id: str
+    proposal_id: str
+    proposal_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    review_id: str
+    patch_id: str
+    version_id: str
+    inverse_operation_count: int = Field(gt=0)
+    accepted_by: str = Field(min_length=1)
+    accepted_at: datetime = Field(default_factory=utc_now)
+    canonical_version_created: Literal[True] = True
+    reversible: Literal[True] = True
+
+
 SCHEMA_MODELS: dict[str, type[BaseModel]] = {
     "asset": Asset,
     "media-manifest": Asset,
@@ -4349,9 +5308,7 @@ SCHEMA_MODELS: dict[str, type[BaseModel]] = {
     "editorial-brief": EditorialBriefRevision,
     "screen-workflow-plan": ScreenWorkflowPlan,
     "screen-workflow-experience-admission": ScreenWorkflowExperienceAdmission,
-    "screen-workflow-experience-public-projection": (
-        ScreenWorkflowExperiencePublicProjection
-    ),
+    "screen-workflow-experience-public-projection": (ScreenWorkflowExperiencePublicProjection),
     "screen-workflow-experience-receipt": ScreenWorkflowExperienceReceipt,
     "screen-workflow-voiceover-timing": ScreenWorkflowVoiceoverTiming,
     "screen-workflow-edit-spec": ScreenWorkflowEditSpec,
@@ -4401,6 +5358,21 @@ SCHEMA_MODELS: dict[str, type[BaseModel]] = {
     "motion-ground-truth": MotionGroundTruthCorpus,
     "motion-recovery": MotionRecoveryReport,
     "motion-recovery-gate": MotionRecoveryGateReport,
+    "video-sampling-plan": VideoSamplingPlan,
+    "video-frame-sample-manifest": VideoFrameSampleManifest,
+    "video-structure-evidence": VideoStructureEvidence,
+    "video-visual-observation": VideoVisualObservation,
+    "video-motion-evidence": VideoMotionEvidence,
+    "video-audio-timeline-evidence": VideoAudioTimelineEvidence,
+    "video-anatomy": VideoAnatomy,
+    "video-anatomy-resource-estimate": VideoAnatomyResourceEstimate,
+    "video-anatomy-cache-prune": VideoAnatomyCachePruneReceipt,
+    "video-anatomy-eval-corpus": VideoAnatomyEvalCorpus,
+    "video-anatomy-eval": VideoAnatomyEvalReport,
+    "editorial-structure-proposal": EditorialStructureProposal,
+    "reference-reconstruction-proposal": ReferenceReconstructionProposal,
+    "video-proposal-review": VideoProposalReview,
+    "video-proposal-acceptance": VideoProposalAcceptanceReceipt,
     "ai-capability-catalog": AICapabilityCatalog,
     "local-provider-binding": LocalProviderBinding,
     "resolved-provider-receipt": ResolvedProviderReceipt,

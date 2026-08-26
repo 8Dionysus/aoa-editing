@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+import aoa_editing.evals.completion as completion
 from aoa_editing.domain.models import CompletionAuditReport
 from aoa_editing.evals.completion import DONE_REQUIREMENTS, run_completion_audit
 from aoa_editing.evals.motion_recovery import REQUIRED_CORPUS_TAGS
@@ -74,30 +75,7 @@ def test_completion_audit_v2_is_fail_closed_and_covers_every_done_row(
 ) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
-    required_files = [
-        "README.md",
-        "DESIGN.md",
-        "docs/architecture.md",
-        "docs/definition-of-done.md",
-        "docs/evaluation.md",
-        "docs/operations.md",
-        "docs/roadmap.md",
-        "manifests/ai-capabilities.json",
-        "scripts/bootstrap",
-        "scripts/launch",
-        "scripts/test",
-        "scripts/eval",
-        "scripts/clean",
-        "scripts/reproduce-reference",
-        "src/aoa_editing/agent.py",
-        "src/aoa_editing/api/app.py",
-        "src/aoa_editing/cli.py",
-        "src/aoa_editing/domain/models.py",
-        "src/aoa_editing/web/index.html",
-        "editing-knowledge/scenarios/speech.clean.json",
-        "editing-knowledge/scenarios/memory.montage.json",
-        "editing-knowledge/scenarios/still.motion.json",
-    ]
+    required_files = list(completion.REQUIRED_REPOSITORY_PATHS)
     for relative in required_files:
         path = repo / relative
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -176,6 +154,87 @@ def test_completion_audit_v2_is_fail_closed_and_covers_every_done_row(
             "git_revision": revision,
             "reference_content_decoded": False,
             "checks": [_check(item) for item in readiness_checks],
+        },
+    )
+
+    video_anatomy_media = tmp_path / "video-anatomy-fixture.mp4"
+    video_anatomy_media.write_bytes(b"independent-video-anatomy-fixture")
+    video_anatomy_tags = sorted(completion.REQUIRED_VIDEO_ANATOMY_TAGS)
+    video_anatomy_coverage = {item: ["fixture"] for item in video_anatomy_tags}
+    video_anatomy_corpus = _write_json(
+        tmp_path / "video-anatomy-corpus.json",
+        {
+            "schema_version": "1.0.0",
+            "content_origin": "synthetic_ground_truth",
+            "fixtures": [
+                {
+                    "schema_version": "1.0.0",
+                    "id": "fixture",
+                    "content_origin": "synthetic_ground_truth",
+                    "video_path": str(video_anatomy_media),
+                    "video_sha256": _digest(video_anatomy_media),
+                    "frame_count": 2,
+                    "frame_rate": {"numerator": 1, "denominator": 1},
+                    "variable_frame_rate": False,
+                    "has_audio": False,
+                    "boundaries": [],
+                    "short_event_ranges": [],
+                    "expected_motion_labels": [],
+                    "expected_audio_labels": [],
+                    "requirement_tags": video_anatomy_tags,
+                    "provenance": {
+                        "tool": "fixture",
+                        "tool_version": "1",
+                        "deterministic": True,
+                    },
+                }
+            ],
+            "requirement_coverage": video_anatomy_coverage,
+            "reference_media_used": False,
+            "provenance": {
+                "tool": "fixture",
+                "tool_version": "1",
+                "deterministic": True,
+            },
+        },
+    )
+    video_anatomy = _write_json(
+        tmp_path / "video-anatomy-eval.json",
+        {
+            "schema_version": "1.0.0",
+            "git_revision": revision,
+            "git_clean": True,
+            "corpus_path": str(video_anatomy_corpus),
+            "corpus_sha256": _digest(video_anatomy_corpus),
+            "cases": [
+                {
+                    "fixture_id": "fixture",
+                    "profile": "structural",
+                    "source_sha256": _digest(video_anatomy_media),
+                    "plan_sha256": "1" * 64,
+                    "anatomy_sha256": "2" * 64,
+                    "detected_boundaries": [],
+                    "metrics": {},
+                    "runtime_seconds": 0.0,
+                    "artifact_bytes": 0,
+                    "checks": [_check("fixture-case")],
+                    "overall": "pass",
+                }
+            ],
+            "aggregate_metrics": {},
+            "requirement_coverage": video_anatomy_coverage,
+            "checks": [
+                _check(item)
+                for item in sorted(completion.REQUIRED_VIDEO_ANATOMY_CHECKS)
+            ],
+            "mandatory_skips": 0,
+            "reference_media_used": False,
+            "provenance": {
+                "tool": "fixture",
+                "tool_version": "1",
+                "deterministic": True,
+            },
+            "overall": "pass",
         },
     )
 
@@ -760,8 +819,6 @@ def test_completion_audit_v2_is_fail_closed_and_covers_every_done_row(
         },
     )
 
-    import aoa_editing.evals.completion as completion
-
     def fake_git(_repo: Path, arguments: list[str]) -> str:
         if arguments == ["rev-parse", "HEAD"]:
             return revision + "\n"
@@ -818,6 +875,7 @@ def test_completion_audit_v2_is_fail_closed_and_covers_every_done_row(
             lock_path=lock,
             storage_path=storage,
             readiness_path=readiness,
+            video_anatomy_path=video_anatomy,
             motion_gate_path=motion_gate,
             motion_evidence_path=motion_evidence,
             spec_path=spec,
@@ -845,6 +903,16 @@ def test_completion_audit_v2_is_fail_closed_and_covers_every_done_row(
     assert all(check.status == "pass" for check in report.checks)
     assert set(report.requirement_coverage) == set(completion.DONE_REQUIREMENTS)
     assert Path(report.artifacts["report"]).is_file()
+
+    failed_video_anatomy = json.loads(video_anatomy.read_text(encoding="utf-8"))
+    failed_video_anatomy["overall"] = "fail"
+    video_anatomy.write_text(json.dumps(failed_video_anatomy), encoding="utf-8")
+    video_anatomy_failed_report = audit(tmp_path / "completion-video-anatomy-failed")
+    assert video_anatomy_failed_report.overall == "fail"
+    assert "video-anatomy" in video_anatomy_failed_report.unresolved_requirements
+    assert "video-anatomy-generic" in video_anatomy_failed_report.unresolved_checks
+    failed_video_anatomy["overall"] = "pass"
+    video_anatomy.write_text(json.dumps(failed_video_anatomy), encoding="utf-8")
 
     remote_enabled = True
     remote_report = audit(

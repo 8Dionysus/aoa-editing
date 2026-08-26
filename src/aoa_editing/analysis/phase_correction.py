@@ -10,6 +10,7 @@ from typing import Any, cast
 import numpy as np
 from numpy.typing import NDArray
 
+from aoa_editing import __version__
 from aoa_editing.analysis.motion import (
     _curve_driver,
     _phase_boundaries,
@@ -209,7 +210,7 @@ def derive_phase_correction_v2(
         },
         provenance=Provenance(
             tool="aoa-editing-phase-correction-v2",
-            tool_version="0.1.0",
+            tool_version=__version__,
             parameters={
                 "algorithm_revision": ALGORITHM_REVISION,
                 "spec_path": spec_path,

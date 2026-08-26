@@ -26,6 +26,7 @@ the project source of truth.
 | --- | --- | --- |
 | Project | assets, intent, versions, patches, decisions | media decoding |
 | Evidence | measurements, transcripts, detections, confidence, provenance | editorial acceptance |
+| Video Anatomy | sampling plans, shots, boundaries, selected frames, synchronized audio/visual/motion evidence | timeline mutation or editorial truth |
 | Treatment | scenario-specific proposals and alternatives | canonical version state |
 | Edit graph | timeline/layers/effects/keyframes and invariants | renderer commands |
 | Rendering | deterministic compilation, jobs, artifacts | edit meaning |
@@ -60,6 +61,12 @@ expected: source analyzers, planners, segmentation/depth, render backends,
 quality metrics, interchange targets, and agent transports. The stable center is
 the project/evidence/treatment/edit-graph contract plus a relocatable
 repo-local operational home.
+
+Video Anatomy uses that stable center rather than a parallel graph. Its
+progressive pipeline ends at immutable evidence; editorial and reconstruction
+interpretations are separate proposals. Only explicit review can compile a
+proposal through the existing reversible patch/version boundary. See
+`docs/video-anatomy.md` for profiles, provider, and storage contracts.
 
 ## Non-goals of the first prototype
 
