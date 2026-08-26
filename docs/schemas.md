@@ -14,6 +14,15 @@ versions rather than guessing. The baseline migration supports the documented
 additive `0.1.0` timeline/project shape into `1.0.0`; other legacy kinds are
 rejected until a reviewed migration exists.
 
+Video Anatomy adds checked schemas for the deterministic sampling plan, frame
+sample manifest, contiguous structure/coverage and transition evidence, visual
+observations, motion, synchronized audio timeline, aggregate anatomy, resource
+estimate, rebuildable-cache prune receipt, editorial/reconstruction proposals,
+human review/acceptance, and synthetic corpus/report. Each child is independently
+versioned and hash-bound. The aggregate is evidence only; proposals explicitly
+assert `timeline_mutated=false`, and acceptance is a separate receipt binding
+the reviewed proposal hash to a reversible project version.
+
 `reference-spec.schema.json` is the immutable post-gate observation contract.
 It records technical media properties, sampled camera transforms, audio
 structure, uncertainties, fixed comparison thresholds, and the rule that the
@@ -90,7 +99,8 @@ The baseline also checks explicit schemas for Brief revisions, evidence
 authority/time ranges/supersession, treatment comparison facts, decision graphs,
 patch previews, render frame ranges, derived media, style confirmations,
 clean-rerun reports, transfer reports, and candidate technique packets. A
-`completion-audit.schema.json` v2 joins every current proof lane into a
+`completion-audit.schema.json` v2 joins every current proof lane, including the
+revision-bound independent Video Anatomy corpus, into a
 fail-closed DoD map. It records the exact clean Git revision and goal boundary,
 hashes every evidence file, binds Spec/Protocol/Reconstruction/Clean Rerun
 bytes, requires an exact local tag, preserves a separate human editorial

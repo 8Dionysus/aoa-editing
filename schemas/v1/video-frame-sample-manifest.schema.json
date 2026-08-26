@@ -1,0 +1,354 @@
+{
+  "$defs": {
+    "MotionTimeV2": {
+      "additionalProperties": false,
+      "description": "Exact non-negative frame time with a canonical rational subframe.",
+      "properties": {
+        "frame": {
+          "minimum": 0,
+          "title": "Frame",
+          "type": "integer"
+        },
+        "subframe_numerator": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Subframe Numerator",
+          "type": "integer"
+        },
+        "subframe_denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Subframe Denominator",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "frame"
+      ],
+      "title": "MotionTimeV2",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "VideoFrameSample": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "shot_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shot Id"
+        },
+        "time": {
+          "$ref": "#/$defs/MotionTimeV2"
+        },
+        "time_seconds": {
+          "minimum": 0,
+          "title": "Time Seconds",
+          "type": "number"
+        },
+        "source_frame_index": {
+          "minimum": 0,
+          "title": "Source Frame Index",
+          "type": "integer"
+        },
+        "role": {
+          "$ref": "#/$defs/VideoSampleRole"
+        },
+        "selection_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Selection Reasons",
+          "type": "array"
+        },
+        "artifact_path": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Path"
+        },
+        "artifact_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Sha256"
+        },
+        "width": {
+          "exclusiveMinimum": 0,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "exclusiveMinimum": 0,
+          "title": "Height",
+          "type": "integer"
+        },
+        "pixel_format": {
+          "minLength": 1,
+          "title": "Pixel Format",
+          "type": "string"
+        },
+        "extraction_parameters": {
+          "additionalProperties": true,
+          "title": "Extraction Parameters",
+          "type": "object"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "seek_precision": {
+          "enum": [
+            "exact-frame",
+            "decoded-nearest",
+            "keyframe-snapped"
+          ],
+          "title": "Seek Precision",
+          "type": "string"
+        },
+        "seek_limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Seek Limitations",
+          "type": "array"
+        },
+        "confidence": {
+          "default": 1.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "kept": {
+          "default": true,
+          "title": "Kept",
+          "type": "boolean"
+        },
+        "duplicate_of_sample_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duplicate Of Sample Id"
+        },
+        "duplicate_metrics": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Duplicate Metrics",
+          "type": "object"
+        }
+      },
+      "required": [
+        "time",
+        "time_seconds",
+        "source_frame_index",
+        "role",
+        "selection_reasons",
+        "width",
+        "height",
+        "pixel_format",
+        "extraction_parameters",
+        "provenance",
+        "seek_precision"
+      ],
+      "title": "VideoFrameSample",
+      "type": "object"
+    },
+    "VideoSampleRole": {
+      "enum": [
+        "first-frame",
+        "last-frame",
+        "interior",
+        "representative",
+        "pre-boundary",
+        "boundary",
+        "post-boundary",
+        "pinned"
+      ],
+      "title": "VideoSampleRole",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "plan_id": {
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "plan_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Plan Sha256",
+      "type": "string"
+    },
+    "samples": {
+      "items": {
+        "$ref": "#/$defs/VideoFrameSample"
+      },
+      "minItems": 1,
+      "title": "Samples",
+      "type": "array"
+    },
+    "selected_count": {
+      "minimum": 1,
+      "title": "Selected Count",
+      "type": "integer"
+    },
+    "duplicate_count": {
+      "minimum": 0,
+      "title": "Duplicate Count",
+      "type": "integer"
+    },
+    "artifact_bytes": {
+      "minimum": 0,
+      "title": "Artifact Bytes",
+      "type": "integer"
+    },
+    "manifest_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Manifest Sha256",
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "project_id",
+    "asset_id",
+    "source_sha256",
+    "plan_id",
+    "plan_sha256",
+    "samples",
+    "selected_count",
+    "duplicate_count",
+    "artifact_bytes",
+    "provenance"
+  ],
+  "title": "VideoFrameSampleManifest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/video-frame-sample-manifest.schema.json"
+}

@@ -9,6 +9,7 @@ from pathlib import Path
 
 import numpy as np
 
+from aoa_editing import __version__
 from aoa_editing.domain.models import (
     Asset,
     AudioEffect,
@@ -370,7 +371,7 @@ class FFmpegCompiler:
             compositor_jobs=compositor_jobs,
             compiler=Provenance(
                 tool="aoa-editing-ffmpeg-compiler",
-                tool_version="0.1.0",
+                tool_version=__version__,
                 parameters={
                     "profile": profile.name,
                     "canonical_input": "timeline-projection",

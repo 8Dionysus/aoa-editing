@@ -19,6 +19,34 @@ The gate emits a machine-readable receipt with check IDs, commands, timestamps,
 Git revision, tool versions, and artifact hashes. A skipped mandatory check is a
 failure.
 
+## Video Anatomy generic gate
+
+Before sealed media is decoded, run the independent network-free corpus:
+
+```bash
+./scripts/aoa-editing eval video-anatomy --output /new/video-anatomy-eval
+```
+
+It renders synthetic fixtures from authored truth and measures boundary
+precision/recall and timing, transition classification, complete shot coverage,
+short-event selection, duplicate reduction, semantic/audio coverage, motion
+error, VFR and fractional-FPS identity, unresolved ratio, runtime, and artifact
+size. It also exercises provider absence/timeout/malformed responses,
+cancellation/resume, cache invalidation, legacy `video.scenes`, schema and
+CLI/API/agent/workbench contracts, and reference non-leakage. A passing report
+has zero mandatory skips, requires every fixture/profile case to satisfy its
+declared profile obligations, and explicitly records
+`reference_media_used=false`. Sparse `quick` cases retain their measured
+short-event and boundary limitations without pretending to provide the
+mandatory structural coverage that is evaluated on `structural` cases.
+
+The post-gate named reference route runs `quick`, `structural`, and
+`reconstruct`, then joins the source-neutral proposal to the existing all-frame
+Reference Spec/Comparison Protocol v2. Proposal review and candidate editorial
+review remain two attributable human decisions. Objective success without the
+exact candidate-hash verdict stays `warn`; reference absence from render
+lineage is mandatory.
+
 For `screen.workflow`, generic contract coverage includes multi-segment beats,
 source and camera continuity, gradual speed tiers, real-time prompt entry,
 explicit risk above 24x, live-region loopability, natural holds, and aggregation
@@ -394,6 +422,7 @@ claim:
 ./scripts/aoa-editing eval completion-audit \
   --storage /path/to/relocation-receipt.json \
   --readiness /path/to/readiness.json \
+  --video-anatomy /path/to/video-anatomy-eval.json \
   --motion-gate /path/to/current/motion-recovery-gate.json \
   --motion-evidence /path/to/reference-motion-evidence-v2.json \
   --spec /path/to/reference-spec-v2.json \
@@ -418,10 +447,11 @@ tag there, and confirm that the working branch has no upstream. Do not use the
 flag merely to ignore a remote error.
 
 The audit re-hashes both immutable user inputs and every receipt, requires the
-readiness, motion gate, provider gate, and live-AI gate to match the clean
-current Git revision, verifies the exact Spec/Protocol/Reconstruction/Clean
-Rerun chain, rejects a missing human review or any nested skip/failure, proves
-that the reference hash is absent from render lineage and tracked files, and
-maps all 28 rows in `docs/definition-of-done.md` to passing checks. Until the
+readiness, independent Video Anatomy corpus, motion gate, provider gate, and
+live-AI gate to match the clean current Git revision, verifies the exact
+Spec/Protocol/Reconstruction/Clean Rerun chain, rejects a missing human review
+or any nested skip/failure, proves that the reference hash is absent from render
+lineage and tracked files, and maps every row in `docs/definition-of-done.md`
+to passing checks. Until the
 human verdict and local tag exist, the report is expected to fail and names
 those unresolved checks; it never upgrades an objective-only comparison.

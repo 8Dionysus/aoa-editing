@@ -12,6 +12,8 @@ The prototype is intentionally production-shaped:
 - evidence-backed treatments for speech cleanup, memory montage, animated
   stills, and script-bound terminal workflows;
 - reversible patches, versions, comparison, preview/final render, and QC;
+- progressive **Video Anatomy** profiles that produce typed shot, transition,
+  frame, audio, semantic, and motion evidence before any edit proposal;
 - FFmpeg rendering with Kdenlive/MLT as the first editable interchange lane;
 - nine typed local-AI capability aliases with untracked bindings, live health,
   redacted provider receipts, and deterministic fallbacks so the product
@@ -44,6 +46,17 @@ reference/candidate playback, overlays and differences, motion/derivative
 curves, uncertainty, typed correction previews, per-item approve/reject, and
 point rerenders without admitting reference media into render lineage. The CLI
 and line-delimited JSON agent protocol call the same application services.
+
+For an ingested video, estimate and then run one progressive profile:
+
+```bash
+./scripts/aoa-editing anatomy estimate PROJECT ASSET --profile structural
+./scripts/aoa-editing anatomy run PROJECT ASSET --profile reconstruct
+```
+
+`reconstruct` returns immutable anatomy plus inert editorial and source-neutral
+reconstruction proposals. Explicit review is still required before a reversible
+version can exist. See [Video Anatomy](docs/video-anatomy.md).
 
 The checkout is the repo-local operational home: `.venv/` contains the
 project-specific runtime and untracked `var/` contains projects, evals,
@@ -136,6 +149,7 @@ stack/machine owner evidence.
 ## Documentation
 
 - [User guide](docs/user-guide.md)
+- [Video Anatomy](docs/video-anatomy.md)
 - [Agent protocol](docs/agent-protocol.md)
 - [Operations and storage](docs/operations.md)
 - [Ports and adapters](docs/ports-and-adapters.md)
@@ -146,6 +160,7 @@ stack/machine owner evidence.
 - [Prototype completion report](docs/completion-report.md)
 - [Roadmap](docs/roadmap.md)
 - [Troubleshooting](docs/troubleshooting.md)
+- [Changelog](CHANGELOG.md)
 - [Third-party licenses](docs/third-party-licenses.md)
 
 ## License

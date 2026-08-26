@@ -6,6 +6,7 @@ import hashlib
 import re
 from collections.abc import Sequence
 
+from aoa_editing import __version__
 from aoa_editing.domain.models import (
     CheckResult,
     Provenance,
@@ -164,7 +165,7 @@ def build_screen_workflow_plan(
         reference_study_ids=list(reference_study_ids),
         provenance=Provenance(
             tool="aoa-editing-screen-workflow-planner",
-            tool_version="0.1.0",
+            tool_version=__version__,
             parameters={
                 "planner": "script-to-capture-plan-v1",
                 "beat_authority": "editor-authored" if beats is not None else "deterministic-draft",

@@ -9,6 +9,7 @@ from typing import Any, Literal, cast
 
 import numpy as np
 
+from aoa_editing import __version__
 from aoa_editing.domain.models import (
     Asset,
     BezierHandleV2,
@@ -382,7 +383,7 @@ def reference_reconstruct_v2(
         ],
         planner=Provenance(
             tool="aoa-editing-reference-planner-v2",
-            tool_version="0.1.0",
+            tool_version=__version__,
             parameters={
                 "planner": "reference-spec-v2",
                 "spec_id": spec.id,

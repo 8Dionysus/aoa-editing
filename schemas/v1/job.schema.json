@@ -44,6 +44,74 @@
       "default": null,
       "title": "Version Id"
     },
+    "asset_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Asset Id"
+    },
+    "plan_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Plan Id"
+    },
+    "plan_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Plan Sha256"
+    },
+    "profile": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Profile"
+    },
+    "phase": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Phase"
+    },
+    "progress": {
+      "default": 0.0,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Progress",
+      "type": "number"
+    },
     "status": {
       "$ref": "#/$defs/JobStatus",
       "default": "queued"
@@ -105,6 +173,103 @@
         "type": "string"
       },
       "title": "Output Hashes",
+      "type": "array"
+    },
+    "checkpoint_path": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Checkpoint Path"
+    },
+    "checkpoint_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Checkpoint Sha256"
+    },
+    "cache_key": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cache Key"
+    },
+    "cache_hit": {
+      "default": false,
+      "title": "Cache Hit",
+      "type": "boolean"
+    },
+    "cancellation_requested": {
+      "default": false,
+      "title": "Cancellation Requested",
+      "type": "boolean"
+    },
+    "parent_job_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parent Job Id"
+    },
+    "resume_from_job_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Resume From Job Id"
+    },
+    "attempt": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Attempt",
+      "type": "integer"
+    },
+    "request_parameters": {
+      "additionalProperties": true,
+      "title": "Request Parameters",
+      "type": "object"
+    },
+    "completed_phases": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Completed Phases",
+      "type": "array"
+    },
+    "partial_evidence_refs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Partial Evidence Refs",
       "type": "array"
     },
     "error": {

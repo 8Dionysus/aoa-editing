@@ -40,19 +40,23 @@ The executable proof order is:
 1. bootstrap the pinned Python runtime;
 2. run schemas, Ruff, Mypy, unit/integration tests, UI smoke, and doctor;
 3. create an ignored reference lock from the public template;
-4. pass the revision-bound generic readiness gate;
-5. pass the independent ground-truth motion-recovery gate;
-6. freeze all-frame Motion Evidence v2, Reconstruction Spec v2, and Comparison
+4. pass the independent network-free Video Anatomy corpus;
+5. pass the revision-bound generic readiness gate;
+6. pass the independent ground-truth motion-recovery gate;
+7. run the sealed reference through `quick`, `structural`, and `reconstruct`
+   Video Anatomy profiles and review its source-neutral proposal;
+8. freeze all-frame Motion Evidence v2, Reconstruction Spec v2, and Comparison
    Protocol v2;
-7. run bounded reconstruction passes through normal application services;
-8. compare the selected candidate on all objective axes;
-9. inspect and correct motion through the real Reference Workspace UI;
-10. attach an attributable human review for the exact candidate hash;
-11. replay the selected semantics in a clean home;
-12. transfer the technique across seven heterogeneous source classes;
-13. pass provider-alias and live existing-model admission gates;
-14. create the final local-only tag;
-15. join every receipt with Completion Audit v2.
+9. accept through the normal reversible version path and render independently;
+10. compare the selected candidate on all objective axes;
+11. inspect and correct motion through the real Reference Workspace UI;
+12. attach an attributable human review for the exact candidate hash;
+13. replay the selected semantics in a clean home;
+14. transfer the technique across seven heterogeneous source classes;
+15. pass provider-alias and live existing-model admission gates;
+16. create the final local-only tag;
+17. join every receipt, including the exact Video Anatomy eval, with Completion
+    Audit v2.
 
 The reference remains evaluation evidence and is forbidden from render lineage.
 The checked-in reveal technique remains a reviewable candidate rather than
@@ -87,8 +91,9 @@ be read as that verdict.
 ## Honest growth boundary
 
 This is a complete prototype, not a claim of feature parity with a mature NLE.
-The remaining layers are listed in `docs/roadmap.md`: process-isolated jobs and
-checkpoints, semantic vision/audio adapters, richer direct timeline and
+The remaining layers are listed in `docs/roadmap.md`: a process-isolated queue
+built on the Video Anatomy checkpoint spine, additional semantic vision/audio
+adapters, richer direct timeline and
 keyframe manipulation, higher-fidelity interchange, compositor ports, broader
 transfer evaluation, and eventual human-governed Tree of Editing promotion.
 Those additions should preserve the canonical edit graph, immutable history,

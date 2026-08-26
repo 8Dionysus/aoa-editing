@@ -112,6 +112,9 @@ host AI capabilities. The product binds to `127.0.0.1:8787` by default.
 | Start no-terminal workbench | `./scripts/launch` or desktop entry |
 | Test all contracts | `./scripts/test` |
 | Generic evaluation | `./scripts/eval` |
+| Video Anatomy estimate/run | `./scripts/aoa-editing anatomy estimate --help` / `anatomy run --help` |
+| Video Anatomy synthetic gate | `./scripts/aoa-editing eval video-anatomy --output /new/root` |
+| Video Anatomy cache preview/apply | `./scripts/aoa-editing anatomy prune-cache` / `anatomy prune-cache --apply` |
 | Draft narration timing | `./scripts/aoa-editing workflow time-voiceover --help` |
 | Review narration timing | `./scripts/aoa-editing workflow review-voiceover --help` |
 | Admit reviewed demo experience | `./scripts/aoa-editing workflow admit-experience --help` |
@@ -128,6 +131,13 @@ host AI capabilities. The product binds to `127.0.0.1:8787` by default.
 | Review individual corrections | `./scripts/aoa-editing reference review --help` |
 | Replay selected v2 semantics in a clean home | `./scripts/reproduce-reference --help` or `./scripts/aoa-editing eval clean-rerun-v2 --help` |
 | Safe cleanup preview/apply | `./scripts/clean` / `./scripts/clean --apply` |
+
+Video Anatomy keeps immutable packets and selected frame artifacts inside each
+project. Temporary decode products use `var/tmp`; provider-result cache uses
+`var/cache/video-anatomy`. `anatomy prune-cache` is dry-run first and cannot
+delete project analysis, proposals, versions, renders, or evaluation roots. A
+deep profile performs resource preflight and fails before decode when the
+required free-space reserve is unavailable.
 
 `scripts/reproduce-reference` requires a frozen Spec v2, the selected passing
 `5r` reconstruction receipt, and a new output root. It performs the independent

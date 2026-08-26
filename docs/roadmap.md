@@ -7,8 +7,9 @@ decision boundary, source lineage, and common application services.
 
 ## Next growth layers
 
-1. Background job queue with process isolation, cancellation, and resumable
-   checkpoints for long ASR/segmentation/render work.
+1. Generalize the implemented Video Anatomy phase receipts, cancellation, and
+   resumable checkpoints into a process-isolated queue for ASR, segmentation,
+   and rendering.
 2. Bind only owner-proven semantic vision capabilities: OpenVINO-friendly
    description/regions first, segmentation/depth only where hardware, latency,
    quality, and licenses justify them.
@@ -30,6 +31,9 @@ decision boundary, source lineage, and common application services.
   provider: VAD, diarization, semantic vision/retrieval, and editorial models
   remain unavailable until a stack/machine owner registration and product eval
   prove them.
+- Video Anatomy now implements structural/audio sampling, optional semantic
+  description, dense motion, focused rescans, and reviewed reconstruction.
+  OCR, regions, tracking, segmentation, and depth remain honest extension ports.
 - Caption compilation, segment-level voiceover alignment, and human timing
   review exist; interactive word-level transcript surgery and automatic
   repetition decisions need dedicated evals.
@@ -44,8 +48,9 @@ decision boundary, source lineage, and common application services.
   human assertion before positive application.
 - Kdenlive/MLT is the live-validated editable lane. OTIO is intentionally lossy
   for several effects; Resolve/Premiere adapters are future ports.
-- Jobs have durable receipts and safe retry, but not yet a multi-process queue,
-  checkpoint scheduler, pause, or distributed collaboration.
+- Video Anatomy jobs have durable per-phase checkpoints, cancellation, cache,
+  and verified resume. The product still lacks a multi-process scheduler, pause,
+  or distributed collaboration shared by all job kinds.
 - The workflow-reference gate currently trusts attributable manual range
   classification and measures only deterministic frame activity. Automatic
   presenter/human detection may assist review later, but cannot silently make

@@ -7,6 +7,7 @@ from copy import deepcopy
 from itertools import pairwise
 from typing import Any, Literal
 
+from aoa_editing import __version__
 from aoa_editing.domain.models import (
     Asset,
     AudioEffect,
@@ -99,7 +100,7 @@ def creative_treatment_variants(primary: Treatment) -> list[Treatment]:
 def _planner() -> Provenance:
     return Provenance(
         tool="aoa-editing",
-        tool_version="0.1.0",
+        tool_version=__version__,
         parameters={"planner": "deterministic-baseline-v1"},
         deterministic=True,
     )
@@ -664,7 +665,7 @@ def reference_reconstruct(
         ],
         planner=Provenance(
             tool="aoa-editing",
-            tool_version="0.1.0",
+            tool_version=__version__,
             parameters={
                 "planner": "reference-spec-v1",
                 "spec_id": spec.id,
@@ -775,7 +776,7 @@ def apply_camera_technique(
         alternatives=technique.creative_variants,
         planner=Provenance(
             tool="aoa-editing-tree-of-editing",
-            tool_version="0.1.0",
+            tool_version=__version__,
             parameters={
                 "technique_id": technique.id,
                 "technique_revision": technique.revision,
@@ -942,7 +943,7 @@ def assess_camera_technique_v2(
         },
         provenance=Provenance(
             tool="aoa-editing-technique-applicability-v2",
-            tool_version="0.1.0",
+            tool_version=__version__,
             parameters={
                 "technique_id": technique.id,
                 "technique_revision": technique.revision,
@@ -1047,7 +1048,7 @@ def apply_camera_technique_v2(
         alternatives=technique.creative_variants,
         planner=Provenance(
             tool="aoa-editing-tree-of-editing-v2",
-            tool_version="0.1.0",
+            tool_version=__version__,
             parameters={
                 "technique_id": technique.id,
                 "technique_revision": technique.revision,

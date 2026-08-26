@@ -1,0 +1,82 @@
+{
+  "additionalProperties": false,
+  "description": "Proof that an approved proposal entered the ordinary reversible version path.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "proposal_id": {
+      "title": "Proposal Id",
+      "type": "string"
+    },
+    "proposal_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Proposal Sha256",
+      "type": "string"
+    },
+    "review_id": {
+      "title": "Review Id",
+      "type": "string"
+    },
+    "patch_id": {
+      "title": "Patch Id",
+      "type": "string"
+    },
+    "version_id": {
+      "title": "Version Id",
+      "type": "string"
+    },
+    "inverse_operation_count": {
+      "exclusiveMinimum": 0,
+      "title": "Inverse Operation Count",
+      "type": "integer"
+    },
+    "accepted_by": {
+      "minLength": 1,
+      "title": "Accepted By",
+      "type": "string"
+    },
+    "accepted_at": {
+      "format": "date-time",
+      "title": "Accepted At",
+      "type": "string"
+    },
+    "canonical_version_created": {
+      "const": true,
+      "default": true,
+      "title": "Canonical Version Created",
+      "type": "boolean"
+    },
+    "reversible": {
+      "const": true,
+      "default": true,
+      "title": "Reversible",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "project_id",
+    "proposal_id",
+    "proposal_sha256",
+    "review_id",
+    "patch_id",
+    "version_id",
+    "inverse_operation_count",
+    "accepted_by"
+  ],
+  "title": "VideoProposalAcceptanceReceipt",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/video-proposal-acceptance.schema.json"
+}

@@ -1,0 +1,605 @@
+{
+  "$defs": {
+    "EditPatch": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "base_version_id": {
+          "title": "Base Version Id",
+          "type": "string"
+        },
+        "operations": {
+          "items": {
+            "$ref": "#/$defs/PatchOperation"
+          },
+          "title": "Operations",
+          "type": "array"
+        },
+        "inverse_operations": {
+          "items": {
+            "$ref": "#/$defs/PatchOperation"
+          },
+          "title": "Inverse Operations",
+          "type": "array"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id",
+        "base_version_id",
+        "operations",
+        "rationale"
+      ],
+      "title": "EditPatch",
+      "type": "object"
+    },
+    "FrameRange": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "duration": {
+          "exclusiveMinimum": 0,
+          "title": "Duration",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "duration"
+      ],
+      "title": "FrameRange",
+      "type": "object"
+    },
+    "FrameRate": {
+      "additionalProperties": false,
+      "properties": {
+        "numerator": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        }
+      },
+      "title": "FrameRate",
+      "type": "object"
+    },
+    "MotionTimeV2": {
+      "additionalProperties": false,
+      "description": "Exact non-negative frame time with a canonical rational subframe.",
+      "properties": {
+        "frame": {
+          "minimum": 0,
+          "title": "Frame",
+          "type": "integer"
+        },
+        "subframe_numerator": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Subframe Numerator",
+          "type": "integer"
+        },
+        "subframe_denominator": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Subframe Denominator",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "frame"
+      ],
+      "title": "MotionTimeV2",
+      "type": "object"
+    },
+    "PatchOperation": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "enum": [
+            "add",
+            "remove",
+            "replace",
+            "test"
+          ],
+          "title": "Op",
+          "type": "string"
+        },
+        "path": {
+          "pattern": "^/",
+          "title": "Path",
+          "type": "string"
+        },
+        "value": {
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "required": [
+        "op",
+        "path"
+      ],
+      "title": "PatchOperation",
+      "type": "object"
+    },
+    "PatchPreview": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "base_version_id": {
+          "title": "Base Version Id",
+          "type": "string"
+        },
+        "natural_language_command": {
+          "title": "Natural Language Command",
+          "type": "string"
+        },
+        "patch": {
+          "$ref": "#/$defs/EditPatch"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "requires_confirmation": {
+          "const": true,
+          "default": true,
+          "title": "Requires Confirmation",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "project_id",
+        "base_version_id",
+        "natural_language_command",
+        "patch",
+        "summary"
+      ],
+      "title": "PatchPreview",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_version": {
+          "title": "Tool Version",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "deterministic": {
+          "default": true,
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "tool_version"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ReconstructionShotSkeleton": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^reconstruction-shot-[0-9]{4,}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "source_shot_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Shot Ids",
+          "type": "array"
+        },
+        "timeline_range": {
+          "$ref": "#/$defs/FrameRange"
+        },
+        "composition_summary": {
+          "minLength": 1,
+          "title": "Composition Summary",
+          "type": "string"
+        },
+        "transforms": {
+          "items": {
+            "$ref": "#/$defs/ReconstructionTransformSample"
+          },
+          "title": "Transforms",
+          "type": "array"
+        },
+        "transition_in": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VideoTransitionType"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "transition_out": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VideoTransitionType"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "audio_events": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Audio Events",
+          "type": "array"
+        },
+        "overlays": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Overlays",
+          "type": "array"
+        },
+        "technique_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Technique Ids",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "source_shot_ids",
+        "timeline_range",
+        "composition_summary",
+        "evidence_refs",
+        "confidence"
+      ],
+      "title": "ReconstructionShotSkeleton",
+      "type": "object"
+    },
+    "ReconstructionTransformSample": {
+      "additionalProperties": false,
+      "properties": {
+        "time": {
+          "$ref": "#/$defs/MotionTimeV2"
+        },
+        "center_x": {
+          "maximum": 8,
+          "minimum": -8,
+          "title": "Center X",
+          "type": "number"
+        },
+        "center_y": {
+          "maximum": 8,
+          "minimum": -8,
+          "title": "Center Y",
+          "type": "number"
+        },
+        "contain_relative_scale": {
+          "exclusiveMinimum": 0,
+          "title": "Contain Relative Scale",
+          "type": "number"
+        },
+        "rotation_degrees": {
+          "title": "Rotation Degrees",
+          "type": "number"
+        },
+        "opacity": {
+          "default": 1.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Opacity",
+          "type": "number"
+        }
+      },
+      "required": [
+        "time",
+        "center_x",
+        "center_y",
+        "contain_relative_scale",
+        "rotation_degrees"
+      ],
+      "title": "ReconstructionTransformSample",
+      "type": "object"
+    },
+    "VideoTransitionType": {
+      "enum": [
+        "hard-cut",
+        "fade-in",
+        "fade-out",
+        "cross-dissolve",
+        "flash",
+        "wipe-or-directional",
+        "continuous-motion",
+        "unknown"
+      ],
+      "title": "VideoTransitionType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "reference_anatomy_id": {
+      "title": "Reference Anatomy Id",
+      "type": "string"
+    },
+    "reference_anatomy_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Reference Anatomy Sha256",
+      "type": "string"
+    },
+    "output_width": {
+      "exclusiveMinimum": 0,
+      "title": "Output Width",
+      "type": "integer"
+    },
+    "output_height": {
+      "exclusiveMinimum": 0,
+      "title": "Output Height",
+      "type": "integer"
+    },
+    "output_frame_rate": {
+      "$ref": "#/$defs/FrameRate"
+    },
+    "duration_frames": {
+      "exclusiveMinimum": 0,
+      "title": "Duration Frames",
+      "type": "integer"
+    },
+    "shot_skeleton": {
+      "items": {
+        "$ref": "#/$defs/ReconstructionShotSkeleton"
+      },
+      "minItems": 1,
+      "title": "Shot Skeleton",
+      "type": "array"
+    },
+    "motion_phases": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Motion Phases",
+      "type": "array"
+    },
+    "audio_structure": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Audio Structure",
+      "type": "array"
+    },
+    "unsupported_elements": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Unsupported Elements",
+      "type": "array"
+    },
+    "unresolved_elements": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Unresolved Elements",
+      "type": "array"
+    },
+    "evidence_refs": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Evidence Refs",
+      "type": "array"
+    },
+    "confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "refinement_plan": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Refinement Plan",
+      "type": "array"
+    },
+    "patch_preview": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PatchPreview"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "target_asset_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target Asset Id"
+    },
+    "source_neutral": {
+      "const": true,
+      "default": true,
+      "title": "Source Neutral",
+      "type": "boolean"
+    },
+    "reference_media_embedded": {
+      "const": false,
+      "default": false,
+      "title": "Reference Media Embedded",
+      "type": "boolean"
+    },
+    "timeline_mutated": {
+      "const": false,
+      "default": false,
+      "title": "Timeline Mutated",
+      "type": "boolean"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "project_id",
+    "reference_anatomy_id",
+    "reference_anatomy_sha256",
+    "output_width",
+    "output_height",
+    "output_frame_rate",
+    "duration_frames",
+    "shot_skeleton",
+    "evidence_refs",
+    "confidence",
+    "provenance"
+  ],
+  "title": "ReferenceReconstructionProposal",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents-of-abyss.local/aoa-editing/v1/reference-reconstruction-proposal.schema.json"
+}

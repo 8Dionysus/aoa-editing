@@ -35,6 +35,14 @@ Evidence has algorithm/model provenance, rational time bases and ranges,
 confidence, authority, and explicit supersession. Human corrections win in the
 effective view without deleting analyzer history.
 
+Video Anatomy is the progressive video-analysis aggregate inside this same
+evidence context. A deterministic sampling plan drives structure, selected
+frames, audio, optional visual semantics, and dense motion. Child packets remain
+independently hashable; the aggregate records coverage, unresolved ranges, and a
+provenance graph. Editorial and reconstruction interpretations are separate
+proposal records and cannot mutate the edit graph. Full details are in
+[video-anatomy.md](video-anatomy.md).
+
 ## Runtime boundaries
 
 FFmpeg/ffprobe is the baseline decoder and renderer. Kdenlive/MLT is an external
@@ -138,6 +146,12 @@ Analyzer capabilities implement a replaceable port. A capability failure is an
 `analysis.failure` record and does not erase sibling evidence. SQLite is rebuilt
 from canonical JSON at startup. Missing derived media is regenerated, while a
 source hash mismatch fails closed.
+
+Video Anatomy adds durable phase checkpoints, cooperative cancellation,
+idempotent retry/resume, sibling-stage reuse, revision-bound cache hits, and
+resource admission. Only `var/cache/video-anatomy` is rebuildable through its
+dedicated prune operation; project analysis packets are canonical evidence and
+are outside that operation.
 
 ## Interaction surfaces
 
